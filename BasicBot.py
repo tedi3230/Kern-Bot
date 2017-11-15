@@ -7,13 +7,6 @@ module.
 There are a number of utility commands being showcased here.'''
 bot = commands.Bot(command_prefix='?', description=description)
 
-baseURL = "https://discordapp.com/api/oauth2/authorize"
-tokenURL = "https://discordapp.com/api/oauth2/token"
-revocationURL = "https://discordapp.com/api/oauth2/token/revoke"
-
-CLIENT_SECRET = open('client_secret.txt', mode='r').read()
-CLIENT_ID = open('client_id.txt', mode='r').read()
-
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -62,4 +55,4 @@ async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
 
-bot.run('token')
+bot.run('RK8kxrtLI5Jo1BWqmN06aHRga7Z4H8LY')

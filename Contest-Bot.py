@@ -1,14 +1,27 @@
 import discord
 from discord.ext import commands
 
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-There are a number of utility commands being showcased here.'''
-bot = commands.Bot(command_prefix='?', description=description)
+'''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380295391012192256&scope=bot'''
 
-baseURL = "https://discordapp.com/api/oauth2/authorize"
-tokenURL = "https://discordapp.com/api/oauth2/token"
-revocationURL = "https://discordapp.com/api/oauth2/token/revoke"
+description = '''Allows for the creation of contests that can be used in servers.'''
+bot = commands.Bot(command_prefix='!', description=description)
 
-CLIENT_SECRET = open('client_secret.txt', mode='r').read()
-CLIENT_ID = open('client_id.txt', mode='r').read()
+token = open('client_secret.txt', mode='r').read()
+
+@bot.event
+async def on_ready():
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    print('------')
+
+@bot.command()
+async def submit_map(data : str):
+    submit_contest_item(data)
+
+@bot.command()
+async def submit_contest_item(data : str):
+    """Submits Contest Item"""
+    await bot.say(data)
+
+bot.run(token)
