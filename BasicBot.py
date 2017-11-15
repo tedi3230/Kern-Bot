@@ -14,10 +14,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-@bot.command()
-async def add(left : int, right : int):
-    """Adds two numbers together."""
-    await bot.say(left + right)
+gfgf
 
 @bot.command()
 async def roll(dice : str):
@@ -55,4 +52,4 @@ async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
 
-bot.run('RK8kxrtLI5Jo1BWqmN06aHRga7Z4H8LY')
+bot.run('')

@@ -16,10 +16,6 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def submit_map(*args):
-    submit_contest_item(args)
-
-@bot.command()
 async def submit_contest_item(*args):
     """Submits Contest Item"""
     await bot.say(' '.join(args))
