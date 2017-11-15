@@ -26,9 +26,15 @@ async def submit(ctx, title, imageURL, *, description):
     embed.add_field(name="Title:", value=title, inline=False)
     embed.add_field(name="Description:", value=description, inline=False)
     embed.set_image(url=imageURL)
+    embed.set_footer(text="Type !allow to allow this and !allow False to prevent the moving on this onwards.")
     for server, channelList in serverSettings.items():
         if ctx.message.channel.server.id == server:
             if ctx.message.channel.id == channelList[1]:
                 await bot.send_message(discord.Object(id=channelList[0]),embed=embed)
+
+@submit.error
+async def submit_error_handler(error, ctx):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await bot.say("You did not pass all the required arguments, please try again.")
 
 bot.run(token)
