@@ -3,6 +3,7 @@ import ast
 from discord.ext import commands
 import pickle
 from DB_Access import *
+from atexit import register
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
 bot = commands.Bot(command_prefix='!', description='Allows for the creation of contests that can be used in servers.')
@@ -13,22 +14,29 @@ token = tokenFile.read()
 tokenFile.close()
 
 def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
-    embed = discord.Embed(title="Submission by:", description=messageAuthor, color=colour)
+    embed = discord.Embed(title="Submission by:", description=messageAuthor, colour=colour)
     embed.add_field(name="Title:", value=title, inline=False)
     embed.add_field(name="Description:", value=description, inline=False)
     embed.set_image(url=imageURL)
     embed.set_footer(text=footerText)
     return embed
 
+@register
+def cleanUp():
+    #await bot.close()
+    Client.close()
+    cleanUP()
+
 @bot.event
 async def on_ready():
-    print('Logged in as')
+    print('Logged in as:')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
 
 @bot.command(pass_context=True)
-async def set_config(ctx,receiveChannel, allowChannel, outputChannel):
+async def set_channels(ctx,receiveChannel, allowChannel, outputChannel):
+    """Defines the server channels for use in the submission of contests."""
     receiveChannelID = receiveChannel.translate({ord(c): None for c in '<>#'})
     allowChannelID = allowChannel.translate({ord(c): None for c in '<>#'})
     outputChannelID = outputChannel.translate({ord(c): None for c in '<>#'})
@@ -37,36 +45,41 @@ async def set_config(ctx,receiveChannel, allowChannel, outputChannel):
 
 @bot.command(pass_context=True)
 async def submit(ctx, title, imageURL, *, description):
-    """Submits Contest Item"""
+    """Submits items into the contest. Enclose title & imageURL in quotes."""
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(ctx.message.id,ctx.message.id)
-    embed = generateEmbed(ctx.message.author.mentions,title,0x00ff00,description,imageURL,footerText)
+    embed = generateEmbed(ctx.message.author.mention,title,0x00ff00,description,imageURL,footerText)
     if int(ctx.message.channel.id) == getServerChannels(ctx.message.channel.server.id, "receiveChannelID"):
         await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
         addSubmission(ctx.message.id,embed)
 
-# @submit.error
-# async def submit_error_handler(error, ctx):
-#     if isinstance(error, commands.MissingRequiredArgument):
-#         await bot.say("You did not pass all the required arguments, please try again.")
-#     else:
-#         await bot.say("Warning:\n%s"%str(error))
+@submit.error
+async def submit_error_handler(error, ctx):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await bot.say("You did not pass all the required arguments, please try again.")
+    else:
+        await bot.say("Warning:\n%s"%str(error))
 
 @bot.command(pass_context=True)
-async def allow(messageID,allowed=True):
-    submissionsFile = open('submissions.txt',"r+")
-    submissionsLines = submissionsFile.readlines()
-    submissionsFile.close()
-    for line in submissionsLines:
-        if line.startswith(messageID):
-            if allowed:
-                embed = getSubmission(messageID)
-                embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(messageID,messageID))
-                await bot.send_message(discord.Object(id=getServerChannels(messageID, "outputChannelID")),embed=embed)
-            else:
-                submissionsFile = open('submissions.txt',"w")
-                for line in submissionsLines:
-                    if not line.startswith(messageID):
-                        submissionsFile.write(line)
-                submissionsFile.close()
+async def allow(ctx,messageID,allowed="True"):
+    """Allows for moderators to approve/disaprove submissions."""
+    if allowed.lower() == "true":
+        embed = getSubmission(messageID)
+        embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(messageID,messageID))
+        await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "outputChannelID")),embed=embed)
+    elif allowed.lower() == "false":
+        embed = getSubmission(messageID)
+        removeSubmission(messageID)
+        await bot.say("Submssions with messageID of {} has been disapproved.".format(messageID))
+        message = await bot.get_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),messageID)
+        embed.colour = 0xff0000
+        await bot.edit_message(message,embed=embed)
+    else:
+        await bot.say("A correct value of true/false was not passed ")
 
+# @allow.error
+# async def allow_error_handler(error, ctx):
+#     if isinstance(error, SubmissionNotExist):
+#         await bot.say(str(error))
+#     else:
+#         await bot.say("Warning:\n%s"%str(error))
 bot.run(token)
