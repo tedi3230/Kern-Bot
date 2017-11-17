@@ -1,5 +1,6 @@
 import sqlite3
 import pickle
+from random import randint
 
 dataBase = sqlite3.connect("database.db")
 cur = dataBase.cursor()
@@ -57,4 +58,15 @@ def getSubmission(messageID):
 
 def removeSubmission(messageID):
     cur.execute("DELETE FROM Submissions WHERE id = ?",(messageID,))
+    dataBase.commit()
     return None
+
+def generateID():
+    messageID = "{:06}".format(randint(0,999999))
+    cur.execute("SELECT id FROM Submissions")
+    submissions = cur.fetchall()
+    if len(submissions) == 0:
+        return messageID
+    while messageID in submissions[0]:
+        messageID = "{:06}".format(randint(0,999999))
+    return messageID

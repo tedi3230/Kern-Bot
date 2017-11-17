@@ -46,11 +46,12 @@ async def set_channels(ctx,receiveChannel, allowChannel, outputChannel):
 @bot.command(pass_context=True)
 async def submit(ctx, title, imageURL, *, description):
     """Submits items into the contest. Enclose title & imageURL in quotes."""
-    footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(ctx.message.id,ctx.message.id)
+    messageID = generateID() 
+    footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(messageID,messageID)
     embed = generateEmbed(ctx.message.author.mention,title,0x00ff00,description,imageURL,footerText)
     if int(ctx.message.channel.id) == getServerChannels(ctx.message.channel.server.id, "receiveChannelID"):
         await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
-        addSubmission(ctx.message.id,embed)
+        addSubmission(messageID,embed)
 
 @submit.error
 async def submit_error_handler(error, ctx):
