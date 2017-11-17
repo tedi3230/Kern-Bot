@@ -12,8 +12,8 @@ tokenFile = open('client_secret.txt', mode='r')
 token = tokenFile.read()
 tokenFile.close()
 
-def generateEmbed(messageAuthor,color,title,description,imageURL,footerText):
-    embed = discord.Embed(title="Submission by", description=messageAuthor, color=color)
+def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
+    embed = discord.Embed(title="Submission by:", description=messageAuthor, color=colour)
     embed.add_field(name="Title:", value=title, inline=False)
     embed.add_field(name="Description:", value=description, inline=False)
     embed.set_image(url=imageURL)
@@ -28,18 +28,21 @@ async def on_ready():
     print('------')
 
 @bot.command(pass_context=True)
-async def set_config(ctx,receiveChannel,allowChannel,sendChannel):
-    print("%s %s %s"%(receiveChannel,allowChannel,sendChannel))
+async def set_config(ctx,receiveChannel, allowChannel, outputChannel):
+    receiveChannelID = receiveChannel.translate({ord(c): None for c in '<>#'})
+    allowChannelID = allowChannel.translate({ord(c): None for c in '<>#'})
+    outputChannelID = outputChannel.translate({ord(c): None for c in '<>#'})
+    setServerChannels(ctx.message.channel.server.id,receiveChannelID, allowChannelID, outputChannelID)
+    await bot.say("Set channels to {} {} {}".format(receiveChannel, allowChannel, outputChannel))
 
 @bot.command(pass_context=True)
 async def submit(ctx, title, imageURL, *, description):
     """Submits Contest Item"""
-    footerText = "Type !allow %s to allow this and !allow %s False to prevent the moving on this to voting queue."%(ctx.message.id,ctx.message.id)
-    embed = generateEmbed(ctx.message.author,0x00ff00,title,description,imageURL,footerText)
-    if ctx.message.channel.id == getServerChannels(ctx.message.channel.server.id, "receiveChannelID"):
-        #await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
-        await bot.send_message(discord.Object(id=380289087657213952),embed=embed)
-        addSubmission(ctx.message.id,pickle.dumps(embed))
+    footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(ctx.message.id,ctx.message.id)
+    embed = generateEmbed(ctx.message.author.mentions,title,0x00ff00,description,imageURL,footerText)
+    if int(ctx.message.channel.id) == getServerChannels(ctx.message.channel.server.id, "receiveChannelID"):
+        await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
+        addSubmission(ctx.message.id,embed)
 
 # @submit.error
 # async def submit_error_handler(error, ctx):
@@ -56,13 +59,9 @@ async def allow(messageID,allowed=True):
     for line in submissionsLines:
         if line.startswith(messageID):
             if allowed:
-                # embed = discord.Embed(title="Submission by", description=str(ctx.message.author), color=0x00ff00)
-                # embed.add_field(name="Title:", value=title, inline=False)
-                # embed.add_field(name="Description:", value=description, inline=False)
-                # embed.set_image(url=imageURL)
-                #embed.set_footer(text="Type !vote %s yes to allow this and !vote %s False to prevent the moving on this to voting queue."%(ctx.message.id,ctx.message.id))
-                embed = pickle.loads()
-                await bot.send_message(discord.Object(id=getServerChannels(messageID, "outputChannelID")),"Something not working embed=embed")
+                embed = getSubmission(messageID)
+                embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(messageID,messageID))
+                await bot.send_message(discord.Object(id=getServerChannels(messageID, "outputChannelID")),embed=embed)
             else:
                 submissionsFile = open('submissions.txt',"w")
                 for line in submissionsLines:
