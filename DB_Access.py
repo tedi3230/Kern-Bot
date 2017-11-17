@@ -5,7 +5,7 @@ from random import randint
 dataBase = sqlite3.connect("database.db")
 cur = dataBase.cursor()
 
-cur.execute("CREATE TABLE IF NOT EXISTS Submissions(id INT,Embed MEDIUMBLOB,rating INT)")
+cur.execute("CREATE TABLE IF NOT EXISTS Submissions(submissionID INT,Embed MEDIUMBLOB,messageID INT,rating INT)")
 cur.execute("CREATE TABLE IF NOT EXISTS Servers(serverID INT,receiveChannelID INT,allowChannelID INT, outputChannelID INT)")
 channelTypes = ["receiveChannelID","allowChannelID","outputChannelID"]
 
@@ -30,7 +30,7 @@ def cleanUP():
 def getServerChannels(server, channelType):
     if channelType not in channelTypes:
         raise ChannelTypeFailure("{} is not a valid channelType".format(channelType))
-    cur.execute("SELECT {} FROM Servers WHERE serverID = {}".format(channelType,server,))
+    cur.execute("SELECT {} FROM Servers WHERE serverID = {}".format(channelType,server))
     channelID = cur.fetchall() 
     if len(channelID) == 0:
         raise ServerNotExist("{} is not a known server.".format(server))
@@ -43,30 +43,35 @@ def setServerChannels(*args):
     dataBase.commit()
     #Make so that serverID & other channels, one has INSERT REPLACe the other is insert IGNORE
 
-def addSubmission(messageID,embedFile):
+def addSubmission(submissionID,embedFile,messageID):
     dump = pickle.dumps(embedFile)
-    cur.execute("INSERT INTO Submissions VALUES(?,?);",(messageID,dump,))
+    cur.execute("INSERT INTO Submissions (submissionID,Embed,messageID) VALUES (?,?,?)",(submissionID,dump,messageID,))
     dataBase.commit()
 
-def getSubmission(messageID):
-    cur.execute("SELECT Embed FROM Submissions WHERE id = ?",(messageID,))
+def getSubmission(submissionID):
+    cur.execute("SELECT Embed FROM Submissions WHERE submissionID = ?",(submissionID,))
     embed = cur.fetchall()
     if len(embed) == 0:
-        raise SubmissionNotExist("{} is not a valid submission id".format(messageID))
+        raise SubmissionNotExist("{} is not a valid submissionID".format(submissionID))
     embed = embed[0][0]
     return pickle.loads(embed)
 
-def removeSubmission(messageID):
-    cur.execute("DELETE FROM Submissions WHERE id = ?",(messageID,))
+def removeSubmission(submissionID):
+    cur.execute("DELETE FROM Submissions WHERE submissionID = ?",(submissionID,))
     dataBase.commit()
     return None
 
 def generateID():
-    messageID = "{:06}".format(randint(0,999999))
-    cur.execute("SELECT id FROM Submissions")
+    submissionID = "{:06}".format(randint(0,999999))
+    cur.execute("SELECT submissionID FROM Submissions")
     submissions = cur.fetchall()
     if len(submissions) == 0:
-        return messageID
-    while messageID in submissions[0]:
-        messageID = "{:06}".format(randint(0,999999))
-    return messageID
+        return submissionID
+    while submissionID in submissions[0]:
+        submissionID = "{:06}".format(randint(0,999999))
+    return submissionID
+
+def getMessageID(submissionID):
+    cur.execute("SELECT messageID FROM Submissions WHERE submissionID = {}".format(submissionID))
+    messageID=cur.fetchall()
+    return messageID[0][0]

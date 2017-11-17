@@ -33,6 +33,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    await bot.change_presence(game=discord.Game(name="{} servers for new contests.".format(len(bot.servers)),type=3))
 
 @bot.command(pass_context=True)
 async def set_channels(ctx,receiveChannel, allowChannel, outputChannel):
@@ -46,34 +47,35 @@ async def set_channels(ctx,receiveChannel, allowChannel, outputChannel):
 @bot.command(pass_context=True)
 async def submit(ctx, title, imageURL, *, description):
     """Submits items into the contest. Enclose title & imageURL in quotes."""
-    messageID = generateID() 
-    footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(messageID,messageID)
+    submissionID = generateID() 
+    footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID,submissionID)
     embed = generateEmbed(ctx.message.author.mention,title,0x00ff00,description,imageURL,footerText)
     if int(ctx.message.channel.id) == getServerChannels(ctx.message.channel.server.id, "receiveChannelID"):
-        await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
-        addSubmission(messageID,embed)
+        messageID = await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),embed=embed)
+        addSubmission(submissionID,embed,messageID.id)
 
-@submit.error
-async def submit_error_handler(error, ctx):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await bot.say("You did not pass all the required arguments, please try again.")
-    else:
-        await bot.say("Warning:\n%s"%str(error))
+
+# @submit.error
+# async def submit_error_handler(error, ctx):
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         await bot.say("You did not pass all the required arguments, please try again.")
+#     else:
+#         await bot.say("Submit Warning:\n%s"%str(error))
 
 @bot.command(pass_context=True)
-async def allow(ctx,messageID,allowed="True"):
+async def allow(ctx,submissionID,allowed="True"):
     """Allows for moderators to approve/disaprove submissions."""
     if allowed.lower() == "true":
-        embed = getSubmission(messageID)
-        embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(messageID,messageID))
+        embed = getSubmission(submissionID)
+        embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(submissionID,submissionID))
         await bot.send_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "outputChannelID")),embed=embed)
     elif allowed.lower() == "false":
-        embed = getSubmission(messageID)
-        removeSubmission(messageID)
-        await bot.say("Submssions with messageID of {} has been disapproved.".format(messageID))
-        message = await bot.get_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),messageID)
+        embed = getSubmission(submissionID)
+        await bot.say("Submssions with submissionID of {} has been disapproved.".format(submissionID))
+        message = await bot.get_message(discord.Object(id=getServerChannels(ctx.message.channel.server.id, "allowChannelID")),getMessageID(submissionID))
         embed.colour = 0xff0000
         await bot.edit_message(message,embed=embed)
+        removeSubmission(submissionID)
     else:
         await bot.say("A correct value of true/false was not passed ")
 
