@@ -33,7 +33,6 @@ class InvalidParameter(Exception):
 
 @bot.event
 async def on_ready():
-    print(discord.__version__)
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
@@ -113,7 +112,7 @@ async def settings_get_prefix(ctx):
     await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name,getPrefix(ctx.guild.id)))
 
 @settings.error
-async def settings_error_handler(error,ctx):
+async def settings_error_handler(ctx,error):
     if isinstance(error,InvalidParameter):
         ctx.send(str(error))
     elif isinstance(error,IncorrectNumOfArguments):
@@ -133,7 +132,7 @@ async def submit(ctx, title, imageURL, *, description):
         addSubmission(submissionID,embed,messageID.id)
 
 @submit.error
-async def submit_error_handler(error, ctx):
+async def submit_error_handler(ctx,error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You did not pass all the required arguments, please try again.")
     else:
@@ -158,7 +157,7 @@ async def allow(ctx,submissionID,allowed="True"):
         await ctx.send("​A correct value of true/false was not passed ")
 
 @allow.error
-async def allow_error_handler(error, ctx):
+async def allow_error_handler(ctx,error):
     if isinstance(error, SubmissionNotExist):
         await ctx.send(str(error))
     else:
