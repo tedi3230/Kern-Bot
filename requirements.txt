@@ -1,2 +1,6 @@
 discord.py==0.16.12
 discord==0.0.2
+aiohttp
+websockets
+chardet
+multidict

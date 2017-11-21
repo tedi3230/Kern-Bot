@@ -27,26 +27,27 @@ def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
 class InvalidParameter(Exception):
     pass
 
-counter = 0
-
-@bot.event
-async def statusChanger():
-    global counter
-    if counter % 3 == 0:
-        await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
-    elif counter % 3 == 1:
-        await bot.change_presence(game=discord.Game(name="{} servers.".format(getNumServers()),type=3))
-    elif counter % 3 == 3:
-        await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
-    await sleep(60)
-    counter+=1
-
 @bot.event
 async def on_ready():
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+
+@bot.event
+async def statusChanger():
+    await bot.wait_until_ready()
+    counter = 0
+    while not bot.is_closed:
+        if counter % 3 == 0:
+            await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+        elif counter % 3 == 1:
+            await bot.change_presence(game=discord.Game(name="{} servers.".format(getNumServers()),type=3))
+        elif counter % 3 == 3:
+            await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+        await sleep(60)
+        counter+=1
 
 @bot.command()
 async def restart(ctx):
