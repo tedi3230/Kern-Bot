@@ -33,6 +33,7 @@ class InvalidParameter(Exception):
 
 @bot.event
 async def on_ready():
+    print(discord.__version__)
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
