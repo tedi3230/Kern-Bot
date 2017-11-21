@@ -33,11 +33,11 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+    bot.loop.create_task(statusChanger())
+    
 
 @bot.event
 async def statusChanger():
-    await bot.wait_until_ready()
     counter = 0
     while not bot.is_closed:
         if counter % 3 == 0:
@@ -158,8 +158,6 @@ async def allow_error_handler(error, ctx):
         await ctx.send(str(error))
     else:
         await ctx.send("​Warning:\n%s"%str(error))
-
-bot.loop.create_task(statusChanger())
 
 try:
     bot.run(token)
