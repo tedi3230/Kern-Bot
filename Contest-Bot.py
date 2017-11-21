@@ -150,7 +150,7 @@ async def allow(ctx,submissionID,allowed="True"):
         embed = getSubmission(submissionID)
         await ctx.send("​Submssions with submissionID of {} has been disapproved.".format(submissionID))
         channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, 2 ) )
-        message = await channel.get_message( getServerChannels(ctx.messdiscord.ext.commands.errors.CommandInvokeError: Command raised an exception: ChannelTypeFailure: receiveChannelID is not a valid channelTypeage.guild.id, 2) )
+        message = await channel.get_message( getServerChannels(ctx.message.guild.id, 2) )
         embed.colour = 0xff0000
         await message.edit(embed=embed)
         removeSubmission(submissionID)
