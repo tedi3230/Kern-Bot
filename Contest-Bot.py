@@ -52,14 +52,14 @@ async def statusChanger():
 async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
     await ctx.send("Restarting Bot.")
-    if ctx.author.id == "310316666171162626":
+    if ctx.author.id == 310316666171162626:
         await ctx.send("Restarting Bot.")
         await sleep(5)
         await bot.logout()
         execv(executable,['py'] + argv)
     else:
         #owner = discord.id
-        await ctx.send("You are not ")
+        await ctx.send("You are not @.")
 
 @bot.command()
 async def shutdown(ctx):
