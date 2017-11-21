@@ -1,2 +1,0 @@
-worker: python3 Contest-Bot.py 
-web: python3 Contest-Bot.py 
