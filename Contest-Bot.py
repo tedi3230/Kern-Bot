@@ -84,7 +84,7 @@ async def settings_set(ctx):
 
 @settings_get.command(name="channels")
 async def settings_get_channels(ctx): 
-    channels = getServerChannels(ctx.guild.id,"all")
+    channels = getServerChannels(ctx.guild.id,0)
     if len(channels) == 3:
         await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name,channels[0],channels[1],channels[2]))
     else:
@@ -126,8 +126,9 @@ async def submit(ctx, title, imageURL, *, description):
     submissionID = generateID() 
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID,submissionID)
     embed = generateEmbed(ctx.author,title,0x00ff00,description,imageURL,footerText)
-    if int(ctx.channel.id) == getServerChannels(ctx.guild.id, "receiveChannelID"):
-        channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, "allowChannelID" ) )
+    print(ctx.channel.id)
+    if ctx.channel.id == getServerChannels(ctx.guild.id, 1):
+        channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, 2 ) )
         messageID = await channel.send(embed=embed)
         addSubmission(submissionID,embed,messageID.id)
 
@@ -148,8 +149,8 @@ async def allow(ctx,submissionID,allowed="True"):
     elif allowed.lower() == "false":
         embed = getSubmission(submissionID)
         await ctx.send("​Submssions with submissionID of {} has been disapproved.".format(submissionID))
-        channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, "allowChannelID" ) )
-        message = await channel.get_message( getServerChannels(ctx.message.guild.id, "allowChannelID") )
+        channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, 2 ) )
+        message = await channel.get_message( getServerChannels(ctx.messdiscord.ext.commands.errors.CommandInvokeError: Command raised an exception: ChannelTypeFailure: receiveChannelID is not a valid channelTypeage.guild.id, 2) )
         embed.colour = 0xff0000
         await message.edit(embed=embed)
         removeSubmission(submissionID)
