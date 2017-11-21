@@ -126,7 +126,7 @@ async def submit(ctx, title, imageURL, *, description):
     submissionID = generateID() 
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID,submissionID)
     embed = generateEmbed(ctx.author,title,0x00ff00,description,imageURL,footerText)
-    print(ctx.channel.id)
+    print(getServerChannels(ctx.guild.id, 1))
     if ctx.channel.id == getServerChannels(ctx.guild.id, 1):
         channel = ctx.guild.get_channel( getServerChannels( ctx.guild.id, 2 ) )
         messageID = await channel.send(embed=embed)
