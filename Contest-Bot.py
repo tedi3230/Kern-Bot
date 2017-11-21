@@ -131,12 +131,12 @@ async def submit(ctx, title, imageURL, *, description):
         messageID = await channel.send(embed=embed)
         addSubmission(submissionID,embed,messageID.id)
 
-@submit.error
-async def submit_error_handler(ctx,error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You did not pass all the required arguments, please try again.")
-    else:
-        await ctx.send("​Submit Warning:\n%s"%str(error))
+# @submit.error
+# async def submit_error_handler(ctx,error):
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         await ctx.send("You did not pass all the required arguments, please try again.")
+#     else:
+#         await ctx.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx,submissionID,allowed="True"):
