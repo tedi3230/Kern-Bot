@@ -64,7 +64,7 @@ async def restart(ctx):
 @bot.command()
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""
-    if ctx.author.id == "310316666171162626":
+    if ctx.author.id == 310316666171162626:
         await ctx.send("Shutting Down.")
         await bot.close()
 
