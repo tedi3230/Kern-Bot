@@ -56,6 +56,9 @@ async def restart(ctx):
         await sleep(5)
         await bot.logout()
         execv(executable,['py'] + argv)
+    else:
+        owner = discord.id
+        await ctx.send("You are not ")
 
 @bot.command()
 async def shutdown(ctx):
