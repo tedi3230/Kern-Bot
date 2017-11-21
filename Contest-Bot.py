@@ -6,6 +6,7 @@ from DB_Access import *
 from os import execv
 from sys import argv,executable
 from asyncio import sleep
+from random import choice
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
 bot = commands.Bot(command_prefix='!', description='Allows for the creation of contests that can be used in servers.')
@@ -38,16 +39,11 @@ async def on_ready():
 
 @bot.event
 async def statusChanger():
-    counter = 0
+    status_messages = [discord.Game(name="for new contests.",type=3),discord.Game(name="{} servers.".format(getNumServers()),type=3),discord.Game(name="for new contests.",type=3]
     while not bot.is_closed:
-        if counter % 3 == 0:
-            await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
-        elif counter % 3 == 1:
-            await bot.change_presence(game=discord.Game(name="{} servers.".format(getNumServers()),type=3))
-        elif counter % 3 == 3:
-            await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+        message = choice(status_messages)
+        await bot.change_presence(game=status_message)
         await sleep(60)
-        counter+=1
 
 @bot.command()
 async def restart(ctx):
