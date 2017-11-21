@@ -3,7 +3,7 @@ import ast
 from discord.ext import commands
 import pickle
 from DB_Access import *
-from os import execv
+from os import execv,getenv
 from sys import argv,executable
 from asyncio import sleep
 from random import choice
@@ -12,9 +12,12 @@ from random import choice
 bot = commands.Bot(command_prefix='!', description='Allows for the creation of contests that can be used in servers.')
 Client = discord.Client()
 
-tokenFile = open('client_secret.txt', mode='r')
-token = tokenFile.read()
-tokenFile.close()
+token = getenv("AUTH_KEY")
+
+if token == None:
+    tokenFile = open('client_secret.txt', mode='r')
+    token = tokenFile.read()
+    tokenFile.close()
 
 def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
     embed = discord.Embed(title="Submission by:", description=messageAuthor.mention, colour=colour)
