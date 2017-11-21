@@ -4,9 +4,3 @@ aiohttp
 websockets
 chardet
 multidict
-ast
-pickle
-os
-sys
-asyncio
-random
