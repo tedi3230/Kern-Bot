@@ -23,23 +23,7 @@ class IncorrectNumOfArguments(Exception):
 def cleanUP():
     dataBase.close()
 
-
-
-def checkKeyExists(dic,keyList):    
-    values = []
-    fails = []
-    for key in KeyList:
-        if key in dic.keys():
-            values.append(dic[key])
-        else:
-            fails.append(key)
-    if len(key) > 0:
-        tempString = " ".join(fails)
-        raise TypeError("function() missing at least 1 required keyword argument: {}".format(tempString))
-    else:
-        return values
-
-def accessDatabase(aType,table,columns="*",values=tuple(),whereCol=str(),colValues=str()):
+def accessDatabase(aType,table,columns=None,values=None,whereCol=None,colValues=None):
     """Access the database with easy commands.
     accessDatabase(aType,table,data=None,fields="*",)
     aType: 0="SELECT",1="INSERT",2="DELETE",3="SELECT WHERE".4="INSERT OR IGNORE" Integer.
@@ -51,34 +35,28 @@ def accessDatabase(aType,table,columns="*",values=tuple(),whereCol=str(),colValu
 
     """Do soemething to detect if those exist (aside from try)"""
 
-    """Access Like So: accessDatabase(1,"Server",values=(col1,col2),colValues="hi
+    "Access Like So: accessDatabase(1,'Server',values=(col1,col2),colValues='hi'"
     
-    Named arguments, argumentName=value
+    "Named arguments, argumentName=value"
 
-    """"
-
-    values = kwargs['values']
-    whereCol = kwargs['wherCol']
-    colValues = kwargs['colValues']
     if aType == 0:
         """SELECT"""
-        checkKeyExists(kwargs,['columns'])
-        cur.execute("SELECT ? FROM ?",(columns,table))
+        cur.execute("SELECT {} FROM {}".format(columns,table))
         return cur.fetchall()
     elif aType == 1:
         """INSERT"""
-        if "columns" in kwargs.keys():
-            columns = kwargs['columns']
-        else:
-            
-        values = kwargs['values']
-        if len(columns) != len(values) and columns != "*":
-
+        fails = []
+        if values == None:
+            fails.append("values")
+        if columns == None:
+            fails.append("columns")
+        if len(fails) != 0:
+            TypeError("accessDatabase() missing at least 1 required keyword argument: {}".format(" ".join(fails)))
         cur.execute("INSERT INTO ? ? VALUES ?",(table,columns,values))
     elif aType == 2:
         """DELETE"""
         pass
-    elif aType ==3:
+    elif aType == 3:
         """SELECT WHERE"""
         cur.execute("SELECT ? FROM ? WHERE ? = ?",(columns,table,whereCol,colValues))
         return cur.fetchall()
@@ -88,13 +66,18 @@ def accessDatabase(aType,table,columns="*",values=tuple(),whereCol=str(),colValu
         pass
         #Fail
 
+def getNumServers():
+    """Get the number of servers in the database"""
+    return len(accessDatabase(0,"Servers","serverID")[0])
+
+
 def getServerChannels(server, channelType):
     """Get the submission channels in the server, 0=All Channels,1=Receive Channel",2=Allow Channel,4=Vote Channel"""
     if channelType not in channelTypes:
         raise ChannelTypeFailure("{} is not a valid channelType".format(channelType))
     if channelType == 0:
         cur.execute("SELECT receiveChannelID,allowChannelID,voteChannelID FROM Servers WHERE serverID = (?)",server)
-        accessDatabase(3,)
+        #accessDatabase(3,)
         channelIDs = list(cur)
         channelIDs = list(channelIDs[0])
         channelIDs.pop(0)
@@ -161,5 +144,5 @@ def setPrefix(serverID,prefix):
     return None
 
 if __name__ in "__main__":
-    pass
+    print(getNumServers())
     #cur.execute("INSERT INTO Servers VALUES(380288809310617600,380289063040712704,380289087657213952,380364317809311746);")

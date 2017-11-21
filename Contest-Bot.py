@@ -5,6 +5,7 @@ import pickle
 from DB_Access import *
 from os import execv
 from sys import argv,executable
+from asyncio import sleep
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
 bot = commands.Bot(command_prefix='!', description='Allows for the creation of contests that can be used in servers.')
@@ -26,13 +27,26 @@ def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
 class InvalidParameter(Exception):
     pass
 
+counter = 0
+
+@bot.event
+async def statusChanger():
+    global counter
+    if counter % 3 == 0:
+        await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+    elif counter % 3 == 1:
+        await bot.change_presence(game=discord.Game(name="{} servers.".format(getNumServers()),type=3))
+    elif counter % 3 == 3:
+        await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
+    await sleep(60)
+    counter+=1
+
 @bot.event
 async def on_ready():
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot.change_presence(game=discord.Game(name="for new contests.",type=3))
 
 @bot.command()
 async def restart(ctx):
@@ -143,6 +157,8 @@ async def allow_error_handler(error, ctx):
         await ctx.send(str(error))
     else:
         await ctx.send("​Warning:\n%s"%str(error))
+
+bot.loop.create_task(statusChanger())
 
 try:
     bot.run(token)
