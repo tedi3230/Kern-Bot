@@ -4,12 +4,43 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "heroku push",
-            "command": "py",
+            "label": "Git add",
+            "command": "git",
             "type": "shell",
-            "args": ["${relativeFile}"],
+            "args": ["add ."],
             "problemMatcher": [],
             "group":"build"
         }
+        {
+            "label": "Git Commit",
+            "command": "git",
+            "type": "shell",
+            "args": ["commit -m Heroku-${lineNumber}"],
+            "problemMatcher": [],
+            "group":"build"
+        }
+        {
+            "label": "Heroku Push",
+            "command": "git",
+            "type": "shell",
+            "args": ["push heroku master"],
+            "problemMatcher": [],
+            "group":"build"
+        }
+
+        "tasks": [
+            {
+            "taskName": "Build Type Script",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "args": ["tsc -p ."]
+            },
+            {
+            "taskName": "Open Browser",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "args": ["live-server --open=public_html"]
+            }
+        ]
     ]
 }
