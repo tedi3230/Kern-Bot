@@ -83,6 +83,12 @@ def getServerChannels(server, channelType):
         channelIDs.pop(0)
         return channelIDs
     else:
+        if channelType == 1:
+            channelType = "receiveChannelID"
+        elif channelType == 2:
+            channelType = "allowChannelID"
+        elif channelType == 3:
+            channelType = "voteChannelID"
         cur.execute("SELECT {} FROM Servers WHERE serverID = {}".format(channelType,server))
     channelID = cur.fetchall() 
     if len(channelID) == 0:
