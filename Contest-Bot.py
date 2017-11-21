@@ -39,10 +39,10 @@ async def on_ready():
 
 @bot.event
 async def statusChanger():
-    status_messages = [discord.Game(name="for new contests.",type=3),discord.Game(name="{} servers.".format(getNumServers()),type=3),discord.Game(name="for new contests.",type=3]
+    status_messages = [discord.Game(name="for new contests.",type=3),discord.Game(name="{} servers.".format(getNumServers()),type=3),discord.Game(name="for new contests.",type=3)]
     while not bot.is_closed:
         message = choice(status_messages)
-        await bot.change_presence(game=status_message)
+        await bot.change_presence(game=message)
         await sleep(60)
 
 @bot.command()
