@@ -9,7 +9,7 @@ from asyncio import sleep
 from random import choice
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
-bot = commands.Bot(command_prefix='!', description='Allows for the creation of contests that can be used in servers.')
+bot = commands.Bot(command_prefix='!', description='Creates, manages and votes for contests in servers.')
 Client = discord.Client()
 
 token = getenv("AUTH_KEY")
