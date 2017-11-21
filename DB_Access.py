@@ -93,7 +93,7 @@ def setServerChannels(*args):
     """Set up the channels for making, allowing, and voting for submissions."""
     if len(args) != 4:
         raise IncorrectNumOfArguments("There was an incorrect number of arguments supplied.")
-    cur.execute("INSERT OR IGNORE INTO Servers Values(?,?,?,?)",(args[0],args[1],args[2],args[3],))
+    cur.execute("INSERT OR IGNORE INTO Servers Values(?,?,?,?,?)",(args[0],args[1],args[2],args[3],4))
     dataBase.commit()
     #Make so that serverID & other channels, one has INSERT REPLACe the other is insert IGNORE
 
