@@ -53,6 +53,7 @@ async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
     if ctx.author.id == "310316666171162626":
         await ctx.send("Restarting Bot.")
+        await sleep(5)
         await bot.logout()
         execv(executable,['py'] + argv)
 
