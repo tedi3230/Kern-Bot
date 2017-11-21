@@ -93,7 +93,7 @@ async def settings_get_channels(ctx):
 
 @settings_set.command(name="channels")
 async def settings_set_channels(ctx, *args):
-    if len(args) != 4:
+    if len(args) != 3:
         raise IncorrectNumOfArguments("Too many/little channels supplied, only 3 required.")
     receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
     allowChannelID = args[1].translate({ord(c): None for c in '<>#'})
