@@ -1,1 +1,1 @@
-worker: python Contest-Bot.py 
+worker: python3 Contest-Bot.py 
