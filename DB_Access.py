@@ -25,7 +25,7 @@ dataBase = psycopg2.connect(
 
 cur = dataBase.cursor()
 
-cur.execute("CREATE TABLE IF NOT EXISTS Submissions(submissionID INT,Embed MEDIUMBLOB,messageID INT,rating INT)")
+cur.execute("CREATE TABLE IF NOT EXISTS Submissions(submissionID INT,Embed Binary,messageID INT,rating INT)")
 cur.execute("CREATE TABLE IF NOT EXISTS Servers(serverID INT,receiveChannelID INT,allowChannelID INT, voteChannelID INT,prefix TEXT)")
 channelTypes = [0,1,2,3]
 
