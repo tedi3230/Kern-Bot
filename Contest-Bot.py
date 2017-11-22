@@ -9,7 +9,8 @@ from asyncio import sleep
 from random import choice
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
-    
+modelmat = discord.Object(id=310316666171162626)
+
 def server_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
     
@@ -65,18 +66,18 @@ async def statusChanger():
 @bot.command(hidden=True)
 async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
-    if ctx.author.id == 310316666171162626:
+    if ctx.author == modelmat:
         await ctx.send("Restarting Bot.")
         await bot.logout()
         execv(executable,['py'] + argv)
     else:
         #owner = discord.id
-        await ctx.send("You are not @.")
+        await ctx.send("You are not {}".format(modelmat.mention))
 
 @bot.command(hidden=True)
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""
-    if ctx.author.id == 310316666171162626:
+    if ctx.author == modelmat:
         await ctx.send("Shutting Down.")
         await bot.close()
 
