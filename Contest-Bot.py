@@ -73,7 +73,7 @@ async def restart(ctx):
     else:
         #owner = discord.id
         await ctx.send("You are not {}".format(modelmat.mention))
-
+ 
 @bot.command(hidden=True)
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""

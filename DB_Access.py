@@ -138,7 +138,7 @@ def getMessageID(submissionID):
     return messageID[0][0]
 
 def getPrefix(serverID):
-    cur.execute("SELECT prefix FROM Servers WHERE serverID = (?)",serverID)
+    cur.execute("SELECT prefix FROM Servers WHERE serverID = (?)",str(serverID))
     prefix = cur.fetchall()
     if prefix[0][0] == None:
         return "c!"
