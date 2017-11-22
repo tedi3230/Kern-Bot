@@ -103,3 +103,4 @@ ENV/
 .vscode/*
 .vscode/
 client_secret.txt
+database_secret.txt

@@ -1,8 +1,28 @@
-import sqlite3
+import psycopg2
+from urllib import parse
+import os
 import pickle
 from random import randint
 
-dataBase = sqlite3.connect("database.db")
+parse.uses_netloc.append("postgres")
+
+try:
+    dB_URL = os.environ["DATABASE_URL"]
+except KeyError:
+    dBFile = open('database_secret.txt', mode='r')
+    dB_URL = dBFile.read()
+    dBFile.close()
+
+url = parse.urlparse(os.environ["DATABASE_URL"])
+
+dataBase = psycopg2.connect(
+    database=url.path[1:],
+    user=url.username,
+    password=url.password,
+    host=url.hostname,
+    port=url.port
+)
+
 cur = dataBase.cursor()
 
 cur.execute("CREATE TABLE IF NOT EXISTS Submissions(submissionID INT,Embed MEDIUMBLOB,messageID INT,rating INT)")

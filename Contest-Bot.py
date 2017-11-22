@@ -26,9 +26,9 @@ def server_prefix(bot, message):
 
 bot = commands.Bot(command_prefix=server_prefix, description='Creates, manages and votes for contests in servers.')
 
-token = getenv("AUTH_KEY")
-
-if token == None:
+try:
+    token = os.environ["AUTH_KEY"]
+except KeyError:
     tokenFile = open('client_secret.txt', mode='r')
     token = tokenFile.read()
     tokenFile.close()
