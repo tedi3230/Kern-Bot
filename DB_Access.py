@@ -138,10 +138,10 @@ def getMessageID(submissionID):
     return messageID[0][0]
 
 def getPrefix(serverID):
-    cur.execute("SELECT prefix FROM Servers WHERE serverID = (?)",int(serverID))
+    cur.execute("SELECT prefix FROM Servers WHERE serverID = (?)",serverID)
     prefix = cur.fetchall()
     if prefix[0][0] == None:
-        return "!"
+        return "c!"
     return prefix[0][0]
 
 def setPrefix(serverID,prefix):
