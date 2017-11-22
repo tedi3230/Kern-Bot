@@ -7,9 +7,10 @@ from os import execv,getenv
 from sys import argv,executable
 from asyncio import sleep
 from random import choice
+from datetime import datetime
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
-modelmat = discord.Object(id=310316666171162626)
+modelmat = commands.Bot.get_user(id=310316666171162626)
 
 def server_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
@@ -53,6 +54,9 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    if modelmat.dm_channel == None:
+        modelmat.create_dm()
+    modelmat.dm_channel.send("Bot Online at {} UTC".format(datetime.datetime.utcnow().strftime('%H:%M:%S on %Y/%m/%d')))
     bot.loop.create_task(statusChanger())
 
 @bot.event
