@@ -99,7 +99,7 @@ async def shutdown(ctx):
 @bot.group(invoke_without_command=True)
 async def settings(ctx):
     """Change and manage all settings of this bot"""
-    await ctx.send("For commands, type `!help settings set` or `!help settings get ")
+    await ctx.send("For commands, type `!help settings set` or `!help settings get`")
     # no subcommand invoked, just [p]settings
 
 @settings.group(invoke_without_command=True,name="get")

@@ -76,7 +76,7 @@ def getServerChannels(server, channelType):
     if channelType not in channelTypes:
         raise ChannelTypeFailure("{} is not a valid channelType".format(channelType))
     if channelType == 0:
-        cur.execute("SELECT receiveChannelID,allowChannelID,voteChannelID FROM Servers WHERE serverID = (?)",server)
+        cur.execute("SELECT receiveChannelID,allowChannelID,voteChannelID FROM Servers WHERE serverID = ?",(server,))
         #accessDatabase(3,)
         channelIDs = list(cur)
         channelIDs = list(channelIDs[0])
