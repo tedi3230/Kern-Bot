@@ -71,7 +71,7 @@ async def statusChanger():
     while not bot.is_closed:
         message = choice(status_messages)
         await bot.change_presence(game=message)
-        await sleep(60)
+        await sleep(5)
 
 @bot.command(hidden=True)
 async def restart(ctx):
@@ -143,11 +143,11 @@ async def settings_get_prefix(ctx):
 @settings.error
 async def settings_error_handler(ctx,error):
     if isinstance(error,InvalidParameter):
-        bot_logs.send(str(error))
+        ctx.send(str(error))
     elif isinstance(error,IncorrectNumOfArguments):
-        bot_logs.send(str(error))
+        ctx.send(str(error))
     else:
-        bot_logs.send("Warning:\n{}".format(str(error)))
+        ctx.send("Warning:\n{}".format(str(error)))
 
 @bot.command()
 async def submit(ctx, title, imageURL, *, description):
@@ -164,9 +164,9 @@ async def submit(ctx, title, imageURL, *, description):
 @submit.error
 async def submit_error_handler(ctx,error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await bot_logs.send("You did not pass all the required arguments, please try again.")
+        await ctx.send("You did not pass all the required arguments, please try again.")
     else:
-        await bot_logs.send("​Submit Warning:\n%s"%str(error))
+        await ctx.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx,submissionID,allowed="True"):
