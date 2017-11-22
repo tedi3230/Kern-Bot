@@ -79,6 +79,7 @@ def getServerChannels(server, channelType):
         cur.execute("SELECT receiveChannelID,allowChannelID,voteChannelID FROM Servers WHERE serverID = ?",(server,))
         #accessDatabase(3,)
         channelIDs = list(cur)
+        print(channelIDs)
         channelIDs = list(channelIDs[0])
         channelIDs.pop(0)
         return channelIDs
