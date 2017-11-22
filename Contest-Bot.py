@@ -25,7 +25,6 @@ def server_prefix(bot, message):
     return commands.when_mentioned_or(prefix)(bot, message)
 
 bot = commands.Bot(command_prefix=server_prefix, description='Creates, manages and votes for contests in servers.')
-modelmat = None
 
 token = getenv("AUTH_KEY")
 
@@ -46,16 +45,25 @@ def generateEmbed(messageAuthor,title,colour,description,imageURL,footerText):
 class InvalidParameter(Exception):
     pass
 
+modelmat = None
+bot_logs = None
+
 @bot.event
 async def on_ready():
     global modelmat
+    global bot_logs
     modelmat = bot.get_user(310316666171162626)
+    bot_logs = bot.get_channel(382780308610744331)
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
     await modelmat.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %Y/%m/%d')))
     bot.loop.create_task(statusChanger())
+
+@bot.event
+async def on_guild_join(ctx,guild):
+    bot_logs.send("Joined {} at {}".format(guild.name,datetime.utcnow().strftime('%H:%M:%S UTC on the %Y/%m/%d')))
 
 @bot.event
 async def statusChanger():
@@ -69,19 +77,24 @@ async def statusChanger():
 async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
     if ctx.author == modelmat:
-        await ctx.send("Restarting Bot.")
-        await bot.logout()
+        await ctx.send("Restarting bot.")
+        await bot_logs.send("Restarting bot.")
+        await bot.close()
         execv(executable,['python'] + argv)
     else:
-        #owner = discord.id
         await ctx.send("You are not {}".format(modelmat.mention))
+        await bot_logs.send("{},{} attempted to restart this bot.".format(ctx.author.mention,ctx.author.id))
  
 @bot.command(hidden=True)
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""
     if ctx.author == modelmat:
         await ctx.send("Shutting Down.")
+        await bot_logs.send("Shutting down bot.")
         await bot.close()
+    else:
+        await ctx.send("You are not {}".format(modelmat.mention))
+        await bot_logs.send("{},{} attempted to shutdown this bot.".format(ctx.author.mention,ctx.author.id))
 
 @bot.group(invoke_without_command=True)
 async def settings(ctx):
