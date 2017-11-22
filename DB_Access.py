@@ -62,12 +62,14 @@ def accessDatabase(aType,table,columns=None,values=None,whereCol=None,colValues=
         return cur.fetchall()
     elif aType == 4:
         """ INSERT OR IGNORE"""
+        pass
     else:
         pass
         #Fail
 
 def getNumServers():
     """Get the number of servers in the database"""
+    print(accessDatabase(0,"Servers","serverID"))
     return len(accessDatabase(0,"Servers","serverID")[0])
 
 
