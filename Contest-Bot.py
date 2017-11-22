@@ -58,12 +58,12 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot_logs.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %d of %M, %Y')))
+    await bot_logs.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %d of %B, %Y')))
     bot.loop.create_task(statusChanger())
 
 @bot.event
 async def on_guild_join(guild):
-    bot_logs.send("Joined {} at {}".format(guild.name,datetime.utcnow().strftime('%H:%M:%S UTC on the %d of %M, %Y')))
+    bot_logs.send("Joined {} at {}".format(guild.name,datetime.utcnow().strftime('%H:%M:%S UTC on the %d of %B, %Y')))
 
 @bot.event
 async def statusChanger():
