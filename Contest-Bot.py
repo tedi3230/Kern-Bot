@@ -129,11 +129,11 @@ async def settings_get_prefix(ctx):
 @settings.error
 async def settings_error_handler(ctx,error):
     if isinstance(error,InvalidParameter):
-        ctx.send(str(error))
+        modelmat.send(str(error))
     elif isinstance(error,IncorrectNumOfArguments):
-        ctx.send(str(error))
+        modelmat.send(str(error))
     else:
-        ctx.send("Warning:\n{}".format(str(error)))
+        modelmat.send("Warning:\n{}".format(str(error)))
 
 @bot.command()
 async def submit(ctx, title, imageURL, *, description):
@@ -150,9 +150,9 @@ async def submit(ctx, title, imageURL, *, description):
 @submit.error
 async def submit_error_handler(ctx,error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You did not pass all the required arguments, please try again.")
+        await modelmat.send("You did not pass all the required arguments, please try again.")
     else:
-        await ctx.send("​Submit Warning:\n%s"%str(error))
+        await modelmat.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx,submissionID,allowed="True"):
