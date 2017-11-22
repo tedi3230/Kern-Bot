@@ -133,20 +133,21 @@ def generateID():
     return submissionID
 
 def getMessageID(submissionID):
-    cur.execute("SELECT messageID FROM Submissions WHERE submissionID = (?)",submissionID)
+    cur.execute("SELECT messageID FROM Submissions WHERE submissionID = ?",(submissionID,))
     messageID=cur.fetchall()
     return messageID[0][0]
 
 def getPrefix(serverID):
-    print(serverID)
-    cur.execute("SELECT prefix FROM Servers WHERE serverID = (?)",str(serverID))
+    cur.execute("SELECT prefix FROM Servers WHERE serverID = ?",(serverID,))
     prefix = cur.fetchall()
-    if prefix[0][0] == None:
+    if len(prefix) == 0:
+        return "c!"
+    elif prefix[0][0] is None:
         return "c!"
     return prefix[0][0]
 
 def setPrefix(serverID,prefix):
-    cur.execute("INSERT INTO Servers (prefix) VALUES (?);",prefix)
+    cur.execute("INSERT INTO Servers (prefix) VALUES ?;",(prefix,))
     dataBase.commit()
     return None
 

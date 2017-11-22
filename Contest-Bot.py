@@ -10,8 +10,6 @@ from random import choice
 from datetime import datetime
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
-modelmat = commands.Bot.get_user(id=310316666171162626)
-
 def server_prefix(bot, message):
     """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
     
@@ -27,7 +25,7 @@ def server_prefix(bot, message):
     return commands.when_mentioned_or(prefix)(bot, message)
 
 bot = commands.Bot(command_prefix=server_prefix, description='Creates, manages and votes for contests in servers.')
-Client = discord.Client()
+modelmat = None
 
 token = getenv("AUTH_KEY")
 
@@ -50,13 +48,13 @@ class InvalidParameter(Exception):
 
 @bot.event
 async def on_ready():
+    global modelmat
+    modelmat = bot.get_user(310316666171162626)
     print('\nLogged in as:')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    if modelmat.dm_channel == None:
-        modelmat.create_dm()
-    modelmat.dm_channel.send("Bot Online at {} UTC".format(datetime.datetime.utcnow().strftime('%H:%M:%S on %Y/%m/%d')))
+    await modelmat.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %Y/%m/%d')))
     bot.loop.create_task(statusChanger())
 
 @bot.event
@@ -73,7 +71,7 @@ async def restart(ctx):
     if ctx.author == modelmat:
         await ctx.send("Restarting Bot.")
         await bot.logout()
-        execv(executable,['py'] + argv)
+        execv(executable,['python'] + argv)
     else:
         #owner = discord.id
         await ctx.send("You are not {}".format(modelmat.mention))
