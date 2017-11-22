@@ -112,6 +112,7 @@ async def settings_set(ctx):
 
 @settings_get.command(name="channels")
 async def settings_get_channels(ctx): 
+    print("hi")
     channels = getServerChannels(ctx.guild.id,0)
     if len(channels) == 3:
         await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name,channels[0],channels[1],channels[2]))
