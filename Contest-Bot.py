@@ -9,7 +9,22 @@ from asyncio import sleep
 from random import choice
 '''Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot'''
 
-bot = commands.Bot(command_prefix='c!', description='Creates, manages and votes for contests in servers.')
+    
+def server_prefix(bot, message):
+    """A callable Prefix for our bot. This could be edited to allow per server prefixes."""
+    
+    # Notice how you can use spaces in prefixes. Try to keep them simple though.
+    prefixes = ['c!']
+
+    # Check to see if we are outside of a guild. e.g DM's etc.
+    if not message.guild:
+        # Only allow ? to be used in DMs
+        return '!'
+
+    # If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
+    return commands.when_mentioned_or(*prefixes)(bot, message)
+
+bot = commands.Bot(command_prefix=server_prefix, description='Creates, manages and votes for contests in servers.')
 Client = discord.Client()
 
 token = getenv("AUTH_KEY")
@@ -38,7 +53,6 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     bot.loop.create_task(statusChanger())
-    
 
 @bot.event
 async def statusChanger():
@@ -48,20 +62,18 @@ async def statusChanger():
         await bot.change_presence(game=message)
         await sleep(60)
 
-@bot.command()
+@bot.command(hidden=True)
 async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
-    await ctx.send("Restarting Bot.")
     if ctx.author.id == 310316666171162626:
         await ctx.send("Restarting Bot.")
-        await sleep(5)
         await bot.logout()
         execv(executable,['py'] + argv)
     else:
         #owner = discord.id
         await ctx.send("You are not @.")
 
-@bot.command()
+@bot.command(hidden=True)
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""
     if ctx.author.id == 310316666171162626:
@@ -132,12 +144,12 @@ async def submit(ctx, title, imageURL, *, description):
         messageID = await channel.send(embed=embed)
         addSubmission(submissionID,embed,messageID.id)
 
-# @submit.error
-# async def submit_error_handler(ctx,error):
-#     if isinstance(error, commands.MissingRequiredArgument):
-#         await ctx.send("You did not pass all the required arguments, please try again.")
-#     else:
-#         await ctx.send("​Submit Warning:\n%s"%str(error))
+@submit.error
+async def submit_error_handler(ctx,error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send("You did not pass all the required arguments, please try again.")
+    else:
+        await ctx.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx,submissionID,allowed="True"):
