@@ -58,7 +58,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await modelmat.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %Y/%m/%d')))
+    await bot_logs.send("Bot Online at {}".format(datetime.utcnow().strftime('%H:%M:%S UTC on the %Y/%m/%d')))
     bot.loop.create_task(statusChanger())
 
 @bot.event
@@ -142,11 +142,11 @@ async def settings_get_prefix(ctx):
 @settings.error
 async def settings_error_handler(ctx,error):
     if isinstance(error,InvalidParameter):
-        modelmat.send(str(error))
+        bot_logs.send(str(error))
     elif isinstance(error,IncorrectNumOfArguments):
-        modelmat.send(str(error))
+        bot_logs.send(str(error))
     else:
-        modelmat.send("Warning:\n{}".format(str(error)))
+        bot_logs.send("Warning:\n{}".format(str(error)))
 
 @bot.command()
 async def submit(ctx, title, imageURL, *, description):
@@ -163,9 +163,9 @@ async def submit(ctx, title, imageURL, *, description):
 @submit.error
 async def submit_error_handler(ctx,error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await modelmat.send("You did not pass all the required arguments, please try again.")
+        await bot_logs.send("You did not pass all the required arguments, please try again.")
     else:
-        await modelmat.send("​Submit Warning:\n%s"%str(error))
+        await bot_logs.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx,submissionID,allowed="True"):
