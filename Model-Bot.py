@@ -142,12 +142,12 @@ async def settings_get_channels(ctx):
 
 @settings_set.command(name="channels")
 async def settings_set_channels(ctx, *args):
-    print(args)
     if len(args) < 3:
         raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(server_prefix(bot, ctx)))
     receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
     allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
     outputChannelID = args[2].translate({ord(c): None for c in '<>#'})
+    print(receiveChannelID,allowChannelID,outputChannelID)
     db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
     await ctx.send("​Set channels to {} {} {}".format(args[0], args[1], args[2]))
 
@@ -168,8 +168,9 @@ async def settings_error_handler(ctx, error):
         ctx.send("Warning:\n{}".format(str(error)))
 
 @bot.command()
-async def submit(ctx, title, imageURL, *, description):
+async def submit(ctx, title, imageURL="", *, description):
     """Submits items into the contest. Enclose title & imageURL in quotes."""
+    print(ctx, title, imageURL, description)
     submissionID = db.generate_id()
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
     embed = generateEmbed(ctx.author, title, description, footerText, imageURL, 0x00ff00)
