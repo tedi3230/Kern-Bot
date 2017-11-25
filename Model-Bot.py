@@ -171,8 +171,7 @@ async def settings_error_handler(ctx, error):
 async def submit(ctx, *, args):
     """Submits items into the contest. c!submit <title> <description> [imageURL]"""
     input_split = tuple(args.split(" | "))
-    print(input_split,args)
-    if len(input_split) != 2 or len(input_split) != 3:
+    if len(input_split) != 2 and len(input_split) != 3:
         raise TypeError("Not all arguments passed")
     title, description, image_url = input_split
     print(ctx, title, image_url, description)
