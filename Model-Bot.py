@@ -176,6 +176,8 @@ async def submit(ctx, *, args):
     title, description = input_split[0:2]
     if len(input_split) == 3:
         image_url = input_split[3]
+    else:
+        image_url = ""
     print(ctx, title, image_url, description)
     submissionID = db.generate_id()
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
