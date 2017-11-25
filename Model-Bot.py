@@ -169,7 +169,7 @@ async def settings_error_handler(ctx, error):
 
 @bot.command()
 async def submit(ctx, *, args):
-    """Submits items into the contest. Enclose title & image_url in quotes."""
+    """Submits items into the contest. c!submit <title> <description> [imageURL]"""
     input_split = tuple(args.split("|"))
     if len(input_split) != 2 or len(input_split) != 3:
         raise commands.MissingRequiredArgument("Not all arguments passed")
