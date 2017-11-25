@@ -141,7 +141,7 @@ def generate_id():
     print(data)
     if not data:
         return submission_id
-    while submission_id in data[0]:
+    while submission_id in data:
         submission_id = "{:06}".format(randint(0, 999999))
     return submission_id
 
