@@ -75,7 +75,7 @@ async def on_ready():
     modelmat = bot.get_user(310316666171162626)
     bot_logs = bot.get_channel(382780308610744331)
     print('\nLogged in as:')
-    print(bot.user.name)
+    print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
     await bot_logs.send("Bot Online at {}".format(
