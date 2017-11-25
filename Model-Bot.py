@@ -173,7 +173,9 @@ async def submit(ctx, *, args):
     input_split = tuple(args.split(" | "))
     if len(input_split) != 2 and len(input_split) != 3:
         raise TypeError("Not all arguments passed")
-    title, description, image_url = input_split
+    title, description = input_split[0:2]
+    if len(input_split) == 3:
+        image_url = input_split[3]
     print(ctx, title, image_url, description)
     submissionID = db.generate_id()
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
