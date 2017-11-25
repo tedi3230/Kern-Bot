@@ -173,7 +173,7 @@ async def submit(ctx, *, args):
     input_split = tuple(args.split(" | "))
     print(input_split,args)
     if len(input_split) != 2 or len(input_split) != 3:
-        raise commands.MissingRequiredArgument("Not all arguments passed")
+        raise TypeError("Not all arguments passed")
     title, description, image_url = input_split
     print(ctx, title, image_url, description)
     submissionID = db.generate_id()
