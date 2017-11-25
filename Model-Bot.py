@@ -171,6 +171,7 @@ async def settings_error_handler(ctx, error):
 async def submit(ctx, *, args):
     """Submits items into the contest. c!submit <title> <description> [imageURL]"""
     input_split = tuple(args.split("|"))
+    print(input_split,args)
     if len(input_split) != 2 or len(input_split) != 3:
         raise commands.MissingRequiredArgument("Not all arguments passed")
     title, description, image_url = input_split
@@ -193,7 +194,7 @@ async def submit_error_handler(ctx, error):
 
 @bot.command()
 async def allow(ctx, submissionID, allowed="True"):
-    """Allows for moderators to approve/disaprove submissions."""
+    """Allows for moderators to approve/reject submissions."""
     #CHECK IF SAME SERVER
     embed = db.get_submission(submissionID)
     if allowed.lower() == "true":
