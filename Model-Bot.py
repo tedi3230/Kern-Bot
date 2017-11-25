@@ -142,6 +142,7 @@ async def settings_get_channels(ctx):
 
 @settings_set.command(name="channels")
 async def settings_set_channels(ctx, *args):
+    print(args)
     if len(args) < 3:
         raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(server_prefix(bot, ctx)))
     receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
