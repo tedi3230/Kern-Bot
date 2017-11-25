@@ -1,8 +1,11 @@
-import psycopg2
-from urllib import parse
 import os
 import pickle
+from urllib import parse
 from random import randint
+from traceback import print_exc
+from ast import literal_eval #Putting dic values inside
+from atexit import register
+import psycopg2
 
 parse.uses_netloc.append("postgres")
 
@@ -13,167 +16,150 @@ except KeyError:
     dB_URL = dBFile.read()
     dBFile.close()
 
-url = parse.urlparse(os.environ["DATABASE_URL"])
+url = parse.urlparse(dB_URL)
 
-dataBase = psycopg2.connect(
-    database=url.path[1:],
-    user=url.username,
-    password=url.password,
-    host=url.hostname,
-    port=url.port
-)
+db = psycopg2.connect(database=url.path[1:],
+                      user=url.username,
+                      password=url.password,
+                      host=url.hostname,
+                      port=url.port)
 
-cur = dataBase.cursor()
+cur = db.cursor()
 
-cur.execute("CREATE TABLE IF NOT EXISTS Submissions(submissionID INT,Embed bytea,messageID INT,rating INT)")
-cur.execute("CREATE TABLE IF NOT EXISTS Servers(serverID INT,receiveChannelID INT,allowChannelID INT, voteChannelID INT,prefix TEXT)")
-channelTypes = [0,1,2,3]
+submissions_table = """
+                CREATE TABLE IF NOT EXISTS submissions (
+                    submission_id INT NOT NULL,
+                    embed BYTEA NOT NULL,
+                    message_id BIGINT NOT NULL,
+                    rating VARCHAR
+                )
+                """
 
-"""receiveChannelID is where !submit gets sent, allowChannelID is where !allow gets sent, voteChannelID is where the final contestants get sent"""
+##The rating should be a dictionary - then we can have
 
-class ChannelTypeFailure(Exception):
-    pass
-class ServerNotExist(Exception):
-    pass
-class SubmissionNotExist(Exception):
-    pass
-class IncorrectNumOfArguments(Exception):
-    pass
+servers_table = """
+                CREATE TABLE IF NOT EXISTS servers (
+                    server_id BIGINT NOT NULL UNIQUE,
+                    receive_channel_id BIGINT NOT NULL,
+                    allow_channel_id BIGINT NOT NULL,
+                    vote_channel_id BIGINT NOT NULL,
+                    prefix VARCHAR
+                )
+                """
 
-def cleanUP():
-    dataBase.close()
+def create_tables():
+    """Add the tables to database if not there."""
+    try:
+        cur.execute(submissions_table)
+        cur.execute(servers_table)
 
-def accessDatabase(aType,table,columns=None,values=None,whereCol=None,colValues=None):
-    """Access the database with easy commands.
-    accessDatabase(aType,table,data=None,fields="*",)
-    aType: 0="SELECT",1="INSERT",2="DELETE",3="SELECT WHERE".4="INSERT OR IGNORE" Integer.
-    table = "Table Name". String
-    columns = (col1,col2,etc.). Tuple of strings or "*".
-    values = (value1,value2,etc.). Tuple of strings
-    whereCol = (col). String
-    colValues = (value). String."""
+        db.commit()
 
-    """Do soemething to detect if those exist (aside from try)"""
+    except psycopg2.DatabaseError:
+        print_exc()
 
-    "Access Like So: accessDatabase(1,'Server',values=(col1,col2),colValues='hi'"
-    
-    "Named arguments, argumentName=value"
+def add_query(command, args=None):
+    create_tables()
+    try:
+        if not args is None:
+            cur.execute(command, args)
+        else:
+            cur.execute(command)
 
-    if aType == 0:
-        """SELECT"""
-        cur.execute("SELECT {} FROM {}".format(columns,table))
-        return cur.fetchall()
-    elif aType == 1:
-        """INSERT"""
-        fails = []
-        if values == None:
-            fails.append("values")
-        if columns == None:
-            fails.append("columns")
-        if len(fails) != 0:
-            TypeError("accessDatabase() missing at least 1 required keyword argument: {}".format(" ".join(fails)))
-        cur.execute("INSERT INTO ? ? VALUES ?",(table,columns,values))
-    elif aType == 2:
-        """DELETE"""
-        pass
-    elif aType == 3:
-        """SELECT WHERE"""
-        cur.execute("SELECT ? FROM ? WHERE ? = ?",(columns,table,whereCol,colValues))
-        return cur.fetchall()
-    elif aType == 4:
-        """ INSERT OR IGNORE"""
-        pass
-    else:
-        pass
-        #Fail
+        db.commit()
 
-def getNumServers():
-    """Get the number of servers in the database"""
-    print(accessDatabase(0,"Servers","serverID"))
-    return len(accessDatabase(0,"Servers","serverID")[0])
+    except psycopg2.DatabaseError:
+        print_exc()
 
+def get_query(command, args=None):
+    create_tables()
+    try:
+        if not args is None:
+            cur.execute(command, args)
+        else:
+            cur.execute(command)
 
-def getServerChannels(server, channelType):
-    """Get the submission channels in the server, 0=All Channels,1=Receive Channel",2=Allow Channel,4=Vote Channel"""
-    if channelType not in channelTypes:
-        raise ChannelTypeFailure("{} is not a valid channelType".format(channelType))
-    if channelType == 0:
-        cur.execute("SELECT receiveChannelID,allowChannelID,voteChannelID FROM Servers WHERE serverID = ?",(server,))
-        #accessDatabase(3,)
-        channelIDs = list(cur)
-        print(channelIDs)
-        channelIDs = list(channelIDs[0])
-        channelIDs.pop(0)
-        return channelIDs
-    else:
-        if channelType == 1:
-            channelType = "receiveChannelID"
-        elif channelType == 2:
-            channelType = "allowChannelID"
-        elif channelType == 3:
-            channelType = "voteChannelID"
-        cur.execute("SELECT {} FROM Servers WHERE serverID = {}".format(channelType,server))
-    channelID = cur.fetchall() 
-    if len(channelID) == 0:
-        raise ServerNotExist("{} is not a known server.".format(server))
-    return channelID[0][0]
+        data = cur.fetchall()
+        db.commit()
+        if len(data) == 1:
+            return data[0]
+        return data
 
-def setServerChannels(*args):
-    """Set up the channels for making, allowing, and voting for submissions."""
-    if len(args) != 4:
-        raise IncorrectNumOfArguments("There was an incorrect number of arguments supplied.")
-    cur.execute("INSERT OR IGNORE INTO Servers Values(?,?,?,?,?)",(args[0],args[1],args[2],args[3],4))
-    dataBase.commit()
-    #Make so that serverID & other channels, one has INSERT REPLACe the other is insert IGNORE
+    except psycopg2.DatabaseError:
+        print_exc()
 
-def addSubmission(submissionID,embedFile,messageID):
-    """Add to the database the submission, by the submission ID & also including the embed File"""
-    dump = pickle.dumps(embedFile)
-    cur.execute("INSERT INTO Submissions (submissionID,Embed,messageID) VALUES (?,?,?)",(submissionID,dump,messageID,))
-    dataBase.commit()
+def close_conn():
+    if db is not None:
+        db.close()
 
-def getSubmission(submissionID):
-    cur.execute("SELECT Embed FROM Submissions WHERE submissionID = (?)",(submissionID,))
-    embed = cur.fetchall()
-    if len(embed) == 0:
-        raise SubmissionNotExist("{} is not a valid submissionID".format(submissionID))
+register(close_conn)
+
+def get_num_servers():
+    return len(get_query("SELECT server_id FROM servers"))
+
+def set_server_channels(server_id, receive_channel_id, allow_channel_id, vote_channel_id):
+    """Sets the channels used for submissions in the database"""
+
+    # sql = """UPDATE servers SET receive_channel_id = %s, allow_channel_id = %s, vote_channel_id = %s
+    #          WHERE server_id = %s;
+    #          INSERT INTO servers(server_id, receive_channel_id, allow_channel_id, vote_channel_id)
+    #          VALUES(%s, %s, %s, %s)"""
+    sql = """INSERT INTO servers(server_id, receive_channel_id, allow_channel_id, vote_channel_id)
+             VALUES(%s, %s, %s, %s)
+             ON CONFLICT (server_id) DO UPDATE
+                SET receive_channel_id = excluded.receive_channel_id,
+                    allow_channel_id = excluded.allow_channel_id,
+                    vote_channel_id = excluded.vote_channel_id;"""
+
+    # add_query(sql, (receive_channel_id, allow_channel_id, vote_channel_id, server_id, server_id, receive_channel_id, allow_channel_id, vote_channel_id,))
+    add_query(sql, (server_id, receive_channel_id, allow_channel_id, vote_channel_id,))
+
+def get_server_channels(server_id):
+    """Retrieve the channels used for submissions off the ID of a server"""
+
+    sql = """SELECT receive_channel_id, allow_channel_id, vote_channel_id FROM servers
+             WHERE server_id = %s"""
+
+    return get_query(sql, (server_id,))
+
+def generate_id():
+    """Generate the ID needed to index the submissions"""
+    data = get_query("SELECT submission_id FROM submissions")
+    submission_id = "{:06}".format(randint(0, 999999))
+    if not data:
+        return submission_id
+    while submission_id in data[0]:
+        submission_id = "{:06}".format(randint(0, 999999))
+    return submission_id
+
+def get_prefix(server_id):
+    """Get the prefix for accessing the bot."""
+    data = get_query("SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
+    if data[0] is None:
+        return "c!"
+    return data
+
+def set_prefix(server_id, prefix):
+    """Set the prefix for accessing the bot."""
+    add_query("INSERT INTO servers(prefix) VALUES(%s) WHERE server_id = %s", (prefix, server_id))
+
+def add_submission(submission_id, embed_file, message_id):
+    dump = pickle.dumps(embed_file)
+    add_query("INSERT INTO submissions (submission_id,embed,message_id) VALUES (%s, %s, %s)", (submission_id, dump, message_id,))
+
+def get_submission(submission_id):
+    embed = get_query("SELECT embed FROM submissions WHERE submission_id = %s", (submission_id,))
+    if embed is None:
+        raise KeyError("{} is not a valid submission_id".format(submission_id))
     embed = embed[0][0]
     return pickle.loads(embed)
 
-def removeSubmission(submissionID):
-    cur.execute("DELETE FROM Submissions WHERE submissionID = ?",(submissionID,)) 
-    dataBase.commit()
-    return None
-
-def generateID():
-    submissionID = "{:06}".format(randint(0,999999))
-    cur.execute("SELECT submissionID FROM Submissions")
-    submissions = cur.fetchall()
-    if len(submissions) == 0:
-        return submissionID
-    while submissionID in submissions[0]:
-        submissionID = "{:06}".format(randint(0,999999))
-    return submissionID
-
-def getMessageID(submissionID):
-    cur.execute("SELECT messageID FROM Submissions WHERE submissionID = ?",(submissionID,))
-    messageID=cur.fetchall()
-    return messageID[0][0]
-
-def getPrefix(serverID):
-    cur.execute("SELECT prefix FROM Servers WHERE serverID = ?",(serverID,))
-    prefix = cur.fetchall()
-    if len(prefix) == 0:
-        return "c!"
-    elif prefix[0][0] is None:
-        return "c!"
-    return prefix[0][0]
-
-def setPrefix(serverID,prefix):
-    cur.execute("INSERT INTO Servers (prefix) VALUES ?;",(prefix,))
-    dataBase.commit()
-    return None
+def del_submission(submission_id):
+    add_query("DELETE FROM submissions WHERE submission_id = %s", (submission_id,))
 
 if __name__ in "__main__":
-    print(getNumServers())
-    #cur.execute("INSERT INTO Servers VALUES(380288809310617600,380289063040712704,380289087657213952,380364317809311746);")
+    print(get_server_channels(382780023926554625))
+    #set_server_channels(382780023926554625, 382780254382718997, 382780208014557185, 382780181645099008)
+    set_prefix(382780023926554625,"!")
+    print(get_prefix(382780023926554625))
+    print(get_num_servers())

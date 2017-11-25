@@ -17,3 +17,4 @@ six==1.11.0
 websockets==3.4
 wrapt==1.10.11
 yarl==0.14.2
+PyDictionary==1.5.2
