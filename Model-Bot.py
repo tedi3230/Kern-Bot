@@ -170,7 +170,7 @@ async def settings_error_handler(ctx, error):
 @bot.command()
 async def submit(ctx, *, args):
     """Submits items into the contest. c!submit <title> <description> [imageURL]"""
-    input_split = tuple(args.split("|"))
+    input_split = tuple(args.split(" | "))
     print(input_split,args)
     if len(input_split) != 2 or len(input_split) != 3:
         raise commands.MissingRequiredArgument("Not all arguments passed")
@@ -185,12 +185,12 @@ async def submit(ctx, *, args):
         messageID = await channel.send(embed=embed)
         db.add_submission(submissionID, embed, messageID.id)
 
-@submit.error
-async def submit_error_handler(ctx, error):
-    if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("You did not pass all the required arguments, please try again.")
-    else:
-        await ctx.send("​Submit Warning:\n%s"%str(error))
+# @submit.error
+# async def submit_error_handler(ctx, error):
+#     if isinstance(error, commands.MissingRequiredArgument):
+#         await ctx.send("You did not pass all the required arguments, please try again.")
+#     else:
+#         await ctx.send("​Submit Warning:\n%s"%str(error))
 
 @bot.command()
 async def allow(ctx, submissionID, allowed="True"):
