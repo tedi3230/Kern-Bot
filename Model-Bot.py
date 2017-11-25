@@ -1,4 +1,4 @@
-from os import execv, environ #Getting values off the environment
+from os import execl, environ #Getting values off the environment
 from sys import argv, executable #Bot Restarting >>> BAD
 from asyncio import sleep #Timed Commands
 from random import choice
@@ -89,35 +89,30 @@ async def on_guild_join(guild):
 @bot.event
 async def statusChanger():
     status_messages = [discord.Game(name="for new contests.", type=3),
-                       discord.Game(name="{} servers.".format(db.get_num_servers()), type=3),
-                       discord.Game(name="for new contests.", type=3)]
-    while not bot.is_closed:
+                       discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
+    while not bot.is_closed():
         message = choice(status_messages)
         await bot.change_presence(game=message)
-        await sleep(5)
+        await sleep(60)
 
+@bot.is_owner
 @bot.command(hidden=True)
 async def restart(ctx):
     """Owner of this bot only command; Restart the bot"""
-    if ctx.author == modelmat: #do .is_owner()
+    if ctx.channel != bot_logs:
         await ctx.send("Restarting bot.")
-        await bot_logs.send("Restarting bot.")
-        await bot.close()
-        execv(executable, ['python'] + argv)
-    else:
-        await ctx.send("You are not {}".format(modelmat.mention))
-        await bot_logs.send("{},{} attempted to restart this bot.".format(ctx.author.mention, ctx.author.id))
+    await bot_logs.send("Restarting bot.")
+    await bot.close()
+    execl(executable, 'python "' + "".join(argv) + '"')
 
+@bot.is_owner
 @bot.command(hidden=True)
 async def shutdown(ctx):
     """Owner of this bot only command; Shutdown the bot"""
-    if ctx.author == modelmat:
+    if ctx.channel == bot_logs:
         await ctx.send("Shutting Down.")
-        await bot_logs.send("Shutting down bot.")
-        await bot.close()
-    else:
-        await ctx.send("You are not {}".format(modelmat.mention))
-        await bot_logs.send("{},{} attempted to shutdown this bot.".format(ctx.author.mention, ctx.author.id))
+    await bot_logs.send("Shutting down bot.")
+    await bot.close()
 
 @bot.group(invoke_without_command=True)
 async def settings(ctx):
@@ -219,7 +214,7 @@ dic = PyDictionary()
 
 @bot.command()
 async def define(ctx, word):
-    ctx.send(dic.meaning(word))
+    ctx.send(dic.meaning(str(word)))
 
 try:
     bot.run(token)

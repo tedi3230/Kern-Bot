@@ -3,7 +3,7 @@ import pickle
 from urllib import parse
 from random import randint
 from traceback import print_exc
-from ast import literal_eval #Putting dic values inside
+from ast import literal_eval  # Putting dic values inside
 from atexit import register
 import psycopg2
 
@@ -26,16 +26,14 @@ db = psycopg2.connect(database=url.path[1:],
 
 cur = db.cursor()
 
-submissions_table = """
-                CREATE TABLE IF NOT EXISTS submissions (
-                    submission_id INT NOT NULL,
-                    embed BYTEA NOT NULL,
-                    message_id BIGINT NOT NULL,
-                    rating VARCHAR
-                )
-                """
+submissions_table = """CREATE TABLE IF NOT EXISTS submissions (
+                       submission_id INT NOT NULL,
+                       embed BYTEA NOT NULL,
+                       message_id BIGINT NOT NULL,
+                       rating VARCHAR
+                    )"""
 
-##The rating should be a dictionary - then we can have
+# The rating should be a dictionary - then we can have
 
 servers_table = """
                 CREATE TABLE IF NOT EXISTS servers (
@@ -47,19 +45,25 @@ servers_table = """
                 )
                 """
 
-def create_tables():
+
+def check_for_table_exists():
     """Add the tables to database if not there."""
     try:
-        cur.execute(submissions_table)
-        cur.execute(servers_table)
+        cur.execute("SELECT relname FROM pg_class WHERE relname = 'servers'")
+        if cur.fetchall() == []:
+            cur.execute(servers_table)
+        cur.execute("SELECT relname FROM pg_class WHERE relname = 'submissions'")
+        if cur.fetchall() == []:
+            cur.execute(submissions_table)
 
         db.commit()
 
     except psycopg2.DatabaseError:
         print_exc()
 
+
 def add_query(command, args=None):
-    create_tables()
+    check_for_table_exists()
     try:
         if not args is None:
             cur.execute(command, args)
@@ -71,8 +75,9 @@ def add_query(command, args=None):
     except psycopg2.DatabaseError:
         print_exc()
 
+
 def get_query(command, args=None):
-    create_tables()
+    check_for_table_exists()
     try:
         if not args is None:
             cur.execute(command, args)
@@ -88,14 +93,18 @@ def get_query(command, args=None):
     except psycopg2.DatabaseError:
         print_exc()
 
+
 def close_conn():
     if db is not None:
         db.close()
 
+
 register(close_conn)
+
 
 def get_num_servers():
     return len(get_query("SELECT server_id FROM servers"))
+
 
 def set_server_channels(server_id, receive_channel_id, allow_channel_id, vote_channel_id):
     """Sets the channels used for submissions in the database"""
@@ -112,7 +121,9 @@ def set_server_channels(server_id, receive_channel_id, allow_channel_id, vote_ch
                     vote_channel_id = excluded.vote_channel_id;"""
 
     # add_query(sql, (receive_channel_id, allow_channel_id, vote_channel_id, server_id, server_id, receive_channel_id, allow_channel_id, vote_channel_id,))
-    add_query(sql, (server_id, receive_channel_id, allow_channel_id, vote_channel_id,))
+    add_query(sql, (server_id, receive_channel_id,
+                    allow_channel_id, vote_channel_id,))
+
 
 def get_server_channels(server_id):
     """Retrieve the channels used for submissions off the ID of a server"""
@@ -121,6 +132,7 @@ def get_server_channels(server_id):
              WHERE server_id = %s"""
 
     return get_query(sql, (server_id,))
+
 
 def generate_id():
     """Generate the ID needed to index the submissions"""
@@ -132,34 +144,53 @@ def generate_id():
         submission_id = "{:06}".format(randint(0, 999999))
     return submission_id
 
+
 def get_prefix(server_id):
     """Get the prefix for accessing the bot."""
-    data = get_query("SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
+    data = get_query(
+        "SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
+    if len(data) == 0:
+        return "c!"
     if data[0] is None:
         return "c!"
-    return data
+    return data[0]
+
 
 def set_prefix(server_id, prefix):
     """Set the prefix for accessing the bot."""
-    add_query("INSERT INTO servers(prefix) VALUES(%s) WHERE server_id = %s", (prefix, server_id))
+    query = """UPDATE servers
+                SET prefix = %s
+                WHERE server_id = %s"""
+
+    add_query(query, (prefix, server_id))
+
 
 def add_submission(submission_id, embed_file, message_id):
     dump = pickle.dumps(embed_file)
-    add_query("INSERT INTO submissions (submission_id,embed,message_id) VALUES (%s, %s, %s)", (submission_id, dump, message_id,))
+    add_query("INSERT INTO submissions (submission_id,embed,message_id) VALUES (%s, %s, %s)",
+              (submission_id, dump, message_id,))
+
 
 def get_submission(submission_id):
-    embed = get_query("SELECT embed FROM submissions WHERE submission_id = %s", (submission_id,))
+    embed = get_query(
+        "SELECT embed FROM submissions WHERE submission_id = %s", (submission_id,))
     if embed is None:
         raise KeyError("{} is not a valid submission_id".format(submission_id))
     embed = embed[0][0]
     return pickle.loads(embed)
 
+
 def del_submission(submission_id):
-    add_query("DELETE FROM submissions WHERE submission_id = %s", (submission_id,))
+    add_query("DELETE FROM submissions WHERE submission_id = %s",
+              (submission_id,))
+
 
 if __name__ in "__main__":
-    print(get_server_channels(382780023926554625))
+    #print(get_server_channels(382780023926554625))
     #set_server_channels(382780023926554625, 382780254382718997, 382780208014557185, 382780181645099008)
-    set_prefix(382780023926554625,"!")
-    print(get_prefix(382780023926554625))
-    print(get_num_servers())
+    #print(get_query("SELECT * FROM servers"))
+    #set_prefix(382780023926554625, "c!")
+    #print(get_query("SELECT * FROM servers"))
+    #print(get_prefix(382780023926554625))
+    #print(get_num_servers())
+    pass
