@@ -138,6 +138,7 @@ def generate_id():
     """Generate the ID needed to index the submissions"""
     data = get_query("SELECT submission_id FROM submissions")
     submission_id = "{:06}".format(randint(0, 999999))
+    print(data)
     if not data:
         return submission_id
     while submission_id in data[0]:
