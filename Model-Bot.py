@@ -40,7 +40,7 @@ except KeyError:
     tokenFile.close()
 
 #pylint: disable-msg=too-many-arguments
-def generateEmbed(messageAuthor, title, description, footerText, imageURL="", colour=0x00ff00):
+def generateEmbed(messageAuthor, title, description, footerText, image_url="", colour=0x00ff00):
     """Generates a discord embed object off the given parameters
 
     Arguments:
@@ -51,7 +51,7 @@ def generateEmbed(messageAuthor, title, description, footerText, imageURL="", co
 
     Keyword Arguments:
         colour {hex} -- Used for the bar on the left's colour (default: {0x00ff00} -- green)
-        imageURL {string} -- The image shown at the bottom of the embed. (default: {""} -- no image)
+        image_url {string} -- The image shown at the bottom of the embed. (default: {""} -- no image)
 
     Returns:
         [discord.Embed] -- The embed object generated.
@@ -59,7 +59,7 @@ def generateEmbed(messageAuthor, title, description, footerText, imageURL="", co
     embed = discord.Embed(title="Submission by:", description=messageAuthor.mention, colour=colour)
     embed.add_field(name="Title:", value=title, inline=False)
     embed.add_field(name="Description:", value=description, inline=False)
-    embed.set_image(url=imageURL)
+    embed.set_image(url=image_url)
     embed.set_footer(text=footerText)
     embed.set_thumbnail(url=messageAuthor.avatar_url)
     return embed
@@ -144,10 +144,10 @@ async def settings_get_channels(ctx):
 async def settings_set_channels(ctx, *args):
     if len(args) < 3:
         raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(server_prefix(bot, ctx)))
+    print(args)
     receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
     allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
     outputChannelID = args[2].translate({ord(c): None for c in '<>#'})
-    print(receiveChannelID,allowChannelID,outputChannelID)
     db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
     await ctx.send("​Set channels to {} {} {}".format(args[0], args[1], args[2]))
 
@@ -168,12 +168,16 @@ async def settings_error_handler(ctx, error):
         ctx.send("Warning:\n{}".format(str(error)))
 
 @bot.command()
-async def submit(ctx, title, imageURL="", *, description):
-    """Submits items into the contest. Enclose title & imageURL in quotes."""
-    print(ctx, title, imageURL, description)
+async def submit(ctx, *, args):
+    """Submits items into the contest. Enclose title & image_url in quotes."""
+    input_split = tuple(args.split("|"))
+    if len(input_split) != 2 or len(input_split) != 3:
+        raise commands.MissingRequiredArgument("Not all arguments passed")
+    title, description, image_url = input_split
+    print(ctx, title, image_url, description)
     submissionID = db.generate_id()
     footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
-    embed = generateEmbed(ctx.author, title, description, footerText, imageURL, 0x00ff00)
+    embed = generateEmbed(ctx.author, title, description, footerText, image_url, 0x00ff00)
     print(db.get_server_channels(ctx.guild.id)[0])
     if ctx.channel.id == db.get_server_channels(ctx.guild.id)[0]:
         channel = ctx.guild.get_channel(db.get_server_channels(ctx.guild.id)[1])
