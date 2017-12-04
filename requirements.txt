@@ -18,3 +18,4 @@ websockets==3.4
 wrapt==1.10.11
 yarl==0.14.2
 PyDictionary==1.5.2
+git+https://github.com/rachmadaniHaryono/google-images-download.git

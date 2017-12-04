@@ -7,6 +7,9 @@ from ast import literal_eval  # Putting dic values inside
 from atexit import register
 import psycopg2
 
+
+"""https://github.com/aio-libs/aiopg use for async"""
+
 parse.uses_netloc.append("postgres")
 
 try:
@@ -148,8 +151,7 @@ def generate_id():
 
 def get_prefix(server_id):
     """Get the prefix for accessing the bot."""
-    data = get_query(
-        "SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
+    data = get_query("SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
     if len(data) == 0:
         return "c!"
     if data[0] is None:
