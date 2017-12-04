@@ -1,4 +1,3 @@
-import sys
 import traceback
 from datetime import datetime
 from os import environ
@@ -38,27 +37,26 @@ def server_prefix(bots, message):
     if not message.guild:
         return 'c!'
 
-    prefix = ['c!',db.get_prefix(message.guild.id)]
+    prefixes = ['c!', db.get_prefix(message.guild.id)]
 
-    return commands.when_mentioned_or(prefix)(bots, message)
+    return commands.when_mentioned_or(*prefixes)(bots, message)
 
-initial_extensions = [#'cogs.database',
-                      'cogs.dictionary',
-                      'cogs.contests',
-                      'cogs.misc',
-                      'cogs.settings']
+initial_extensions = ['dictionary', #database
+                      'contests',
+                      'misc',
+                      'settings']
 
 
 
 bot = commands.Bot(command_prefix=server_prefix,
-                   description='Creates, manages and votes for contests in servers.')
+                   description='Multiple functions, including contests, definitions, and more.')
 
 try:
     token = environ["AUTH_KEY"]
 except KeyError:
-    tokenFile = open('client_secret.txt', mode='r')
-    token = tokenFile.read()
-    tokenFile.close()
+    with open("client_secret.txt", encoding="utf-8") as file:
+        lines = [l.strip() for l in file]
+        token = lines[0]
 
 bot_logs = None
 time_format = '%H:%M:%S UTC on the %d of %B, %Y'
@@ -72,8 +70,8 @@ async def on_ready():
         for extension in initial_extensions:
             try:
                 bot.load_extension(extension)
-            except Exception as e:
-                print(f'Failed to load extension {extension}.', file=sys.stderr)
+            except:
+                print(f'Failed to load extension {extension}.')
                 traceback.print_exc()
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
