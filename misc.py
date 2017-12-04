@@ -33,8 +33,13 @@ class Misc:
         if ctx.channel == self.bot_logs:
             await ctx.send("Shutting Down.")
         await self.bot_logs.send("Shutting down bot.")
-        print("Restarting...")
+        print("Shutting Down...")
         await self.bot.close()
+
+    @commands.command()
+    async def ping(self, ctx):
+        ctx.send("Pong.")
+        print(ctx.message.created_at)
 
 def setup(bot):
     bot.add_cog(Misc(bot))

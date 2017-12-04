@@ -1,10 +1,11 @@
 import asyncio
-import async_timeout
-import aiohttp
 from os import environ
 
+import aiohttp
+import async_timeout
 import discord
 from discord.ext import commands
+
 
 class Dictionary:
     def __init__(self, bot):
@@ -30,7 +31,7 @@ class Dictionary:
                     assert response.status == 200
                     return await response.json()
 
-    @commands.command
+    @commands.command()
     async def synonym(self, ctx, term):
         if len(term.split()) > 1:
             print("One word only")
@@ -41,7 +42,7 @@ class Dictionary:
             return
         results = data['results']          
 
-    @commands.command
+    @commands.command()
     async def antonym(self, ctx, term):
         if len(term.split()) > 1:
             print("One word only")
@@ -54,7 +55,7 @@ class Dictionary:
         for i in results:
             print(i)   
 
-    @commands.command
+    @commands.command()
     async def meaning(self, ctx, term):
         if len(term.split()) > 1:
             print("One word only")
