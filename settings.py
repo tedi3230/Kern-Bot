@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import database as db
 
-class SettingsCog:
+class Settings:
     def __init__(self, bot):
         self.bot = bot
 
@@ -60,4 +60,4 @@ class SettingsCog:
             ctx.send("Warning:\n{}".format(str(error)))
 
 def setup(bot):
-    bot.add_cog(SettingsCog(bot))
+    bot.add_cog(Settings(bot))

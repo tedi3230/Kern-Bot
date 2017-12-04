@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import database as db
 
-class ContestsCog:
+class Contests:
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(382780308610744331)
@@ -86,4 +86,4 @@ class ContestsCog:
             await ctx.send("​Warning:\n%s"%str(error))
 
 def setup(bot):
-    bot.add_cog(ContestsCog(bot))
+    bot.add_cog(Contests(bot))
