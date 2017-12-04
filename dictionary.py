@@ -6,17 +6,10 @@ from os import environ
 import discord
 from discord.ext import commands
 
-class Dictionary(object):
-    def __init__(self, bot, *args):
+class Dictionary:
+    def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(382780308610744331)
-        try:
-            if isinstance(args[0], list):
-                self.args = args[0]
-            else:
-                self.args = args
-        except:
-            self.args = args
         self.dictionary_URL = 'https://od-api.oxforddictionaries.com/api/v1/entries/en/{}'
         try:
             app_id = environ["APP_ID"]
@@ -28,9 +21,8 @@ class Dictionary(object):
                 app_key = lines[2]
         self.headers = {"Accept": "application/json",
                         "app_id": app_id,
-                        "app_key": app_key
-                        }
-    
+                        "app_key": app_key}
+
     async def _get_dic_request(self, url):
         async with aiohttp.ClientSession() as session:
             with async_timeout.timeout(10):
@@ -60,8 +52,7 @@ class Dictionary(object):
             return
         results = data['results']
         for i in results:
-            print(i)
-                
+            print(i)   
 
     @commands.command
     async def meaning(self, ctx, term):
