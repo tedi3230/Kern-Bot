@@ -51,7 +51,8 @@ class Contests:
         if ctx.channel.id == db.get_server_channels(ctx.guild.id)[0]:
             channel = ctx.guild.get_channel(db.get_server_channels(ctx.guild.id)[1])
             messageID = await channel.send(embed=embed)
-            db.add_submission(submissionID, embed, messageID.id)
+            db.add_submission(submissionID, embed.to_dict(), messageID.id)
+            """http://discordpy.readthedocs.io/en/rewrite/api.html#discord.Embed.to_dict"""
 
     @submit.error
     async def submit_error_handler(self, ctx, error):
