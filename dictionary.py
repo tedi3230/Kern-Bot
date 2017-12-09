@@ -181,7 +181,6 @@ class Dictionary:
         ipa_string = str()
         for entry in results:
             if 'pronunications' in entry:
-                print(entry['pronunciations'])
                 for pronunciation in entry['pronunciations']:   
                     ipa_string += "**{}:** {}\n".format(entry['lexicalCategory'], pronunciation['phoneticSpelling'])
                 embed.add_field(name="Pronunciation", value=ipa_string)
@@ -192,8 +191,8 @@ class Dictionary:
             embed.add_field(name="Word Origin:", value=etymology)
         
 
-        if len(category_list) == 1 and category_list.keys()[0] == "Residual":
-            url_term = term.upper)()
+        if len(category_list) == 1 and next(iter(category_list)) == "Residual":
+            url_term = term.upper()
         else:
             url_term = term.capitalize()
 
