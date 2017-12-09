@@ -45,8 +45,9 @@ class Settings:
 
     @settings_set.command(name="prefix")
     async def settings_set_prefix(self, ctx, prefix):
-        db.set_prefix(ctx.guild.id, prefix)
-        await ctx.send("Set prefix to `{}`".format(prefix))
+        if db.set_prefix(ctx.guild.id, prefix):
+            await ctx.send("Channels are not set. Currently a limitation.")
+        await ctx.send("Set prefix to `{}`".format(db.get_prefix(ctx.guild.id)))
 
     @settings_get.command(name="prefix")
     async def settings_get_prefix(self, ctx):
