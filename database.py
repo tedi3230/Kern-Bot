@@ -7,6 +7,8 @@ from ast import literal_eval  # Putting dic values inside
 from atexit import register
 import psycopg2
 
+import discord
+
 
 """https://github.com/aio-libs/aiopg use for async"""
 
@@ -31,7 +33,7 @@ cur = db.cursor()
 
 submissions_table = """CREATE TABLE IF NOT EXISTS submissions (
                        submission_id INT NOT NULL,
-                       embed BYTEA NOT NULL,
+                       embed VARCHAR NOT NULL,
                        message_id BIGINT NOT NULL,
                        rating VARCHAR
                     )"""
@@ -159,19 +161,19 @@ def get_prefix(server_id):
     return data[0]
 
 
-def set_prefix(server_id, prefix):
+def set_prefix(server_id : int, prefix):
     """Set the prefix for accessing the bot."""
     query = """UPDATE servers
                 SET prefix = %s
                 WHERE server_id = %s"""
-
+    if not get_server_channels(server_id):
+        return "No channels setup"
     add_query(query, (prefix, server_id))
 
 
 def add_submission(submission_id, embed_file, message_id):
-    dump = pickle.dumps(embed_file)
     add_query("INSERT INTO submissions (submission_id,embed,message_id) VALUES (%s, %s, %s)",
-              (submission_id, dump, message_id,))
+              (submission_id, embed_file, message_id,))
 
 
 def get_submission(submission_id):
@@ -180,7 +182,7 @@ def get_submission(submission_id):
     if embed is None:
         raise KeyError("{} is not a valid submission_id".format(submission_id))
     embed = embed[0][0]
-    return pickle.loads(embed)
+    return discord.Embed.from_data(embed)
 
 
 def del_submission(submission_id):
@@ -189,11 +191,11 @@ def del_submission(submission_id):
 
 
 if __name__ in "__main__":
-    #print(get_server_channels(382780023926554625))
-    #set_server_channels(382780023926554625, 382780254382718997, 382780208014557185, 382780181645099008)
-    #print(get_query("SELECT * FROM servers"))
-    #set_prefix(382780023926554625, "c!")
-    #print(get_query("SELECT * FROM servers"))
-    #print(get_prefix(382780023926554625))
-    #print(get_num_servers())
+##    print(get_server_channels(382780023926554625))
+##    set_server_channels(382780023926554625, 382780254382718997, 382780208014557185, 382780181645099008)
+##    print(get_query("SELECT * FROM servers"))
+##    set_prefix(382780023926554625, "!")
+##    print(get_query("SELECT * FROM servers"))
+##    print(get_prefix(382780023926554625))
+##    print(get_num_servers())
     pass
