@@ -166,7 +166,6 @@ class Dictionary:
                 category_list[definition[0]] = [definition]
 
         embed = discord.Embed(colour=0x00ff00, url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
-        embed.set_author(name="{}".format(term.capitalize()), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
 
         for lexical_category, definitions in category_list.items():
             value = ""
@@ -177,20 +176,28 @@ class Dictionary:
                 for example in definition[3]:
                     value += "\n*{}.*".format(example['text'].capitalize())
                 value += "\n\n"
-            print(lexical_category, value)
             embed.add_field(name=lexical_category, value=value, inline=False)
 
         ipa_string = str()
         for entry in results:
             if 'pronunications' in entry:
-                for pronunciation in entry['pronunciations']:
+                print(entry['pronunciations'])
+                for pronunciation in entry['pronunciations']:   
                     ipa_string += "**{}:** {}\n".format(entry['lexicalCategory'], pronunciation['phoneticSpelling'])
-        
-        embed.add_field(name="Pronunciation", value=ipa_string)
+                embed.add_field(name="Pronunciation", value=ipa_string)
 
         if 'etymologies' in data[0]["lexicalEntries"][0]['entries'][0]:
             etymology = data[0]["lexicalEntries"][0]['entries'][0]['etymologies'][0]
+            print(etymology)
             embed.add_field(name="Word Origin:", value=etymology)
+        
+
+        if len(category_list) == 1 and category_list.keys()[0] == "Residual":
+            url_term = term.upper)()
+        else:
+            url_term = term.capitalize()
+
+        embed.set_author(name="{}".format(url_term), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
         
         embed.set_thumbnail(url=await self._get_image(term))
         embed.set_footer(text="Requested by: {} | Results provided by the Oxford Dictionary".format(ctx.message.author), icon_url='https://en.oxforddictionaries.com/apple-touch-icon-180x180.png')
