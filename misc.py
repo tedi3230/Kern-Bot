@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import execl
 from sys import executable, argv
 
@@ -22,9 +22,12 @@ class Misc:
         if ctx.channel != self.bot_logs:
             await ctx.send("Restarting bot.")
         await self.bot_logs.send("Restarting bot.")
-        print("Restarting...")
+        await self.bot.change_presence(status=discord.Status.offline)
+        print("\nRestarting...\n")
         await self.bot.close()
         execl(executable, 'python "' + "".join(argv) + '"')
+
+        #MAKE THIS CHANGE STATUS
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -33,13 +36,14 @@ class Misc:
         if ctx.channel == self.bot_logs:
             await ctx.send("Shutting Down.")
         await self.bot_logs.send("Shutting down bot.")
-        print("Shutting Down...")
+        await self.bot.change_presence(status=discord.Status.offline)
+        print("\nShutting Down...\n")
         await self.bot.close()
 
     @commands.command()
     async def ping(self, ctx):
-        ctx.send("Pong.")
-        print(ctx.message.created_at)
+        time_difference = datetime.utcnow() - ctx.message.created_at
+        await ctx.send("Pong. Time taken: `{}ms`".format(round(time_difference.total_seconds() * 1000)))
 
 def setup(bot):
     bot.add_cog(Misc(bot))
