@@ -73,6 +73,7 @@ async def on_ready():
             except:
                 print(f'Failed to load extension {extension}.')
                 traceback.print_exc()
+    await bot.change_presence(status=discord.Status.online)
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
