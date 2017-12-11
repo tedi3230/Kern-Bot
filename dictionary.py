@@ -118,12 +118,12 @@ class Dictionary:
             if len(synonym_list) > 1:
                 category+="s:"
             embed.add_field(name=category.capitalize(), value="\n".join(synonym_list))
-        embed.set_author(name="Oxford Dictionary", url="https://en.oxforddictionaries.com/", icon_url='https://en.oxforddictionaries.com/apple-touch-icon-180x180.png')
+        embed.set_author(name="Antonyms for: {}".format(url_term), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
 
         await ctx.send(embed=embed)     
 
     @commands.command(aliases=['antonyms','a'])
-    async def antonym(self, ctx, term):
+    async def antonym(self, ctx, *, term):
         await ctx.trigger_typing()
         if len(term.split()) > 1:
             term = "_".join(term.split())
@@ -142,7 +142,7 @@ class Dictionary:
             if len(antonym_list) > 1:   
                 category+="s:"
             embed.add_field(name=category.capitalize(), value="\n".join(antonym_list))
-        embed.set_author(name="Oxford Dictionary", url="https://en.oxforddictionaries.com/", icon_url='https://en.oxforddictionaries.com/apple-touch-icon-180x180.png')
+        embed.set_author(name="Antonyms for: {}".format(url_term), url='https://en.oxforddictionaries.com/thesaurus/{}'.format("_".join(term.split())))
 
         await ctx.send(embed=embed)   
 
@@ -196,7 +196,7 @@ class Dictionary:
         else:
             url_term = term.capitalize()
 
-        embed.set_author(name="{}".format(url_term), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
+        embed.set_author(name="Definition for: {}".format(url_term), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
         
         embed.set_thumbnail(url=await self._get_image(term))
         embed.set_footer(text="Requested by: {} | Results provided by the Oxford Dictionary".format(ctx.message.author), icon_url='https://en.oxforddictionaries.com/apple-touch-icon-180x180.png')
