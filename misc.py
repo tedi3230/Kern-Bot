@@ -13,6 +13,7 @@ class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(382780308610744331)
+        self.bot_launch_time = datetime.utcnow().strftime(time_format)
         # bot.remove_command('help')
 
     async def on_guild_join(self, guild):
@@ -45,6 +46,10 @@ class Misc:
     async def ping(self, ctx):
         time_difference = datetime.utcnow() - ctx.message.created_at
         await ctx.send("Pong. Time taken: `{}ms`".format(round(time_difference.total_seconds() * 1000)))
+
+    @commands.command()
+    async def bot_info(self, ctx):
+        await ctx.send("Latest Build @ {}".format(self.bot_launch_time))
 
     # @commands.command(name='help')
     # async def _help(self, ctx, *, command: str = None):
