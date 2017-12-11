@@ -29,7 +29,8 @@ class Misc:
         await self.bot.change_presence(status=discord.Status.offline)
         print("\nRestarting...\n")
         await self.bot.close()
-        execl(executable, 'python "' + "".join(argv) + '"')
+        execl('heroku restart')
+        #execl(executable, 'python "' + "".join(argv) + '"')
 
     @commands.is_owner()
     @commands.command(hidden=True)
