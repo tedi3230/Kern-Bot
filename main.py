@@ -92,7 +92,6 @@ async def statusChanger():
         message = choice(status_messages)
         await bot.change_presence(game=message)
         await sleep(60)
-
 try:
     bot.run(token, reconnect=True)
 except (KeyboardInterrupt, EOFError):
