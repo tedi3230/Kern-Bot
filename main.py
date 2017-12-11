@@ -7,7 +7,7 @@ from asyncio import sleep #Timed Commands
 import discord
 from discord.ext import commands
 
-import database as db #Database Mangament
+import database_old as db #Database Mangament
 
 """Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot
 

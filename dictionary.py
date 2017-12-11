@@ -100,10 +100,9 @@ class Dictionary:
 
     @commands.command(aliases=['synonyms','s'])
     async def synonym(self, ctx, *, term):
-        term = "_".join(term.split())
         await ctx.trigger_typing()
-        if len(term.split()) > 1:
-            term = "_".join(term.split())
+        # if len(term.split()) > 1:
+        #     term = "_".join(term.split())
         data = await self._get_dic_request(self.dictionary_base_URL.format(term.lower()) + "/synonyms")
         if data is None:
             await ctx.send(embed=await self._word_not_found(term))
@@ -126,9 +125,8 @@ class Dictionary:
     @commands.command(aliases=['antonyms','a'])
     async def antonym(self, ctx, *, term):
         await ctx.trigger_typing()
-        term = "_".join(term.split())
-        if len(term.split()) > 1:
-            term = "_".join(term.split())
+        # if len(term.split()) > 1:
+        #     term = "_".join(term.split())
         data = await self._get_dic_request(self.dictionary_base_URL.format(term.lower()) + "/antonyms")
         if data is None:
             await ctx.send(embed=await self._word_not_found(term))
@@ -151,9 +149,8 @@ class Dictionary:
     @commands.command(aliases=['define','d'])
     async def meaning(self, ctx, *, term):
         await ctx.trigger_typing()
-        term = "_".join(term.split())
-        if len(term.split()) > 1:
-            term = "_".join(term.split())
+        # if len(term.split()) > 1:
+        #     term = "_".join(term.split())
         data = await self._get_dic_request(self.dictionary_base_URL.format(term.lower()))
         if data is None:
             await ctx.send(embed=await self._word_not_found(term))
