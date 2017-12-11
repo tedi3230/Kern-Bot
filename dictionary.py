@@ -92,7 +92,6 @@ class Dictionary:
         results = await self._get_dic_request("https://od-api.oxforddictionaries.com/api/v1/search/en?q={}&prefix=false&limit=5".format(term))
         similar_words = [match['word'] for match in results]
         similar_words = ["[{}](https://en.oxforddictionaries.com/definition/{})".format(term.capitalize(), "_".join(term.split())) for term in similar_words]
-        print(similar_words)
         embed = discord.Embed(title="Error:", description="No matches found for `{}`.".format(term), colour=0xff0000)
         if bool(similar_words):
             embed.add_field(name="Did you mean?", value="\n".join(similar_words))
@@ -187,7 +186,6 @@ class Dictionary:
 
         if 'etymologies' in data[0]["lexicalEntries"][0]['entries'][0]:
             etymology = data[0]["lexicalEntries"][0]['entries'][0]['etymologies'][0]
-            print(etymology)
             embed.add_field(name="Word Origin:", value=etymology)
         
 

@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import database as db
+import database_old as db
 
 class Contests:
     def __init__(self, bot):
