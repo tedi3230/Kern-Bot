@@ -85,5 +85,10 @@ class Contests:
         else:
             await ctx.send("​Warning:\n%s"%str(error))
 
+    @commands.command()
+    async def vote(self, ctx, submissionsID):
+        "Not implemented yet."
+        pass
+
 def setup(bot):
     bot.add_cog(Contests(bot))
