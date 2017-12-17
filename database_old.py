@@ -160,7 +160,7 @@ def get_prefix(server_id):
 
 
 def set_prefix(server_id : int, prefix):
-    """Set the prefix for accessing the bot."""
+    """Set the prefix for accessing the bot.""" #FIX THE CODE FOR WHEN NO SERVERS
     query = """UPDATE servers
                 SET prefix = %s
                 WHERE server_id = %s"""

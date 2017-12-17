@@ -21,7 +21,7 @@ class Misc:
 
     @commands.command(name="help")
     async def _help(self, ctx, command : str=None):
-        """Shows this message."""
+        """Shows this message. Does not display details for each command yet."""
         embed = discord.Embed(description=self.bot.description, color=0x00ff00)
         embed.set_author(name="Help", url="https://discord.gg/qWkyxjg")
         embed.set_footer(text="Requested by: {} | {}".format(ctx.message.author, datetime.utcnow().strftime(time_format)), icon_url=ctx.message.author.avatar_url)
@@ -73,6 +73,12 @@ class Misc:
     async def bot_info(self, ctx):
         """Returns when bot last started."""
         await ctx.send("Latest Build @ {}".format(self.bot_launch_time))
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def leave(self, ctx):
+        await ctx.send("Leaving {}".format(ctx.guild))
+        await ctx.guild.leave
 
 def setup(bot):
     bot.add_cog(Misc(bot))

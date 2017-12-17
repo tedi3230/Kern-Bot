@@ -35,9 +35,9 @@ def server_prefix(bots, message):
         string -- The prefix to be used by the bot for receiving commands.
     """
     if not message.guild:
-        return 'c!'
+        return '_'
 
-    prefixes = ['c!', db.get_prefix(message.guild.id)]
+    prefixes = ['_', db.get_prefix(message.guild.id)]
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
