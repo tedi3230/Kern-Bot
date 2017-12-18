@@ -29,7 +29,7 @@ class Misc:
         for command in self.bot.commands:
             if command.cog_name not in known_cogs:
                 known_cogs.append(command.cog_name)
-                cog_commands_length = len([i for i in self.bot.get_cog_commands(command.cog_name) if not command.hidden])
+                cog_commands_length = len([i for i in self.bot.get_cog_commands(command.cog_name) if not i.hidden])
                 embed.add_field(name="-----{}-----".format(command.cog_name), value="{} commands".format(cog_commands_length), inline=False)
                 for cog_command in self.bot.get_cog_commands(command.cog_name):
                     if not cog_command.hidden:
@@ -66,9 +66,7 @@ class Misc:
     @commands.command()
     async def ping(self, ctx):
         """Returns time taken for a internet packet to go from this bot to discord"""
-        time_difference = datetime.utcnow() - ctx.message.created_at
-        await ctx.send("Pong. Time taken: `{}ms`".format(round(time_difference.total_seconds() * 1000)))
-        print(self.bot.latency)
+        await ctx.send("Pong. Time taken: `{}ms`".format(self.bot.latency * 1000))
 
     @commands.command()
     async def bot_info(self, ctx):
@@ -78,7 +76,7 @@ class Misc:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def leave(self, ctx):
-        await ctx.send("Leaving {}".format(ctx.guild))
+        await ctx.send("Leaving `{}`".format(ctx.guild))
         await ctx.guild.leave()
 
 def setup(bot):
