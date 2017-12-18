@@ -78,7 +78,10 @@ class Misc:
     @commands.command(hidden=True)
     async def leave(self, ctx):
         await ctx.send("Leaving {}".format(ctx.guild))
-        await ctx.guild.leave
+        await ctx.guild.leave()
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
 
 def setup(bot):
     bot.add_cog(Misc(bot))

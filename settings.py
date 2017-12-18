@@ -6,12 +6,22 @@ class Settings:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(invoke_without_command=True)
+    async def settings_perm_check(self, ctx):
+        if commands.is_owner():
+            print("owner")
+            return True
+        elif commands.has_permissions(manage_server=True):
+            print("manage server")
+            return True
+        else:
+            return False
+
+    @commands.group()
     async def get(self, ctx):
         await ctx.send("For commands, type _help settings get")
 
-    @
-    @commands.group(invoke_without_command=True, name="set")
+    @commands.check(settings_perm_check)
+    @commands.group(name="set")
     async def _set(self, ctx):
         await ctx.send("For commands, type _help settings set")
 
@@ -40,7 +50,7 @@ class Settings:
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, prefix):
-        if db.set_prefix(ctx.guild.id, prefix):
+        if db.set_prefix(ctx.guild.id, prefix): 
             await ctx.send("Channels are not set. Currently a limitation.")
         await ctx.send("Set prefix to `{}`".format(db.get_prefix(ctx.guild.id)))
 
