@@ -20,7 +20,7 @@ class Settings:
     async def get(self, ctx):
         await ctx.send("For commands, type _help settings get")
 
-    @commands.check(settings_perm_check)
+    #@commands.check(settings_perm_check)
     @commands.group(name="set")
     async def _set(self, ctx):
         await ctx.send("For commands, type _help settings set")
