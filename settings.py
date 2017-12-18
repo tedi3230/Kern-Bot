@@ -6,15 +6,15 @@ class Settings:
     def __init__(self, bot):
         self.bot = bot
 
-    async def settings_perm_check(self, ctx):
-        if commands.is_owner():
-            print("owner")
-            return True
-        elif commands.has_permissions(manage_server=True):
-            print("manage server")
-            return True
-        else:
-            return False
+    # async def settings_perm_check(self, ctx):
+    #     if commands.is_owner():
+    #         print("owner")
+    #         return True
+    #     elif commands.has_permissions(manage_server=True):
+    #         print("manage server")
+    #         return True
+    #     else:
+    #         return False
 
     @commands.group()
     async def get(self, ctx):
@@ -71,6 +71,11 @@ class Settings:
             ctx.send(str(error))
         else:
             ctx.send("Warning:\n{}".format(str(error)))
+
+    @commands.is_owner()
+    @get.command(hidden=True)
+    async def permissions(self, ctx):
+        await ctx.send()
 
 def setup(bot):
     bot.add_cog(Settings(bot))

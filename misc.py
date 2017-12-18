@@ -68,6 +68,7 @@ class Misc:
         """Returns time taken for a internet packet to go from this bot to discord"""
         time_difference = datetime.utcnow() - ctx.message.created_at
         await ctx.send("Pong. Time taken: `{}ms`".format(round(time_difference.total_seconds() * 1000)))
+        print(self.bot.latency)
 
     @commands.command()
     async def bot_info(self, ctx):
@@ -79,9 +80,6 @@ class Misc:
     async def leave(self, ctx):
         await ctx.send("Leaving {}".format(ctx.guild))
         await ctx.guild.leave()
-
-    @commands.is_owner()
-    @commands.command(hidden=True)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
