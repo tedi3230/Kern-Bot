@@ -22,7 +22,7 @@ https://gist.github.com/MysterialPy/d78c061a4798ae81be9825468fe146be
 """
 
 
-def server_prefix(bots, message):
+def server_prefix(bots, ctx):
     """A callable Prefix for our bot.
 
     This allow for per server prefixes.
@@ -34,12 +34,12 @@ def server_prefix(bots, message):
     Returns:
         string -- The prefix to be used by the bot for receiving commands.
     """
-    if not message.guild:
-        return '_'
+    if not ctx.guild:
+        return ';'
 
-    prefixes = ['_', db.get_prefix(message.guild.id)]
+    prefixes = [';', db.get_prefix(ctx.guild.id)]
 
-    return commands.when_mentioned_or(*prefixes)(bots, message)
+    return commands.when_mentioned_or(*prefixes)(bots, ctx)
 
 initial_extensions = ['dictionary', #database
                       'contests',

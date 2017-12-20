@@ -4,6 +4,7 @@ from random import randint
 from traceback import print_exc
 from atexit import register
 import psycopg2
+from json import dumps, loads
 
 import discord
 
@@ -31,8 +32,8 @@ cur = db.cursor()
 
 submissions_table = """CREATE TABLE IF NOT EXISTS submissions (
                        submission_id INT NOT NULL,
-                       embed VARCHAR NOT NULL,
-                       message_id BIGINT NOT NULL,
+                       embed JSONB NOT NULL,
+                       server_id BIGINT NOT NULL,
                        rating VARCHAR
                     )"""
 
@@ -153,9 +154,9 @@ def get_prefix(server_id):
     """Get the prefix for accessing the bot."""
     data = get_query("SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
     if len(data) == 0:
-        return "c!"
+        return "/"
     if data[0] is None:
-        return "c!"
+        return "/"
     return data[0]
 
 
@@ -169,9 +170,10 @@ def set_prefix(server_id : int, prefix):
     add_query(query, (prefix, server_id))
 
 
-def add_submission(submission_id, embed_file, message_id):
-    add_query("INSERT INTO submissions (submission_id,embed,message_id) VALUES (%s, %s, %s)",
-              (submission_id, embed_file, message_id,))
+def add_submission(submission_id, embed_file, server_id):
+    embed_file = dumps(embed_file)
+    add_query("INSERT INTO submissions (submission_id, embed, server_id) VALUES (%s, %s, %s)",
+              (submission_id, embed_file, server_id,))
 
 
 def get_submission(submission_id):
@@ -180,8 +182,20 @@ def get_submission(submission_id):
     if embed is None:
         raise KeyError("{} is not a valid submission_id".format(submission_id))
     embed = embed[0][0]
-    return discord.Embed.from_data(embed)
+    return discord.Embed.from_data(loads(embed))
 
+def list_submissions(server_id):
+    check_for_table_exists()
+    command = "SELECT submission_id, embed FROM submissions WHERE server_id = %s"
+    try:
+        cur.execute(command, server_id)
+
+        data = cur.fetchall()
+        db.commit()
+        print(data)
+
+    except psycopg2.DatabaseError:
+        print_exc()
 
 def del_submission(submission_id):
     add_query("DELETE FROM submissions WHERE submission_id = %s",
