@@ -35,7 +35,7 @@ class Contests:
 
     @commands.command()
     async def submit(self, ctx, *, args):
-        """Submits an item into a contest. c!submit <title> | <description> | [imageURL]. Note the spaces"""
+        """Submits an item into a contest. ;submit <title> | <description> | [imageURL]. Note the spaces"""
         input_split = tuple(args.split("  |"))
         if len(input_split) != 2 and len(input_split) != 3:
             raise TypeError("Not all arguments passed")
@@ -45,13 +45,13 @@ class Contests:
         else:
             image_url = ""
         submissionID = db.generate_id()
-        footerText = "Type !allow {} to allow this and !allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
+        footerText = "Type ;allow {} to allow this and ;allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
         embed = self.generateEmbed(ctx.author, title, description, footerText, image_url, 0x00ff00)
         print(db.get_server_channels(ctx.guild.id)[0])
         if ctx.channel.id == db.get_server_channels(ctx.guild.id)[0]:
             channel = ctx.guild.get_channel(db.get_server_channels(ctx.guild.id)[1])
-            messageID = await channel.send(embed=embed)
-            db.add_submission(submissionID, embed.to_dict(), messageID.id)
+            message = await channel.send(embed=embed)
+            db.add_submission(submissionID, embed.to_dict(), message.guild.id)
 
     @submit.error
     async def submit_error_handler(self, ctx, error):
@@ -59,6 +59,11 @@ class Contests:
             await ctx.send("You did not pass all the required arguments, please try again.")
         else:
             await ctx.send("​Submit Warning:\n%s"%str(error))
+
+    @commands.command()
+    async def list_submissions(self, ctx):
+        "Not implemented yet"
+        pass
 
     @commands.command()
     async def allow(self, ctx, submissionID, allowed="True"):
