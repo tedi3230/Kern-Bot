@@ -31,14 +31,14 @@ class Database:
         self.prefix_conn = await asyncpg.connect()
         self.prefix_stmt = await self.prefix_conn.prepare("SELECT prefix FROM servers WHERE server_id = $1")
 
-    async def get_prefix(self, server_id):
+    async def get_prefix(self, ctx, server_id):
         """Get the prefix for accessing the bot."""
         data = await self.prefix_stmt.fetchrow(server_id)
         print(data)
         if len(data) == 0:
-            return "c!"
+            return "m!"
         if data[0] is None:
-            return "c!"
+            return "m!"
         return data[0]
 
 def setup(bot):
