@@ -25,18 +25,22 @@ class Misc:
         embed = discord.Embed(description=self.bot.description, color=0x00ff00)
         embed.set_author(name="Help", url="https://discord.gg/qWkyxjg")
         embed.set_footer(text="Requested by: {} | {}".format(ctx.message.author, datetime.utcnow().strftime(time_format)), icon_url=ctx.message.author.avatar_url)
-        known_cogs = []
-        for command in self.bot.commands:
-            if command.cog_name not in known_cogs:
-                known_cogs.append(command.cog_name)
-                cog_commands_length = len([i for i in self.bot.get_cog_commands(command.cog_name) if not i.hidden])
-                embed.add_field(name="-----{}-----".format(command.cog_name), value="{} commands".format(cog_commands_length), inline=False)
-                for cog_command in self.bot.get_cog_commands(command.cog_name):
-                    if not cog_command.hidden:
-                        c_help = cog_command.short_doc
-                        if c_help == "":
-                            c_help = "No information available."
-                        embed.add_field(name=cog_command.name, value=c_help, inline=False)
+           
+        if not command:
+            known_cogs = []
+            for command in self.bot.commands:
+                if command.cog_name not in known_cogs:
+                    known_cogs.append(command.cog_name)
+                    cog_commands_length = len([cmd for cmd in self.bot.get_cog_commands(command.cog_name) if not cmd.hidden])
+                    embed.add_field(name="-----{}-----".format(command.cog_name), value="{} commands".format(cog_commands_length), inline=False)
+                    for cog_command in self.bot.get_cog_commands(command.cog_name):
+                        if not cog_command.hidden:
+                            c_help = cog_command.short_doc
+                            if c_help == "":
+                                c_help = "No information available."
+                            embed.add_field(name=cog_command.name, value=c_help, inline=False)
+        else:
+            pass
         await ctx.send(embed=embed)
 
 
