@@ -12,17 +12,20 @@ async def settings_perm_check(ctx):
         return False
 
 class Settings:
+    """Sets and gets the settings for the bot"""
     def __init__(self, bot):
         self.bot = bot
 
     @commands.group()
     async def get(self, ctx):
-        await ctx.send("For commands, type _help settings get")
+        """Commands related to determining the value of settings."""
+        pass
 
     @commands.check(settings_perm_check)
     @commands.group(name="set")
     async def _set(self, ctx):
-        await ctx.send("For commands, type {}help settings set".format(ctx.prefix))
+        """Commands related to the changing of settings."""
+        pass
 
     @get.command(name="channels")
     async def get_channels(self, ctx):
@@ -34,12 +37,12 @@ class Settings:
                                                                                channels[2]))
         else:
             print(channels)
-            await ctx.send("​This server does not have channels set up yet, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.prefix))
+            await ctx.send("​This server does not have channels set up yet, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.get_prefix))
 
     @_set.command(name="channels")
     async def set_channels(self, ctx, *args):
         if len(args) < 3:
-            raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(ctx.prefix))
+            raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(ctx.get_prefix))
         print(args)
         receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
         allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
@@ -56,7 +59,7 @@ class Settings:
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, db.get_prefix(ctx.guild.id)))
+        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, ctx.get_prefix))
 
     @get.error
     async def get_error_handler(self, ctx, error):
