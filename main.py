@@ -8,7 +8,6 @@ import discord
 from discord.ext import commands
 
 import database_old as db #Database Mangament
-from help_formatter import HelpFormatter
 
 """Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot
 
