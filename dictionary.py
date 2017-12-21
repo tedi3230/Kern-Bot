@@ -1,4 +1,3 @@
-import asyncio
 from os import environ
 import re
 import json
@@ -29,19 +28,18 @@ class Dictionary:
                         "app_id": app_id,
                         "app_key": app_key}
 
-    def validate(self, dictionary, key, return_value):
+    @staticmethod
+    def validate(dictionary, key, return_value):
         if key in dictionary:
             return dictionary[key]
-        else:
-            return return_value
+        return return_value
 
     async def _result_parser(self, results: list):
         for lexicalEntry in results:
             for entry in lexicalEntry['entries']:
                 for sense in entry['senses']:
-                    keys =  ['domains', 'definitions', 'examples']
+                    keys = ['domains', 'definitions', 'examples']
                     yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(sense, key, []) for key in keys]]
-                    
                     for subsense in self.validate(sense, 'subsenses', []):
                         yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(subsense, key, []) for key in keys]]
 
@@ -51,8 +49,8 @@ class Dictionary:
                 async with session.get(url, headers=self.headers) as response:
                     if not response.status == 200:
                         return
-                    json = await response.json()
-                    return json['results']
+                    r_json = await response.json()
+                    return r_json['results']
 
     async def _get_key(self, term):
         parameters = {'q': term}

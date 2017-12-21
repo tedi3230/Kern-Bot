@@ -2,7 +2,6 @@ from datetime import datetime
 from os import execl
 from sys import executable, argv
 import inspect
-import asyncio
 
 # https://github.com/Rapptz/discord.py/blob/rewrite/discord/ext/commands/formatter.py#L126%3Ex
 
@@ -41,7 +40,7 @@ class Miscellaneous:
         await ctx.send("Error:```diff\n-%s```"%str(error))
 
     @commands.command(name="help")
-    async def _help(self, ctx, command: str=None):
+    async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
 
         cogs = {}
@@ -125,12 +124,10 @@ class Miscellaneous:
         if seconds > 0:
             output += "{} seconds\n".format(seconds)
         return output
-        
 
     @commands.command(aliases=['stats'])
     async def info(self, ctx):
         """Returns information about the bot."""
-        
         owner = (await self.bot.application_info()).owner
 
         total_members = sum(1 for _ in self.bot.get_all_members())
