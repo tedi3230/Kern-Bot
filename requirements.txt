@@ -18,4 +18,4 @@ websockets==3.4
 wrapt==1.10.11
 yarl==0.14.2
 asyncpg==0.13.0
-git+https://github.com/rachmadaniHaryono/google-images-download.git
+psutil==5.4.2
