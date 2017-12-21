@@ -58,7 +58,7 @@ class Miscellaneous:
             elif cmd_sub_class in self.bot.commands:
                 if not cmd_sub_class.hidden:
                     embed = discord.Embed(description=cmd_sub_class.help.format(ctx.prefix), color=0x00ff00)
-                    if cmd_sub_class.has
+                    #if cmd_sub_class.has
                     embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
             else:
                 embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
