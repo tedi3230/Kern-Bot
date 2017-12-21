@@ -25,6 +25,16 @@ class Miscellaneous:
     async def on_guild_join(self, guild):
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(time_format)))
 
+    @commands.is_owner()
+    @commands.command(name="eval", hidden=True)
+    async def _eval(self, ctx, *, command: str):
+        exec(command)
+        await ctx.send("Command ran successfully")
+
+    @_eval.error
+    async def _eval_error_handler(self, ctx, error):
+        await ctx.send("Error:```diff\n-%s```"%str(error))
+
     @commands.command(name="help")
     async def _help(self, ctx, command: str=None):
         """Shows this message. Does not display details for each command yet."""
