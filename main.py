@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 
 import database_old as db #Database Mangament
+from help_formatter import HelpFormatter
 
 """Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot
 
@@ -21,6 +22,7 @@ bot.remove_command("help")
 https://gist.github.com/MysterialPy/d78c061a4798ae81be9825468fe146be
 """
 
+prefix = "k "
 
 def server_prefix(bots, ctx):
     """A callable Prefix for our bot.
@@ -35,9 +37,9 @@ def server_prefix(bots, ctx):
         string -- The prefix to be used by the bot for receiving commands.
     """
     if not ctx.guild:
-        return ';'
+        return prefix
 
-    prefixes = [';', db.get_prefix(ctx.guild.id)]
+    prefixes = [prefix, db.get_prefix(ctx.guild.id)]
 
     return commands.when_mentioned_or(*prefixes)(bots, ctx)
 
@@ -78,9 +80,8 @@ async def on_ready():
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
-
-    await bot_logs.send("Bot Online at {}".format(
-        datetime.utcnow().strftime(time_format)))
+    await bot.user.edit(username="Kern")
+    await bot_logs.send("Bot Online at {}".format(datetime.utcnow().strftime(time_format)))
     bot.loop.create_task(statusChanger())
 
 
