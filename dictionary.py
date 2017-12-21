@@ -39,16 +39,11 @@ class Dictionary:
         for lexicalEntry in results:
             for entry in lexicalEntry['entries']:
                 for sense in entry['senses']:
-                    yield [self.validate(lexicalEntry, 'lexicalCategory', ""),
-                            self.validate(sense, 'domains', []),
-                            self.validate(sense, 'definitions', []),
-                            self.validate(sense, 'examples', [])]
+                    keys =  ['domains', 'definitions', 'examples']
+                    yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(sense, key, []) for key in keys]]
                     
                     for subsense in self.validate(sense, 'subsenses', []):
-                        yield [self.validate(lexicalEntry, 'lexicalCategory', ""),
-                                self.validate(subsense, 'domains', []),
-                                self.validate(subsense, 'definitions', []),
-                                self.validate(subsense, 'examples', [])]
+                        yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(subsense, key, []) for key in keys]]
 
     async def _get_dic_request(self, url):
         async with aiohttp.ClientSession() as session:
