@@ -8,6 +8,8 @@ import async_timeout
 import discord
 from discord.ext import commands
 
+# Add: https://developer.oxforddictionaries.com/documentation#!/Search/get_search_source_lang, and check for no definitions (key error)
+
 class Dictionary:
     """Provides dictionary functionality"""
     def __init__(self, bot):
@@ -27,30 +29,26 @@ class Dictionary:
                         "app_id": app_id,
                         "app_key": app_key}
 
+    def validate(self, dictionary, key, return_value):
+        if key in dictionary:
+            return dictionary[key]
+        else:
+            return return_value
+
     async def _result_parser(self, results: list):
         for lexicalEntry in results:
             for entry in lexicalEntry['entries']:
                 for sense in entry['senses']:
-                    if 'domains' in sense:
-                        domains = sense['domains']
-                    else:
-                        domains = []
-                    if 'examples' in sense:
-                        examples = sense['examples']
-                    else:
-                        examples = []
-                    yield [lexicalEntry['lexicalCategory'], domains, sense['definitions'], examples]
-                    if 'subsenses' in sense:
-                        for subsense in sense['subsenses']:
-                            if 'domains' in subsense:
-                                domains = subsense['domains']
-                            else:
-                                domains = []
-                            if 'examples' in subsense:
-                                examples = subsense['examples']
-                            else:
-                                examples = []
-                            yield [lexicalEntry['lexicalCategory'], domains, subsense['definitions'], examples]
+                    yield [self.validate(lexicalEntry, 'lexicalCategory', ""),
+                            self.validate(sense, 'domains', []),
+                            self.validate(sense, 'definitions', []),
+                            self.validate(sense, 'examples', [])]
+                    
+                    for subsense in self.validate(sense, 'subsenses', []):
+                        yield [self.validate(lexicalEntry, 'lexicalCategory', ""),
+                                self.validate(subsense, 'domains', []),
+                                self.validate(subsense, 'definitions', []),
+                                self.validate(subsense, 'examples', [])]
 
     async def _get_dic_request(self, url):
         async with aiohttp.ClientSession() as session:
