@@ -149,14 +149,15 @@ def generate_id():
         submission_id = "{:06}".format(randint(0, 999999))
     return submission_id
 
+prefix = "k " 
 
 def get_prefix(server_id):
     """Get the prefix for accessing the bot."""
     data = get_query("SELECT prefix FROM servers WHERE server_id = %s", (server_id,))
     if len(data) == 0:
-        return "/"
+        return prefix
     if data[0] is None:
-        return "/"
+        return prefix
     return data[0]
 
 
