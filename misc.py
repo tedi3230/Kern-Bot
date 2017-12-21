@@ -2,10 +2,11 @@ from datetime import datetime
 from os import execl
 from sys import executable, argv
 import inspect
-import psutil
+import asyncio
 
 # https://github.com/Rapptz/discord.py/blob/rewrite/discord/ext/commands/formatter.py#L126%3Ex
 
+import psutil
 import discord
 from discord.ext import commands
 
@@ -26,13 +27,17 @@ class Miscellaneous:
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(time_format)))
 
     @commands.is_owner()
-    @commands.command(name="eval", hidden=True)
-    async def _eval(self, ctx, *, command: str):
-        eval(command)
-        await ctx.send("Command ran successfully")
+    @commands.command(hidden=True)
+    async def delete(self, ctx, *, message_id: int):
+        msg = await ctx.get_message(message_id)
+        if msg.author == self.bot.user:
+            await msg.delete()
+            await ctx.send("Message deleted")
+        else:
+            await ctx.send("This message was not the bot's, or this bot does not have manage_messages permission.")
 
-    @_eval.error
-    async def _eval_error_handler(self, ctx, error):
+    @delete.error
+    async def delete_error_handler(self, ctx, error):
         await ctx.send("Error:```diff\n-%s```"%str(error))
 
     @commands.command(name="help")
