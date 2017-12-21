@@ -10,6 +10,7 @@ import asyncio
 # https://magicstack.github.io/asyncpg/current/api/index.html#prepared-statements
 
 class Database:
+    """Accessing database functions"""
     def __init__(self, bot):
         self.bot = bot
         try:
@@ -23,6 +24,7 @@ class Database:
         self.pool = None
         self.prefix_conn = None
         self.prefix_stmt = None
+        self.prefix = "k "
 
         
     async def init(self):
@@ -36,9 +38,9 @@ class Database:
         data = await self.prefix_stmt.fetchrow(server_id)
         print(data)
         if len(data) == 0:
-            return "m!"
+            return self.prefix
         if data[0] is None:
-            return "m!"
+            return self.prefix
         return data[0]
 
 def setup(bot):
