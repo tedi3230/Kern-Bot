@@ -28,7 +28,7 @@ class Miscellaneous:
     @commands.is_owner()
     @commands.command(name="eval", hidden=True)
     async def _eval(self, ctx, *, command: str):
-        exec(command)
+        eval(command)
         await ctx.send("Command ran successfully")
 
     @_eval.error
