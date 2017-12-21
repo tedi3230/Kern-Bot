@@ -3,6 +3,7 @@ from discord.ext import commands
 import database_old as db
 
 class Contests:
+    """Contest functions"""
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(382780308610744331)
@@ -45,7 +46,7 @@ class Contests:
         else:
             image_url = ""
         submissionID = db.generate_id()
-        footerText = "Type ;allow {} to allow this and ;allow {} False to prevent the moving on this to voting queue.".format(submissionID, submissionID)
+        footerText = "Type {0}allow {1} True to allow this and {0}allow {1} False to prevent the moving on this to voting queue.".format(ctx.prefix, submissionID)
         embed = self.generateEmbed(ctx.author, title, description, footerText, image_url, 0x00ff00)
         print(db.get_server_channels(ctx.guild.id)[0])
         if ctx.channel.id == db.get_server_channels(ctx.guild.id)[0]:
@@ -71,7 +72,7 @@ class Contests:
         #CHECK IF SAME SERVER
         embed = db.get_submission(submissionID)
         if allowed.lower() == "true":
-            embed.set_footer(text="Type !vote {} 0 to not like it, type !vote {} 5 to really like it.".format(submissionID, submissionID))
+            embed.set_footer(text="Type {0}vote {1} 0 to hate it, type {0}vote {1} 5 to really like it.".format(ctx.prefix, submissionID))
             await ctx.send(embed=embed)
         elif allowed.lower() == "false":
             await ctx.send("​Submssions with submissionID of {} has been rejected.".format(submissionID))
