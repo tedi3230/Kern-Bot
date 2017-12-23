@@ -31,26 +31,22 @@ class Settings:
     async def get_channels(self, ctx):
         channels = db.get_server_channels(ctx.guild.id)
         if len(channels) == 3:
-            await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name,
-                                                                               channels[0],
-                                                                               channels[1],
-                                                                               channels[2]))
+            await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
         else:
-            print(channels)
             await ctx.send("​This server does not have channels set up yet, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.prefix))
 
     @_set.command(name="channels")
-    async def set_channels(self, ctx, *args):
-        if len(args) == 1:
-            receiveChannelID, allowChannelID, outputChannelID = tuple([args[0] * 3])
-        elif len(args) < 3:
+    async def set_channels(self, ctx):
+        ch_mentions = ctx.message.channel_mentions
+        raw_ch_mentions = ctx.message.raw_channel_mentions
+        if len(ch_mentions) == 1:
+            receiveChannelID, allowChannelID, outputChannelID = raw_ch_mentions * 3
+        elif len(ch_mentions) < 3:
             raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(ctx.prefix))
         else:
-            receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
-            allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
-            outputChannelID = args[2].translate({ord(c): None for c in '<>#'})
+            receiveChannelID, allowChannelID, outputChannelID = raw_ch_mentions
         db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
-        await ctx.send("​Set channels to {} {} {}".format(args[0], args[1], args[2]))
+        await ctx.send("​Set channels to {} {} {}".format(*ch_mentions))
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
