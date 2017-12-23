@@ -109,12 +109,15 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        if ctx.command == "submit":
-            await ctx.send("Not all required arguments were passed, please try again. Either `1` or `3` arguments can be passed.")
+        await ctx.send("Not all required arguments were passed, please try again.")
+
+    elif isinstance(error, TypeError):
+        if ctx.command == "set":
+            await ctx.send(error)
 
     else:
         await ctx.send("Something went wrong. The error has been reported and hopefully will be fixed. In the meantime, check your arguments for any errors.")
-        
+
     await bot_logs.send("{}\nIgnoring exception in command {}:```diff\n-{}: {}```".format(owner.mention, ctx.command, type(error).__qualname__, error))
     print('Ignoring exception in command `{}`:'.format(ctx.command))
     traceback.print_exception(type(error), error, error.__traceback__)
