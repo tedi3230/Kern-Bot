@@ -29,6 +29,7 @@ class Settings:
 
     @get.command(name="channels")
     async def get_channels(self, ctx):
+        """Get the channels used for the contests"""
         channels = db.get_server_channels(ctx.guild.id)
         if len(channels) == 3:
             await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
@@ -37,6 +38,7 @@ class Settings:
 
     @_set.command(name="channels")
     async def set_channels(self, ctx, *channels: discord.TextChannel):
+        """Set the channels used for the contests"""
         if len(channels) == 1:
             channels *= 3
         elif len(channels) < 3:
@@ -47,6 +49,7 @@ class Settings:
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
+        """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
         if db.set_prefix(ctx.guild.id, prefix): 
             await ctx.send("Channels are not set. Currently a limitation.")
@@ -54,7 +57,8 @@ class Settings:
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, ctx.prefix))
+        """Get the bot's prefix for this server"""
+        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, db.get_prefix(ctx.guild.id)))
 
     @commands.is_owner()
     @get.command(hidden=True)
