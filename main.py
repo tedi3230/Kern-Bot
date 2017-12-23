@@ -110,7 +110,8 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, TypeError):
         if ctx.command == "set":
-            await ctx.send("Not all required arguments were passed.")
+            await ctx.send(error)
+            return
 
     else:
         await ctx.send("Something went wrong. The error has been reported and hopefully will be fixed. In the meantime, check your arguments for any errors.")
