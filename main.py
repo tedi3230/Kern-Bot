@@ -3,7 +3,6 @@ from datetime import datetime
 from os import environ
 from random import choice
 from asyncio import sleep #Timed Commands
-import traceback
 
 import discord
 from discord.ext import commands
@@ -61,11 +60,11 @@ except KeyError:
         token = lines[0]
 
 bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
+bot.bot_logs_id = 382780308610744331
 #pylint: disable-msg=w0603
 #pylint: disable-msg=w0702
 @bot.event
 async def on_ready():
-    bot.bot_logs_id = 382780308610744331
     if __name__ == '__main__':
         for extension in initial_extensions:
             try:
