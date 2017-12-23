@@ -3,6 +3,7 @@ from datetime import datetime
 from os import environ
 from random import choice
 from asyncio import sleep #Timed Commands
+import traceback
 
 import discord
 from discord.ext import commands
@@ -92,6 +93,32 @@ async def statusChanger():
         message = choice(status_messages)
         await bot.change_presence(game=message)
         await sleep(60)
+
+@bot.event
+async def on_command_error(ctx, error):
+    owner = (await bot.application_info()).owner
+    # This prevents any commands with local handlers being handled here in on_command_error.
+    if hasattr(ctx.command, 'on_error'):
+        return
+
+    ignored = (commands.CommandNotFound, commands.UserInputError)
+
+    error = getattr(error, 'original', error)
+
+    if isinstance(error, ignored):
+        return
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        if ctx.command == "submit":
+            await ctx.send("Not all required arguments were passed, please try again. Either `1` or `3` arguments can be passed.")
+
+    else:
+        await ctx.send("Something went wrong. The error has been reported and hopefully will be fixed. In the meantime, check your arguments for any errors.")
+        
+    await bot_logs.send("{}\nIgnoring exception in command {}:```diff\n-{}: {}```".format(owner.mention, ctx.command, type(error).__qualname__, error))
+    print('Ignoring exception in command `{}`:'.format(ctx.command))
+    traceback.print_exception(type(error), error, error.__traceback__)
+
 try:
     bot.run(token, reconnect=True)
 except (KeyboardInterrupt, EOFError):

@@ -35,10 +35,6 @@ class Miscellaneous:
         else:
             await ctx.send("This message was not the bot's, or this bot does not have manage_messages permission.")
 
-    @delete.error
-    async def delete_error_handler(self, ctx, error):
-        await ctx.send("Error:```diff\n-%s```"%str(error))
-
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
@@ -143,10 +139,6 @@ class Miscellaneous:
         embed.add_field(name="Uptime:", value=self.get_uptime())
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed=embed)
-
-    @info.error
-    async def info_error_handler(self, ctx, error):
-        await ctx.send("Error:```diff\n-%s```"%str(error))
 
     @commands.is_owner()
     @commands.command(hidden=True)

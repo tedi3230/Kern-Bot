@@ -54,13 +54,6 @@ class Contests:
             message = await channel.send(embed=embed)
             db.add_submission(submissionID, embed.to_dict(), message.guild.id)
 
-    @submit.error
-    async def submit_error_handler(self, ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("You did not pass all the required arguments, please try again.")
-        else:
-            await ctx.send("​Submit Warning:\n%s"%str(error))
-
     @commands.command()
     async def list_submissions(self, ctx):
         "Not implemented yet"
@@ -83,13 +76,6 @@ class Contests:
             db.del_submission(submissionID)
         else:
             await ctx.send("​A correct value of true/false was not passed ")
-
-    @allow.error
-    async def allow_error_handler(self, ctx, error):
-        if isinstance(error, LookupError):
-            await ctx.send(str(error))
-        else:
-            await ctx.send("​Warning:\n%s"%str(error))
 
     @commands.command()
     async def vote(self, ctx, submissionsID):
