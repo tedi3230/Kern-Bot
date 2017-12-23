@@ -53,7 +53,8 @@ class Settings:
     async def set_channels(self, ctx, *channels: discord.TextChannel):
         print(channels)
         if len(channels) == 1:
-            receiveChannelID, allowChannelID, outputChannelID = channels * 3
+            channels *= 3
+            receiveChannelID, allowChannelID, outputChannelID = channels
         elif len(channels) < 3:
             raise commands.MissingRequiredArgument("Too few channels supplied, you need three. Type {}help settings set channels for more information".format(ctx.prefix))
         else:
