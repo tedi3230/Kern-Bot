@@ -3,13 +3,9 @@ from os import execl
 from sys import executable, argv
 import inspect
 
-# https://github.com/Rapptz/discord.py/blob/rewrite/discord/ext/commands/formatter.py#L126%3Ex
-
 import psutil
 import discord
 from discord.ext import commands
-
-time_format = '%H:%M:%S UTC on the %d of %B, %Y'
 
 
 class Miscellaneous:
@@ -23,7 +19,7 @@ class Miscellaneous:
         self.process = psutil.Process()
 
     async def on_guild_join(self, guild):
-        self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(time_format)))
+        self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -38,7 +34,7 @@ class Miscellaneous:
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
-
+        cmd_group = self.bot.get_command(command)
         cogs = {}
         for b_command in self.bot.commands:
             if b_command.hidden:
@@ -50,30 +46,32 @@ class Miscellaneous:
         for cog in cogs:
             cogs[cog] = sorted(cogs[cog])
 
-        if not command:
+        if command is None:
+            command = "Help"
             embed = discord.Embed(description="{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(self.bot.description, ctx.prefix), color=0x00ff00)
-            embed.set_author(name="Help", url="https://discord.gg/bEYgRmc")
-            for cog, cog_commands in cogs.items():
-                embed.add_field(name="{}".format(cog), value="\n".join(cog_commands))
+            for cog in sorted(cogs):
+                embed.add_field(name=cog, value="\n".join(cogs[cog]))
+
+        elif command.capitalize() in cogs:
+            command = command.capitalize()
+            embed = discord.Embed(description=inspect.cleandoc(self.bot.get_cog(command).__doc__), colour=0x00ff00)
+            for cmd in self.bot.get_cog_commands(command):
+                if not cmd.hidden:
+                    embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
+
+        elif cmd_group in self.bot.commands and not cmd_group.hidden:
+            embed = discord.Embed(description=cmd_group.help.format(ctx.prefix), color=0x00ff00)
+            if isinstance(cmd_group, commands.Group):
+                for cmd in cmd_group.commands:
+                    if not cmd.hidden:
+                        embed.add_field(name=cmd.name, value=cmd.help)
 
         else:
-            cmd_sub_class = self.bot.get_command(command)
-            if command.capitalize() in cogs:
-                command = command.capitalize()
-                embed = discord.Embed(description=inspect.cleandoc(self.bot.get_cog(command).__doc__), color=0x00ff00)
-                embed.set_author(name=command, url="https://discord.gg/bEYgRmc")
-                for cmd in self.bot.get_cog_commands(command):
-                    if not cmd.hidden:
-                        embed.add_field(name="{}".format(cmd.qualified_name), value=cmd.help, inline=False)
-            elif cmd_sub_class in self.bot.commands:
-                if not cmd_sub_class.hidden:
-                    embed = discord.Embed(description=cmd_sub_class.help.format(ctx.prefix), color=0x00ff00)
-                    #if cmd_sub_class.has
-                    embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
-            else:
-                embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
-                embed.set_author(name="Error:", url="https://discord.gg/bEYgRmc")
+            embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
+            command = "Error"
+
         embed.timestamp = datetime.utcnow()
+        embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         await ctx.send(embed=embed)
 
