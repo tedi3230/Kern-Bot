@@ -40,7 +40,7 @@ class Settings:
         if len(channels) == 1:
             channels *= 3
         elif len(channels) < 3:
-            raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more information".format(ctx.prefix))
+            raise TypeError("Too few channels supplied, you need three. Type `{}help settings set channels` for more information".format(ctx.prefix))
         receiveChannelID, allowChannelID, outputChannelID = [channel.id for channel in channels]
         db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
         await ctx.send("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))

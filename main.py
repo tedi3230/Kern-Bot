@@ -76,6 +76,7 @@ async def on_ready():
                 print(f'Failed to load extension {extension}.')
                 traceback.print_exc()
     await bot.change_presence(status=discord.Status.online)
+    owner = (await bot.application_info()).owner
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
@@ -96,7 +97,6 @@ async def statusChanger():
 
 @bot.event
 async def on_command_error(ctx, error):
-    owner = (await bot.application_info()).owner
     # This prevents any commands with local handlers being handled here in on_command_error.
     if hasattr(ctx.command, 'on_error'):
         return
@@ -109,9 +109,8 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, TypeError):
-        if ctx.command == "set":
-            await ctx.send(error)
-            return
+        await ctx.send(error)
+        return
 
     else:
         await ctx.send("Something went wrong. The error has been reported and hopefully will be fixed. In the meantime, check your arguments for any errors.")
