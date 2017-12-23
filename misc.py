@@ -17,7 +17,7 @@ class Miscellaneous:
 
     def __init__(self, bot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(382780308610744331)
+        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.bot_launch_time = datetime.utcnow()
         self.bot.remove_command("help")
         self.process = psutil.Process()

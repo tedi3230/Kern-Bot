@@ -6,7 +6,7 @@ class Contests:
     """Contest functions"""
     def __init__(self, bot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(382780308610744331)
+        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
     #pylint: disable-msg=too-many-arguments
     def generateEmbed(self, messageAuthor: discord.User, title, description, footerText, image_url="", colour=0x00ff00):

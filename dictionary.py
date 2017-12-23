@@ -13,7 +13,7 @@ class Dictionary:
     """Provides dictionary functionality"""
     def __init__(self, bot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(382780308610744331)
+        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.dictionary_base_URL = 'https://od-api.oxforddictionaries.com/api/v1/entries/en/{}'
         self.image_base_url = 'https://duckduckgo.com/'
         try:

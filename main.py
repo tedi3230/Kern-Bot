@@ -60,14 +60,12 @@ except KeyError:
         lines = [l.strip() for l in file]
         token = lines[0]
 
-bot_logs = None
-time_format = '%H:%M:%S UTC on the %d of %B, %Y'
+bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
 #pylint: disable-msg=w0603
 #pylint: disable-msg=w0702
 @bot.event
 async def on_ready():
-    global bot_logs
-    bot_logs = bot.get_channel(382780308610744331)
+    bot.bot_logs_id = 382780308610744331
     if __name__ == '__main__':
         for extension in initial_extensions:
             try:
@@ -76,13 +74,13 @@ async def on_ready():
                 print(f'Failed to load extension {extension}.')
                 traceback.print_exc()
     await bot.change_presence(status=discord.Status.online)
-    owner = (await bot.application_info()).owner
+    bot.owner = (await bot.application_info()).owner
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
     await bot.user.edit(username="Kern")
-    await bot_logs.send("Bot Online at {}".format(datetime.utcnow().strftime(time_format)))
+    await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
 
 
@@ -113,9 +111,9 @@ async def on_command_error(ctx, error):
         return
 
     else:
-        await ctx.send("Something went wrong. The error has been reported and hopefully will be fixed. In the meantime, check your arguments for any errors.")
+        await ctx.send("An unknown error occurred. Please check your arguments for errors.")
 
-    await bot_logs.send("{}\nIgnoring exception in command {}:```diff\n-{}: {}```".format(owner.mention, ctx.command, type(error).__qualname__, error))
+    await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command {}:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
     print('Ignoring exception in command `{}`:'.format(ctx.command))
     traceback.print_exception(type(error), error, error.__traceback__)
 
