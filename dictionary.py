@@ -28,20 +28,14 @@ class Dictionary:
                         "app_id": app_id,
                         "app_key": app_key}
 
-    @staticmethod
-    def validate(dictionary, key, return_value):
-        if key in dictionary:
-            return dictionary[key]
-        return return_value
-
     async def _result_parser(self, results: list):
         for lexicalEntry in results:
             for entry in lexicalEntry['entries']:
                 for sense in entry['senses']:
                     keys = ['domains', 'definitions', 'examples']
-                    yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(sense, key, []) for key in keys]]
-                    for subsense in self.validate(sense, 'subsenses', []):
-                        yield [self.validate(lexicalEntry, 'lexicalCategory', ""), *[self.validate(subsense, key, []) for key in keys]]
+                    yield [lexicalEntry.get('lexicalCategory', ''), *[sense.get(key, []) for key in keys]]
+                    for subsense in sense.get('subsenses', []):
+                        yield [lexicalEntry.get('lexicalCategory', ''), *[subsense.get(key, []) for key in keys]]
 
     async def _get_dic_request(self, url):
         async with aiohttp.ClientSession() as session:
@@ -171,7 +165,11 @@ class Dictionary:
             for definition in definitions:
                 for domain in definition[1]:
                     value += "*{}*, ".format(domain)
-                value += definition[2][0].capitalize()
+                mean = definition[2]
+                print(repr(value))
+                if len(mean) > 0:
+                    value += definition[2][0].capitalize()
+                
                 for example in definition[3]:
                     value += "\n*{}.*".format(example['text'].capitalize())
                 value += "\n\n"
