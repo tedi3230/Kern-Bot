@@ -37,16 +37,18 @@ class Settings:
                                                                                channels[2]))
         else:
             print(channels)
-            await ctx.send("​This server does not have channels set up yet, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.get_prefix))
+            await ctx.send("​This server does not have channels set up yet, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.prefix))
 
     @_set.command(name="channels")
     async def set_channels(self, ctx, *args):
-        if len(args) < 3:
-            raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(ctx.get_prefix))
-        print(args)
-        receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
-        allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
-        outputChannelID = args[2].translate({ord(c): None for c in '<>#'})
+        if len(args) == 1:
+            receiveChannelID, allowChannelID, outputChannelID = tuple([args[0] * 3])
+        elif len(args) < 3:
+            raise TypeError("Too few channels supplied, you need three. Type {}help settings set channels for more inforamtion".format(ctx.prefix))
+        else:
+            receiveChannelID = args[0].translate({ord(c): None for c in '<>#'})
+            allowChannelID = args[1].translate({ord(c): None for c in '<>#'}) #UPDATE FOR NEW SYNTAX
+            outputChannelID = args[2].translate({ord(c): None for c in '<>#'})
         db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
         await ctx.send("​Set channels to {} {} {}".format(args[0], args[1], args[2]))
 
@@ -59,21 +61,7 @@ class Settings:
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, ctx.get_prefix))
-
-    @get.error
-    async def get_error_handler(self, ctx, error):
-        if isinstance(error, TypeError):
-            ctx.send(str(error))
-        else:
-            ctx.send("Warning:\n{}".format(str(error)))
-
-    @_set.error
-    async def set_error_handler(self, ctx, error):
-        if isinstance(error, TypeError):
-            ctx.send(str(error))
-        else:
-            ctx.send("Warning:\n{}".format(str(error)))
+        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, ctx.prefix))
 
     @commands.is_owner()
     @get.command(hidden=True)
