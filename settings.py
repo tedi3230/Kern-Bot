@@ -54,11 +54,9 @@ class Settings:
         print(channels)
         if len(channels) == 1:
             channels *= 3
-            receiveChannelID, allowChannelID, outputChannelID = channels
         elif len(channels) < 3:
             raise commands.MissingRequiredArgument("Too few channels supplied, you need three. Type {}help settings set channels for more information".format(ctx.prefix))
-        else:
-            receiveChannelID, allowChannelID, outputChannelID = [channel.id for channel in channels]
+        receiveChannelID, allowChannelID, outputChannelID = [channel.id for channel in channels]
         db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
         await ctx.send("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
 
