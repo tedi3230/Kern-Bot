@@ -37,7 +37,7 @@ class Contests:
     @commands.command()
     async def submit(self, ctx, *, args):
         """Submits an item into a contest. ;submit <title> | <description> | [imageURL]. Note the spaces"""
-        input_split = tuple(args.split("  |"))
+        input_split = tuple(args.split(" | "))
         if len(input_split) != 2 and len(input_split) != 3:
             raise TypeError("Not all arguments passed")
         title, description = input_split[0:2]
