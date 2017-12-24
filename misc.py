@@ -51,7 +51,6 @@ class Miscellaneous:
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
-        cmd_group = self.bot.get_command(command)
         cogs = {}
         for cmd in self.bot.commands:
             if cmd.hidden:
@@ -76,7 +75,7 @@ class Miscellaneous:
                 if not cmd.hidden:
                     embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
 
-        elif self.bot.get_command(command) in self.bot.commands and not cmd_group.hidden:
+        elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
             cmd_group = self.bot.get_command(command)
             embed = discord.Embed(description=cmd_group.help.format(ctx.prefix), color=0x00ff00)
             if isinstance(cmd_group, commands.Group):
