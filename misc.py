@@ -162,11 +162,11 @@ class Miscellaneous:
         await ctx.guild.leave()
 
     @commands.command()
-    async def hug(self, ctx, item:str):
+    async def hug(self, ctx, item: str):
         await ctx.send("«{}»".format(item))
 
     @commands.command()
-    async def kiss(self, ctx, item:str):
+    async def kiss(self, ctx, item: str):
         await ctx.send(":kiss:{}:kiss:".format(item))
 
 def setup(bot):

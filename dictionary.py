@@ -169,7 +169,6 @@ class Dictionary:
                 print(repr(value))
                 if len(mean) > 0:
                     value += definition[2][0].capitalize()
-                
                 for example in definition[3]:
                     value += "\n*{}.*".format(example['text'].capitalize())
                 value += "\n\n"
