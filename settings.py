@@ -7,9 +7,8 @@ async def settings_perm_check(ctx):
         return True
     elif commands.has_permissions(manage_server=True):
         return True
-    else:
-        await ctx.send("You do not have valid permissions to do this. (Manage Server Permission).")
-        return False
+    await ctx.send("You do not have valid permissions to do this. (Manage Server Permission).")
+    return False
 
 class Settings:
     """Sets and gets the settings for the bot"""
@@ -51,7 +50,7 @@ class Settings:
     async def set_prefix(self, ctx, *, prefix: str):
         """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
-        if db.set_prefix(ctx.guild.id, prefix): 
+        if db.set_prefix(ctx.guild.id, prefix):
             await ctx.send("Channels are not set. Currently a limitation.")
         await ctx.send("Set prefix to `{}`".format(db.get_prefix(ctx.guild.id)))
 
