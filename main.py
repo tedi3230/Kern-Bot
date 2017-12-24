@@ -6,6 +6,7 @@ from asyncio import sleep #Timed Commands
 
 import discord
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 
 import database_old as db #Database Mangament
 
@@ -92,6 +93,7 @@ async def statusChanger():
         await bot.change_presence(game=message)
         await sleep(60)
 
+@commands.cooldown(5, BucketType.channel)
 @bot.event
 async def on_command_error(ctx, error):
     # This prevents any commands with local handlers being handled here in on_command_error.
