@@ -165,6 +165,9 @@ class Miscellaneous:
     async def hug(self, ctx, item:str):
         await ctx.send("«{}»".format(item))
 
+    @commands.command()
+    async def kiss(self, ctx, item:str):
+        await ctx.send(":kissing:{}:kissing:".format(item))
 
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))
