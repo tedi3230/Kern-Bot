@@ -2,6 +2,7 @@ from datetime import datetime
 from os import execl
 from sys import executable, argv
 import inspect
+import asyncio
 
 import psutil
 import discord
@@ -64,7 +65,7 @@ class Miscellaneous:
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
                     if not cmd.hidden:
-                        embed.add_field(name=cmd.name, value=cmd.help)
+                        embed.add_field(name=cmd.name, value=cmd.help, inline=True)
 
         else:
             embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
