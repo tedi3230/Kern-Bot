@@ -93,7 +93,7 @@ async def statusChanger():
         await bot.change_presence(game=message)
         await sleep(60)
 
-@commands.cooldown(5, BucketType.channel)
+@commands.cooldown(5, "seconds", BucketType.channel)
 @bot.event
 async def on_command_error(ctx, error):
     # This prevents any commands with local handlers being handled here in on_command_error.
