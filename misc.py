@@ -76,7 +76,8 @@ class Miscellaneous:
                 if not cmd.hidden:
                     embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
 
-        elif cmd_group in self.bot.commands and not cmd_group.hidden:
+        elif self.bot.get_command(command) in self.bot.commands and not cmd_group.hidden:
+            cmd_group = self.bot.get_command(command)
             embed = discord.Embed(description=cmd_group.help.format(ctx.prefix), color=0x00ff00)
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
