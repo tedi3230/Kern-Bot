@@ -161,6 +161,10 @@ class Miscellaneous:
         await ctx.send("Leaving `{}`".format(ctx.guild))
         await ctx.guild.leave()
 
+    @commands.command()
+    async def hug(self, ctx, item:str):
+        await ctx.send("«{}»".format(item))
+
 
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))
