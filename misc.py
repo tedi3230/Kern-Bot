@@ -23,8 +23,20 @@ class Miscellaneous:
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
 
     @commands.is_owner()
-    @commands.command(hidden=True)
-    async def delete(self, ctx, *, message_id: int):
+    @commands.group(hidden=True, invoke_without_command=True)
+    async def delete(self, ctx):
+        async for message in ctx.channel.history(limit=100):
+            if message.author == self.bot.user:
+                await message.delete()
+                await ctx.send("Message deleted")
+                asyncio.sleep(5)
+                await ctx.message.delete()
+                return
+        ctx.send("No messages were found.")
+
+    @commands.is_owner()
+    @delete.command(hidden=True, name="id")
+    async def delete_by_id(self, ctx, *, message_id: int):
         msg = await ctx.get_message(message_id)
         if msg.author == self.bot.user:
             await msg.delete()
@@ -32,7 +44,7 @@ class Miscellaneous:
             asyncio.sleep(5)
             await ctx.message.delete()
         else:
-            await ctx.send("This message was not the bot's, or this bot does not have manage_messages permission.")
+            await ctx.send("The bot did not send that message.")
             asyncio.sleep(5)
             await ctx.message.delete()
 
