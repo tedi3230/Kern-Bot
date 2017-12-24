@@ -29,20 +29,24 @@ class Miscellaneous:
         if msg.author == self.bot.user:
             await msg.delete()
             await ctx.send("Message deleted")
+            asyncio.sleep(5)
+            await ctx.message.delete()
         else:
             await ctx.send("This message was not the bot's, or this bot does not have manage_messages permission.")
+            asyncio.sleep(5)
+            await ctx.message.delete()
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
         cmd_group = self.bot.get_command(command)
         cogs = {}
-        for b_command in self.bot.commands:
-            if b_command.hidden:
+        for cmd in self.bot.commands:
+            if cmd.hidden:
                 continue
-            if not b_command.cog_name in cogs:
-                cogs[b_command.cog_name] = []
-            cogs[b_command.cog_name].append(b_command.qualified_name)
+            if not cmd.cog_name in cogs:
+                cogs[cmd.cog_name] = []
+            cogs[cmd.cog_name].append(cmd.qualified_name)
 
         for cog in cogs:
             cogs[cog] = sorted(cogs[cog])
