@@ -104,3 +104,4 @@ ENV/
 .vscode/
 client_secret.txt
 database_secret.txt
+streamable_secret.txt
