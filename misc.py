@@ -1,13 +1,15 @@
 from datetime import datetime
-from os import execl
-from sys import executable, argv
+from re import sub
 import inspect
-import asyncio
+import aiohttp
+import async_timeout
 
 import psutil
 import discord
 from discord.ext import commands
+import aiofiles
 
+from os import environ
 
 class Miscellaneous:
     """Miscellaneous functions"""
@@ -19,34 +21,20 @@ class Miscellaneous:
         self.bot.remove_command("help")
         self.process = psutil.Process()
 
+        try:
+            self.streamable_user = environ["STREAM_USER"]
+            self.streamable_password = environ["STREAM_PASS"]
+        except KeyError:
+            stream_file = open('streamable_secret.txt', mode='r')
+            auth = []
+            for line in stream_file:
+                auth.append(line)
+            stream_file.close()
+            self.streamable_user = auth[0]
+            self.streamable_password = auth[1]
+
     async def on_guild_join(self, guild):
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
-
-    @commands.is_owner()
-    @commands.group(hidden=True, invoke_without_command=True)
-    async def delete(self, ctx):
-        async for message in ctx.channel.history(limit=100):
-            if message.author == self.bot.user:
-                await message.delete()
-                await ctx.send("Message deleted")
-                asyncio.sleep(5)
-                await ctx.message.delete()
-                return
-        ctx.send("No messages were found.")
-
-    @commands.is_owner()
-    @delete.command(hidden=True, name="id")
-    async def delete_by_id(self, ctx, *, message_id: int):
-        msg = await ctx.get_message(message_id)
-        if msg.author == self.bot.user:
-            await msg.delete()
-            await ctx.send("Message deleted")
-            asyncio.sleep(5)
-            await ctx.message.delete()
-        else:
-            await ctx.send("The bot did not send that message.")
-            asyncio.sleep(5)
-            await ctx.message.delete()
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
@@ -92,29 +80,6 @@ class Miscellaneous:
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.is_owner()
-    @commands.command(hidden=True)
-    async def restart(self, ctx):
-        """Owner of this bot only command; Restart the bot"""
-        if ctx.channel != self.bot_logs:
-            await ctx.send("Restarting bot.")
-        await self.bot_logs.send("Restarting bot.")
-        await self.bot.change_presence(status=discord.Status.offline)
-        print("\nRestarting...\n")
-        await self.bot.close()
-        execl(executable, 'python "' + "".join(argv) + '"')
-
-    @commands.is_owner()
-    @commands.command(hidden=True)
-    async def shutdown(self, ctx):
-        """Owner of this bot only command; Shutdown the bot"""
-        if ctx.channel == self.bot_logs:
-            await ctx.send("Shutting Down.")
-        await self.bot_logs.send("Shutting down bot.")
-        await self.bot.change_presence(status=discord.Status.offline)
-        print("\nShutting Down...\n")
-        await self.bot.close()
-
     @commands.command()
     async def ping(self, ctx):
         """Returns time taken for a internet packet to go from this bot to discord"""
@@ -155,12 +120,6 @@ class Miscellaneous:
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed=embed)
 
-    @commands.is_owner()
-    @commands.command(hidden=True)
-    async def leave(self, ctx):
-        await ctx.send("Leaving `{}`".format(ctx.guild))
-        await ctx.guild.leave()
-
     @commands.command()
     async def hug(self, ctx, item: str):
         await ctx.send("«{}»".format(item))
@@ -168,6 +127,69 @@ class Miscellaneous:
     @commands.command()
     async def kiss(self, ctx, item: str):
         await ctx.send(":kiss:{}:kiss:".format(item))
+
+    @commands.command()
+    async def obama(self, ctx, *, text):
+        con = {'1': ' one ', '2': ' two ', '3': ' four ', '4': ' four ', '5': ' five ',
+               '6': ' six ', '7': ' seven ', '8': ' eight ', '9': ' nine ', '0': ' zero '}
+        text = "".join([con[c] if c.isnumeric() else c for c in text])
+        text = sub(r"\s+", " ", text)
+        if len(text) > 280:
+            await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters/".format(len(text)))
+            return
+        await ctx.trigger_typing()
+
+        async def create_video(text):
+            async with aiohttp.ClientSession() as session:
+                with async_timeout.timeout(10):
+                    async with session.post(url="http://talkobamato.me/synthesize.py",data={"input_text":text}) as page:
+                        url = page.url
+                        text = await page.text()
+
+            if text.__contains__('<source src="'):
+                start = text.index('<source src="') + len('<source src="')
+                end = text.index('" type="video/mp4">')
+                link = "http://talkobamato.me/"+text[start:end]
+                vid_hash = text[start:end].split('/')[2]+".mp4"
+                return link, vid_hash
+
+            while True:
+                async with aiohttp.ClientSession() as session:
+                    with async_timeout.timeout(10):
+                        async with session.get(url) as r:
+                            text = await r.text()
+                if text.__contains__('<source src="'):
+                    start = text.index('<source src="') + len('<source src="')
+                    end = text.index('" type="video/mp4">')
+                    link = "http://talkobamato.me/" + text[start:end]
+                    vid_hash = text[start:end].split('/')[2]+".mp4"
+                    return link
+
+        # async def download_video(link, file_name):
+        #     async with aiofiles.open(file_name, "w  b") as f:
+        #         async with aiohttp.ClientSession() as session:
+        #             with async_timeout.timeout(10):
+        #                 async with session.get(link, stream=True) as resp:
+        #                     total_length = resp.headers.get('content-length')
+
+        #                     if total_length is None:
+        #                         await f.write(await resp.content)
+        #                     else:
+        #                         async for data in resp.content.iter_chunked(4096):
+        #                             await f.write(data)
+        #                         await f.close()
+        #     return file_name
+
+        async def upload_streamable(url):
+            async with aiohttp.ClientSession() as session:
+                with async_timeout.timeout(10):
+                    async with session.get(url, auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
+                        assert resp.status == 200
+                        return "https://streamable.com/{}".format((await resp.json())['shortcode'])
+
+        link = await create_video(text)
+        # file_name = await download_video(link, vid_hash)
+        ctx.send(await upload_streamable(link))
 
 def setup(bot):
     bot.add_cog(Miscellaneous(bot))
