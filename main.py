@@ -46,7 +46,8 @@ def server_prefix(bots, ctx):
 initial_extensions = ['dictionary', #database
                       'contests',
                       'misc',
-                      'settings']
+                      'settings',
+                      'admin']
 
 
 
@@ -93,7 +94,6 @@ async def statusChanger():
         await bot.change_presence(game=message)
         await sleep(60)
 
-@commands.cooldown(5, "seconds", BucketType.channel)
 @bot.event
 async def on_command_error(ctx, error):
     # This prevents any commands with local handlers being handled here in on_command_error.
@@ -103,14 +103,22 @@ async def on_command_error(ctx, error):
     ignored = (commands.CommandNotFound, commands.UserInputError)
 
     error = getattr(error, 'original', error)
-
+    
     if isinstance(error, ignored):
         return
 
-    elif isinstance(error, TypeError):
-        await ctx.send(error)
-        return
+    async def error_checks():
+        @commands.cooldown(1, 10, BucketType.channel)
+        async def set_get():
+            if isinstance(error, TypeError) and ctx.command in ["set", "get"]:
+                await ctx.send(error)
+                return True
 
+        await set_get()
+
+    if await error_checks():
+        return
+            
     else:
         await ctx.send("An unknown error occurred. Please check your arguments for errors.")
 
