@@ -19,3 +19,4 @@ wrapt==1.10.11
 yarl==0.14.2
 asyncpg==0.13.0
 psutil==5.4.2
+aiofiles==0.3.2
