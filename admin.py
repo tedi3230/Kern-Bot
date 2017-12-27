@@ -5,8 +5,8 @@ import asyncio
 import discord
 from discord.ext import commands
 
-class Administration:
-    """Contest functions"""
+class Admin:
+    """Administration commands."""
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
@@ -47,10 +47,24 @@ class Administration:
             if message.author == self.bot.user:
                 await message.delete()
                 await ctx.send("Message deleted")
-                asyncio.sleep(5)
+                await asyncio.sleep(5)
                 await ctx.message.delete()
                 return
         ctx.send("No messages were found.")
+
+    @commands.has_permissions(manage_messages=True)
+    @delete.command(hidden=True)
+    async def clean(self, ctx, num_messages=200):
+        msg_deleted = 0
+        async for message in ctx.channel.history(limit=num_messages):
+            if msg_deleted % 5 == 0:
+                await asyncio.sleep(1)
+            if message.author == self.bot.user:
+                await message.delete()
+                msg_deleted += 1
+        msg = await ctx.send("Messages cleaned: `{}/200`".format(msg_deleted))
+        await asyncio.sleep(10)
+        await msg.delete()
 
     @commands.is_owner()
     @delete.command(hidden=True, name="id")
@@ -59,12 +73,22 @@ class Administration:
         if msg.author == self.bot.user:
             await msg.delete()
             await ctx.send("Message deleted")
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             await ctx.message.delete()
         else:
             await ctx.send("The bot did not send that message.")
-            asyncio.sleep(5)
+            await asyncio.sleep(5)
             await ctx.message.delete()
 
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def reload_cog(self, ctx, cog_name: str):
+        """stuff"""
+        self.bot.remove_cog(cog_name)
+        print("Cog unloaded.", end=' | ')
+        self.bot.load_extension(cog_name)
+        print("Cog loaded.")
+        await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
+
 def setup(bot):
-    bot.add_cog(Administration(bot))
+    bot.add_cog(Admin(bot))
