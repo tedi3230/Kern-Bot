@@ -1,17 +1,17 @@
 from datetime import datetime
-from re import sub
+from os import environ
 import inspect
+from asyncio import sleep
+
 import aiohttp
 import async_timeout
-
 import psutil
-import discord
-from discord.ext import commands
 import aiofiles
 
-from os import environ
+import discord
+from discord.ext import commands
 
-class Miscellaneous:
+class Misc:
     """Miscellaneous functions"""
 
     def __init__(self, bot):
@@ -30,7 +30,7 @@ class Miscellaneous:
             for line in stream_file:
                 auth.append(line)
             stream_file.close()
-            self.streamable_user = auth[0]
+            self.streamable_user = auth[0].strip('\n')
             self.streamable_password = auth[1]
 
     async def on_guild_join(self, guild):
@@ -130,12 +130,8 @@ class Miscellaneous:
 
     @commands.command()
     async def obama(self, ctx, *, text):
-        con = {'1': ' one ', '2': ' two ', '3': ' four ', '4': ' four ', '5': ' five ',
-               '6': ' six ', '7': ' seven ', '8': ' eight ', '9': ' nine ', '0': ' zero '}
-        text = "".join([con[c] if c.isnumeric() else c for c in text])
-        text = sub(r"\s+", " ", text)
-        if len(text) > 280:
-            await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters/".format(len(text)))
+        if len(text) - 19 > 280:
+            await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
             return
         await ctx.trigger_typing()
 
@@ -149,13 +145,13 @@ class Miscellaneous:
             if text.__contains__('<source src="'):
                 start = text.index('<source src="') + len('<source src="')
                 end = text.index('" type="video/mp4">')
-                link = "http://talkobamato.me/"+text[start:end]
+                link = "http://talkobamato.me/" + text[start:end]
                 vid_hash = text[start:end].split('/')[2]+".mp4"
-                return link, vid_hash
+                return link
 
             while True:
                 async with aiohttp.ClientSession() as session:
-                    with async_timeout.timeout(10):
+                    with async_timeout.timeout(30):
                         async with session.get(url) as r:
                             text = await r.text()
                 if text.__contains__('<source src="'):
@@ -165,31 +161,32 @@ class Miscellaneous:
                     vid_hash = text[start:end].split('/')[2]+".mp4"
                     return link
 
-        # async def download_video(link, file_name):
-        #     async with aiofiles.open(file_name, "w  b") as f:
-        #         async with aiohttp.ClientSession() as session:
-        #             with async_timeout.timeout(10):
-        #                 async with session.get(link, stream=True) as resp:
-        #                     total_length = resp.headers.get('content-length')
-
-        #                     if total_length is None:
-        #                         await f.write(await resp.content)
-        #                     else:
-        #                         async for data in resp.content.iter_chunked(4096):
-        #                             await f.write(data)
-        #                         await f.close()
-        #     return file_name
-
         async def upload_streamable(url):
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(10):
-                    async with session.get(url, auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
+                    async with session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
                         assert resp.status == 200
-                        return "https://streamable.com/{}".format((await resp.json())['shortcode'])
+                        js = await resp.json()
+                        return "https://streamable.com/{}".format(js['shortcode'])
 
         link = await create_video(text)
-        # file_name = await download_video(link, vid_hash)
-        ctx.send(await upload_streamable(link))
+        url = await upload_streamable(link)
+        msg = await ctx.send(url)
+        print('sent')
+        while True:
+            print("hi")
+            async with aiohttp.ClientSession() as session:
+                with async_timeout.timeout(5):
+                    async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
+                        assert resp.status == 200
+                        js = await resp.json()
+                        if js['height'] is not None:
+                            print('exiting')
+                            msg.edit(content=url+'/')
+                            msg.edit(content=url)
+                            return
+                        print('nope')
+            await sleep(10)
 
 def setup(bot):
-    bot.add_cog(Miscellaneous(bot))
+    bot.add_cog(Misc(bot))
