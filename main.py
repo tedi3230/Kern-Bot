@@ -2,7 +2,7 @@ import traceback
 from datetime import datetime
 from os import environ
 from random import choice
-from asyncio import sleep #Timed Commands
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -92,7 +92,7 @@ async def statusChanger():
     while not bot.is_closed():
         message = choice(status_messages)
         await bot.change_presence(game=message)
-        await sleep(60)
+        await asyncio.sleep(60)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -100,31 +100,34 @@ async def on_command_error(ctx, error):
     if hasattr(ctx.command, 'on_error'):
         return
 
-    ignored = (commands.CommandNotFound, commands.UserInputError)
+    print(ctx.command)
+
+    ignored = (commands.UserInputError)
 
     error = getattr(error, 'original', error)
-    
-    if isinstance(error, ignored):
+
+    if isinstance(error, commands.CommandNotFound):
+        print("Command: {} not found.".format(ctx.command))
         return
 
-    async def error_checks():
-        @commands.cooldown(1, 10, BucketType.channel)
-        async def set_get():
-            if isinstance(error, TypeError) and ctx.command in ["set", "get"]:
-                await ctx.send(error)
-                return True
-
-        await set_get()
-
-    if await error_checks():
+    elif isinstance(error, ignored):
         return
-            
+
+    elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
+        await ctx.send(error)
+
+    elif isinstance(error, asyncio.TimeoutError) and ctx.command in ['obama', 'meaning', 'synonym', 'antonym']:
+        await ctx.send("Request timed out.")
+
+    elif isinstance(error, ModuleNotFoundError):
+        await ctx.send("Cog not found: `{}`".format(str(error).split("'")[1]))
+     
     else:
         await ctx.send("An unknown error occurred. Please check your arguments for errors.")
+        await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
+        traceback.print_exception(type(error), error, error.__traceback__)
 
-    await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command {}:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
-    print('Ignoring exception in command `{}`:'.format(ctx.command))
-    traceback.print_exception(type(error), error, error.__traceback__)
+    print('Ignoring exception in command {}:'.format(ctx.command))
 
 try:
     bot.run(token, reconnect=True)
