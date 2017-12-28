@@ -97,17 +97,18 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def list_roles(self, ctx):
-        roles = [role.name.strip('@').capitalize() for role in ctx.guild.roles]
-        await ctx.send(f"Roles in `{ctx.guild.name}`: ```ini\n{roles}```")
+        roles = ", ".join([role.name.strip('@').capitalize() for role in ctx.guild.roles])
+        await ctx.send(f"Roles in `{ctx.guild.name}`: ```ini\n[{roles}]```")
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def list_permissions(self, ctx, role_name: str=None):
         if role_name is None:
-            roles = [role.name.strip('@').capitalize() for role in ctx.guild.me.roles]
-            await ctx.send(f"My roles: ```ini\n{roles}```")
+            roles = ", ".join([role.name.strip('@').capitalize() for role in ctx.guild.me.roles])
+            await ctx.send(f"My roles: ```ini\n[{roles}]```")
         else:
-            pass
+            role = next((role for role in ctx.guild.me.roles if role.name == role_name), None)
+            await ctx.send(role.permissions)
 
 def setup(bot):
     bot.add_cog(Admin(bot))
