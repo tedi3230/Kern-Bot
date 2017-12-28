@@ -11,8 +11,9 @@ class Admin:
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
+    @commands.command(hidden=True)
     async def get_path(self):
-        path.abspath(__file__)
+        ctx.send(path.abspath(__file__))
 
     @commands.is_owner()
     @commands.command(hidden=True)
