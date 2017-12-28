@@ -96,15 +96,15 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def list_roles(self, ctx):
-        roles = ", ".join([role.name.strip('@') for role in ctx.guild.roles])
-        await ctx.send(f"Roles in `{ctx.guild.name}`: {roles}")
+        roles = [role.name.strip('@').capitalize() for role in ctx.guild.roles]
+        await ctx.send(f"Roles in `{ctx.guild.name}`: ```ini\n{roles}```")
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def list_permissions(self, ctx, role_name: str=None):
         if role_name is None:
-            roles = ", ".join([role.name.strip('@') for role in ctx.guild.me.roles])
-            await ctx.send(f"My roles: {roles}")
+            roles = [role.name.strip('@').capitalize() for role in ctx.guild.me.roles]
+            await ctx.send(f"My roles: ```ini\n{roles}```")
         else:
             pass
 
