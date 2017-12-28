@@ -90,5 +90,16 @@ class Admin:
         print("Cog loaded.")
         await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
 
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def list_roles(self, ctx):
+        await ctx.send(ctx.guild.roles)
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def list_permissions(self, ctx):
+        roles = ctx.guild.me.roles
+        await ctx.send(roles)
+
 def setup(bot):
     bot.add_cog(Admin(bot))
