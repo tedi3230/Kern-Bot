@@ -1,4 +1,4 @@
-from os import execl
+from os import execl, path
 from sys import executable, argv
 import asyncio
 
@@ -10,6 +10,9 @@ class Admin:
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
+
+    async def get_path(self):
+        path.abspath(__file__)
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -97,9 +100,12 @@ class Admin:
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def list_permissions(self, ctx):
-        roles = ctx.guild.me.roles
-        await ctx.send(roles)
+    async def list_permissions(self, ctx, role_name: str=None):
+        if role_name is None:
+            roles = ", ".join([role.name for role in ctx.guild.me.roles])
+            await ctx.send(f"Roles in `{ctx.guild.name}`: {roles}")
+        else:
+            pass
 
 def setup(bot):
     bot.add_cog(Admin(bot))
