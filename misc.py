@@ -175,6 +175,7 @@ class Misc:
         print('sent')
         while True:
             print("hi")
+            #NOT WORKING???
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(5):
                     async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
