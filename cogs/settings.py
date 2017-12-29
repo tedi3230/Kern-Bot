@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
-import database_old as db
+import cogs.database_old as db
+#import cogs.database as db
 
 async def settings_perm_check(ctx):
     if commands.is_owner():

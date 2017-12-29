@@ -105,11 +105,6 @@ def close_conn():
 
 register(close_conn)
 
-
-def get_num_servers():
-    return len(get_query("SELECT server_id FROM servers"))
-
-
 def set_server_channels(server_id, receive_channel_id, allow_channel_id, vote_channel_id):
     """Sets the channels used for submissions in the database"""
 
@@ -149,7 +144,7 @@ def generate_id():
         submission_id = "{:06}".format(randint(0, 999999))
     return submission_id
 
-prefix = "k " 
+prefix = "k "
 
 def get_prefix(server_id):
     """Get the prefix for accessing the bot."""
@@ -205,7 +200,7 @@ def del_submission(submission_id):
 
 if __name__ in "__main__":
 ##    print(get_server_channels(382780023926554625))
-##    set_server_channels(382780023926554625, 382780254382718997, 382780208014557185, 382780181645099008)
+##    set_server_channels(382780023 926554625, 382780254382718997, 382780208014557185, 382780181645099008)
 ##    print(get_query("SELECT * FROM servers"))
 ##    set_prefix(382780023926554625, "!")
 ##    print(get_query("SELECT * FROM servers"))
