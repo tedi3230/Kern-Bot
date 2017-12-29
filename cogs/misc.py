@@ -234,23 +234,32 @@ class Misc:
 
         #Now do fake atatck on unsecure port
 
-        @commands.command():
-        async def tree(self, ctx):
-            tree = {}
-            for channel in ctx.guild.text_channels:
-                tree[channel.category] = [channel.name + " (Text)"] + tree.get(channel.category, [])
+    @commands.command()
+    async def tree(self, ctx):
+        tree = {}
+        for channel in ctx.guild.text_channels:
+            if channel.category is None:
+                tree["No category"] = [channel.name + " (Text)"] + tree.get("No category", [])
+                continue
+            appendage = " (Text)"
+            if channel.is_nsfw():
+                appendage += " (nsfw)"
+            tree[channel.category.name] = [channel.name + appendage] + tree.get(channel.category.name, [])
 
-            for channel in ctx.guild.voice_channels:
-                tree[channel.category] = [channel.name + " (Voice)"] + tree.get(channel.category, [])
+        for channel in ctx.guild.voice_channels:
+            if channel.category is None:
+                tree["No category"] = [channel.name + " (Text)"] + tree.get("No category", [])
+                continue
+            tree[channel.category.name] = [channel.name + " (Voice)"] + tree.get(channel.category.name  , [])
 
-            tree_string = ctx.guild.name + "\n"
-            print(tree)
-            for category, channels in tree.items():
-                tree_string += f"|-- {category.upper()}"
-                for channel in channels:
-                    tree_string += f"|  |--{channel}"
+        tree_string = ctx.guild.name + "\n"
+        for category, channels in tree.items():
+            channels.sort()
+            tree_string += f"|-- {category.upper()}\n"
+            for channel in channels:
+                tree_string += f"|  |--{channel}\n"
 
-            print(tree_string)
+        await ctx.send(f"```fix\n{tree_string}```")
 
 
 
