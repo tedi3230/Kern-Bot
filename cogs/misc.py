@@ -234,5 +234,25 @@ class Misc:
 
         #Now do fake atatck on unsecure port
 
+        @commands.command():
+        async def tree(self, ctx):
+            tree = {}
+            for channel in ctx.guild.text_channels:
+                tree[channel.category] = [channel.name + " (Text)"] + tree.get(channel.category, [])
+
+            for channel in ctx.guild.voice_channels:
+                tree[channel.category] = [channel.name + " (Voice)"] + tree.get(channel.category, [])
+
+            tree_string = ctx.guild.name + "\n"
+            print(tree)
+            for category, channels in tree.items():
+                tree_string += f"|-- {category.upper()}"
+                for channel in channels:
+                    tree_string += f"|  |--{channel}"
+
+            print(tree_string)
+
+
+
 def setup(bot):
     bot.add_cog(Misc(bot))
