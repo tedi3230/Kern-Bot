@@ -125,12 +125,19 @@ class Admin:
         pass
 
     @perms.command(name="user")
-    async def perms_user(self, ctx, *, member: discord.Member):
-        perms = ", ".join([perm[0] for perm in member.guild_permissions if perm[1]])
-        if member == ctx.guild.me:
-            await ctx.send(f"My permissions: ```ini\n[{perms}]```")
+    async def perms_user(self, ctx, *, member: discord.Member, here: str=""):
+        if here == "here":
+            perms = ", ".join([perm[0] for perm in ctx.chanel.permissions_for(member) if perm[1]])
+            if member == ctx.guild.me:
+                await ctx.send(f"My permissions in {ctx.channel.mention}: ```ini\n[{perms}]```")
+            elif here == "":
+                await ctx.send(f"Permissions for member `{member}` in {ctx.channel.mention}: ```ini\n[{perms}]```")
         else:
-            await ctx.send(f"Permissions for member `{member}`: ```ini\n[{perms}]```")
+            perms = ", ".join([perm[0] for perm in member.guild_permissions if perm[1]])
+            if member == ctx.guild.me:
+                await ctx.send(f"My permissions: ```ini\n[{perms}]```")
+            else:
+                await ctx.send(f"Permissions for member `{member}`: ```ini\n[{perms}]```")
 
     @perms.command(name="role")
     async def perms_role(self, ctx, *, role: discord.Role):
