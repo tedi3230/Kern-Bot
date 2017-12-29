@@ -211,7 +211,7 @@ class Misc:
         loading = str(self.bot.get_emoji(395834326450831370))
         msg = await ctx.send(f"Looking for open ports in <{url}>")
         content = msg.content
-        fake_ports = sorted([random.randint(0, 9999) for i in range(random.randint(0, 0))])
+        fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
         prtcls = [random.choice(protocols) for i in range(len(fake_ports))]
         secures = [random.choice(['true', 'false']) for i in range(len(fake_ports))]
         table_data = list(zip(fake_ports, prtcls, secures))
@@ -220,9 +220,9 @@ class Misc:
         open_data = [data[0:2] for data in table_data if data[2]]
         open_ports = ", ".join([str(data[0]) for data in open_data])
 
-        for port in range(1, 10000):
+        for port in range(1, 65535):
             if port % 7000 == 0:
-                port_diff = random.randint(port - 350, port + 350)
+                port_diff = random.randint(port - 3500, port + 3500)
                 await msg.edit(content=f"{content}\nPort: {port_diff}{loading}")
                 await sleep(1)
 
