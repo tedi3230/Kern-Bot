@@ -35,7 +35,7 @@ class Database:
     def __init__(self, bot):
         self.bot = bot
         try:
-            self.database_url = os.environ["DATABASE_URL"]
+            self.dsn = os.environ["DATABASE_URL"]
         except KeyError:
             database_file = open('database_secret.txt', mode='r')
             self.dsn = database_file.read()
@@ -49,6 +49,15 @@ class Database:
         lop = asyncio.get_event_loop()
         lop.run_until_complete(self.init())
 
+    async def init(self):
+        self.pool = await asyncpg.create_pool(self.dsn, ssl=True)
+        async with self.pool.acquire() as con:
+            self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
+            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers") is None:
+                con.execute(servers_table)
+            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions") is None:
+                con.execute(submissions_table)
+
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
         submission_id_list = await self.pool.fetchrow("SELECT submission_id FROM submissions")
@@ -59,15 +68,6 @@ class Database:
         while submission_id in submission_id_list:
             submission_id = "{:06}".format(randint(0, 999999))
         return submission_id
-
-    async def init(self):
-        self.pool = await asyncpg.create_pool(self.dsn, ssl=sl)
-        async with self.pool.acquire() as con:
-            self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
-            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers") is None:
-                con.execute(servers_table)
-            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions") is None:
-                con.execute(submissions_table)
 
     async def set_contest_channels(self, server_id: int, *channels):
         sql = """INSERT INTO servers (server_id, receive_channel_id, allow_channel_id, vote_channel_id)
