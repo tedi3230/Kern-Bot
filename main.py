@@ -6,23 +6,16 @@ import asyncio
 
 import discord
 from discord.ext import commands
-from discord.ext.commands.cooldowns import BucketType
 
-import database_old as db #Database Mangament
+import cogs.database_old as db
+#import cogs.database as db
 
 """Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot
 
 
 ADD BAN OPTIONS
 
-https://github.com/Rapptz/discord.py/blob/rewrite/discord/ext/commands/formatter.py#L126%3E
-?tag formatter
-bot.remove_command("help")
-
-https://gist.github.com/MysterialPy/d78c061a4798ae81be9825468fe146be
 """
-
-prefix = "k "
 
 def server_prefix(bots, ctx):
     """A callable Prefix for our bot.
@@ -37,9 +30,9 @@ def server_prefix(bots, ctx):
         string -- The prefix to be used by the bot for receiving commands.
     """
     if not ctx.guild:
-        return prefix
+        return bots.prefix
 
-    prefixes = [prefix, db.get_prefix(ctx.guild.id)]
+    prefixes = [bot.prefix, db.get_prefix(ctx.guild.id)]
 
     return commands.when_mentioned_or(*prefixes)(bots, ctx)
 
@@ -54,6 +47,8 @@ initial_extensions = ['dictionary', #database
 bot = commands.Bot(command_prefix=server_prefix,
                    description='Multiple functions, including contests, definitions, and more.')
 
+bot.prefix = "k "
+
 try:
     token = environ["AUTH_KEY"]
 except KeyError:
@@ -63,6 +58,7 @@ except KeyError:
 
 bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
 bot.bot_logs_id = 382780308610744331
+bot.launch_time = datetime.utcnow()
 #pylint: disable-msg=w0603
 #pylint: disable-msg=w0702
 @bot.event
@@ -70,7 +66,7 @@ async def on_ready():
     if __name__ == '__main__':
         for extension in initial_extensions:
             try:
-                bot.load_extension(extension)
+                bot.load_extension("cogs." + extension)
             except:
                 print(f'Failed to load extension {extension}.')
                 traceback.print_exc()
@@ -84,6 +80,15 @@ async def on_ready():
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
 
+@commands.is_owner()
+@bot.command(hidden=True, name="reload")
+async def reload_cog(ctx, cog_name: str):
+    """stuff"""
+    bot.unload_extension("cogs." + cog_name)
+    print("Cog unloaded.", end=' | ')
+    bot.load_extension("cogs." + cog_name)
+    print("Cog loaded.")
+    await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
 
 @bot.event
 async def statusChanger():
@@ -97,16 +102,15 @@ async def statusChanger():
 @bot.event
 async def on_command_error(ctx, error):
     # This prevents any commands with local handlers being handled here in on_command_error.
+    do_send = True
     if hasattr(ctx.command, 'on_error'):
         return
 
-    print(ctx.command)
-
-    ignored = (commands.UserInputError)
+    ignored = (commands.UserInputError, commands.NotOwner)
 
     error = getattr(error, 'original', error)
 
-    if isinstance(error, commands.CommandNotFound):
+    if isinstance(error, commands.CommandNotFound,):
         print("Command: {} not found.".format(ctx.command))
         return
 
@@ -114,20 +118,30 @@ async def on_command_error(ctx, error):
         return
 
     elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
-        await ctx.send(error)
+        pass
 
     elif isinstance(error, asyncio.TimeoutError) and ctx.command in ['obama', 'meaning', 'synonym', 'antonym']:
-        await ctx.send("Request timed out.")
+        pass
 
     elif isinstance(error, ModuleNotFoundError):
         await ctx.send("Cog not found: `{}`".format(str(error).split("'")[1]))
-     
-    else:
-        await ctx.send("An unknown error occurred. Please check your arguments for errors.")
-        await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
-        traceback.print_exception(type(error), error, error.__traceback__)
+        do_send = False
+        print("Cog failed to unload.")
 
-    print('Ignoring exception in command {}:'.format(ctx.command))
+    elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
+        pass
+
+    elif isinstance(error, commands.errors.CommandOnCooldown):
+        await ctx.send(":octagonal_sign:This can only be used once every 20 seconds.")
+
+    else:
+        await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
+        print('Ignoring exception in command {}:'.format(ctx.command))
+        traceback.print_exception(type(error), error, error.__traceback__)
+        return
+
+    if do_send:
+        print('Ignoring exception in command {}'.format(ctx.command))
 
 try:
     bot.run(token, reconnect=True)
