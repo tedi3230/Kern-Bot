@@ -114,7 +114,7 @@ async def on_command_error(ctx, error):
     if hasattr(ctx.command, 'on_error'):
         return
 
-    ignored = (commands.UserInputError, commands.NotOwner)
+    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure)
 
     error = getattr(error, 'original', error)
 
