@@ -1,11 +1,9 @@
 from datetime import datetime
-from os import environ
+from os import environ, path
 import inspect
 from asyncio import sleep
 from urllib.parse import urlparse
 import random
-
-from collections import namedtuple
 
 import aiohttp
 import async_timeout
@@ -14,7 +12,6 @@ from tabulate import tabulate
 
 import discord
 from discord.ext import commands
-from discord.ext.commands.cooldowns import BucketType
 
 protocols = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp']
 
@@ -46,7 +43,7 @@ class Misc:
             self.streamable_user = environ["STREAM_USER"]
             self.streamable_password = environ["STREAM_PASS"]
         except KeyError:
-            file_path = os.path.join(os.path.dirname(__file__), '../streamable_secret.txt')
+            file_path = path.join(path.dirname(__file__), '../streamable_secret.txt')
             stream_file = open(file_path, mode='r')
             auth = []
             for line in stream_file:
