@@ -37,7 +37,7 @@ class Database:
         try:
             self.dsn = os.environ["DATABASE_URL"]
         except KeyError:
-            database_file = open('database_secret.txt', mode='r')
+            database_file = open('..\database_secret.txt', mode='r')
             self.dsn = database_file.read()
             database_file.close()
 
