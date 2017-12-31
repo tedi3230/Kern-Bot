@@ -17,6 +17,10 @@ ADD BAN OPTIONS
 
 """
 
+async def bot_user_check(ctx):
+    return not ctx.author.bot
+
+
 def server_prefix(bots, ctx):
     """A callable Prefix for our bot.
 
@@ -48,6 +52,8 @@ initial_extensions = ['dictionary', #database
 
 bot = commands.Bot(command_prefix=server_prefix,
                    description='Multiple functions, including contests, definitions, and more.')
+
+bot.add_check(bot_user_check)
 
 bot.prefix = "k "
 
