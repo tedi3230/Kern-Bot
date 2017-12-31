@@ -213,7 +213,7 @@ class Misc:
     async def hack(self, ctx, *, url: Url):
         "Starts a fake hacking instance on a specified URL."
         loading = str(self.bot.get_emoji(395834326450831370))
-        thousands = str(self.bot.get_emoji(396884184104304650))
+        thousands = str(self.bot.get_emoji(396890900783038499))
         hundreds = str(self.bot.get_emoji(396890900426653697))
         tens = str(self.bot.get_emoji(396890900783038499))
         ones = str(self.bot.get_emoji(396890900753547266))
