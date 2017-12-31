@@ -217,8 +217,11 @@ class Misc:
         hundreds = str(self.bot.get_emoji(396890900426653697))
         tens = str(self.bot.get_emoji(396890900783038499))
         ones = str(self.bot.get_emoji(396890900753547266))
+
         msg = await ctx.send(f"Looking for open ports in <{url}>")
+
         content = msg.content
+
         fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
         prtcls = [random.choice(protocols) for i in range(len(fake_ports))]
         secures = [random.choice(['true', 'false']) for i in range(len(fake_ports))]
@@ -228,13 +231,9 @@ class Misc:
         open_data = [data[0:2] for data in table_data if data[2]]
         open_ports = ", ".join([str(data[0]) for data in open_data])
 
-        await ctx.send(f"{content}\nPort: {thousands}{hundreds}{tens}{ones}{loading}")
+        await msg.edit(content=f"{content}\nPort: {thousands}{hundreds}{tens}{ones}{loading}")
 
-        for port in range(1, 65535):
-            if port % 7000 == 0:
-                port_diff = random.randint(port - 3500, port + 3500)
-                await msg.edit(content=f"{content}\nPort: {port_diff}{loading}")
-                await sleep(1)
+        await sleep(10)
 
         if not table_data:
             await msg.edit(content=f"Port scan complete. No ports found.")
