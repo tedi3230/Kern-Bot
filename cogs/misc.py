@@ -219,11 +219,6 @@ class Misc:
         tens = str(self.bot.get_emoji(396890900753547266))
         ones = str(self.bot.get_emoji(396890900426653697))
         
-
-        msg = await ctx.send(f"Looking for open ports in <{url}>")
-
-        content = msg.content
-
         fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
         prtcls = [random.choice(protocols) for i in range(len(fake_ports))]
         secures = [random.choice(["'false'", 'true']) for i in range(len(fake_ports))]
@@ -233,15 +228,16 @@ class Misc:
         open_data = [data[0:2] for data in table_data if data[2]]
         open_ports = ", ".join([str(data[0]) for data in open_data])
 
+        msg = await ctx.send(f"Looking for open ports in <{url}>")
+        content = msg.content
         await msg.edit(content=f"{content}\nPort: {thousands}{hundreds}{tens}{ones}{loading}")
-
         await sleep(10)
 
         if not table_data:
             await msg.edit(content=f"Port scan complete. No ports found.")
             return
 
-        await msg.edit(content=f"Port scan complete. Scan report: ```ml\n{table}```\n{loading}Attempting to bruteforce open ports: ({open_ports})")
+        await msg.edit(content=f"Port scan complete. Scan report: ```ml\n{table}```\n{loading}Attempting to bruteforce insecure ports: ({open_ports})")
 
         #Now do fake atatck on unsecure port
 
