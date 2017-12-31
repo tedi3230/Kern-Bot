@@ -255,7 +255,7 @@ class Misc:
         for channel in ctx.guild.voice_channels:
             if channel.category is None:
                 channel.category.name = "No category"
-            tree[channel.category.name] = ["🔈 " + channel.name] + tree.get(channel.category.name, [])
+            tree[channel.category.name] = ["🔊 " + channel.name] + tree.get(channel.category.name, [])
 
         tree_string = ctx.guild.name + "\n"
         for category, channels in tree.items():
