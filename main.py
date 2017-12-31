@@ -42,6 +42,8 @@ initial_extensions = ['dictionary', #database
                       'settings',
                       'admin']
 
+                      #CHANGE THIS TO USE OS.DIRS> REMEMBER TO FILTER OUT THE __PYCHACHE__ folder
+
 
 
 bot = commands.Bot(command_prefix=server_prefix,
@@ -130,9 +132,6 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
         pass
-
-    elif isinstance(error, commands.errors.CommandOnCooldown):
-        await ctx.send(":octagonal_sign:This can only be used once every 20 seconds.")
 
     else:
         await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
