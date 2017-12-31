@@ -46,7 +46,8 @@ class Misc:
             self.streamable_user = environ["STREAM_USER"]
             self.streamable_password = environ["STREAM_PASS"]
         except KeyError:
-            stream_file = open('streamable_secret.txt', mode='r')
+            file_path = os.path.join(os.path.dirname(__file__), '../streamable_secret.txt')
+            stream_file = open(file_path, mode='r')
             auth = []
             for line in stream_file:
                 auth.append(line)

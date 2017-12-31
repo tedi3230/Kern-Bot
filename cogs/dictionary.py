@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, path
 import re
 import json
 
@@ -20,7 +20,8 @@ class Dictionary:
             app_id = environ["APP_ID"]
             app_key = environ["APP_KEY"]
         except KeyError:
-            with open("client_secret.txt", encoding="utf-8") as file:
+            file_path = path.join(path.dirname(__file__), '../client_secret.txt')
+            with open(file_path, encoding="utf-8") as file:
                 lines = [l.strip() for l in file]
                 app_id = lines[1]
                 app_key = lines[2]
