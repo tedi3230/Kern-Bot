@@ -210,7 +210,6 @@ class Misc:
                         print('nope')
             await sleep(10)
 
-    #@commands.cooldown(1, 10, BucketType.channel)
     @commands.command()
     async def hack(self, ctx, *, url: Url):
         "Starts a fake hacking instance on a specified URL."
