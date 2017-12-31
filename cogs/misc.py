@@ -16,6 +16,10 @@ from discord.ext.commands.cooldowns import BucketType
 
 protocols = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp']
 
+class FakeChannel():
+    def __init__(self, name):
+        self.name = name
+
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
         url = str(argument)
@@ -209,6 +213,10 @@ class Misc:
     async def hack(self, ctx, *, url: Url):
         "Starts a fake hacking instance on a specified URL."
         loading = str(self.bot.get_emoji(395834326450831370))
+        thousands = str(self.bot.get_emoji(378453439711281155))
+        hundreds = str(self.bot.get_emoji(396890900426653697))
+        tens = str(self.bot.get_emoji(396890900783038499))
+        ones = str(self.bot.get_emoji(396890900753547266))
         msg = await ctx.send(f"Looking for open ports in <{url}>")
         content = msg.content
         fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
@@ -219,6 +227,8 @@ class Misc:
         table = str(tabulate(table_data, headers, tablefmt="plain"))
         open_data = [data[0:2] for data in table_data if data[2]]
         open_ports = ", ".join([str(data[0]) for data in open_data])
+
+        await ctx.send(f"{content}\nPort: {thousands}{hundreds}{tens}{ones}{loading}")
 
         for port in range(1, 65535):
             if port % 7000 == 0:
@@ -239,18 +249,16 @@ class Misc:
         tree = {}
         for channel in ctx.guild.text_channels:
             if channel.category is None:
-                tree["No category"] = [channel.name + " (Text)"] + tree.get("No category", [])
-                continue
-            appendage = " (Text)"
+                channel.category = FakeChannel("No category")
+            prefix = "📨 "
             if channel.is_nsfw():
-                appendage += " (nsfw)"
-            tree[channel.category.name] = [channel.name + appendage] + tree.get(channel.category.name, [])
+                prefix += "❌ "
+            tree[channel.category.name] = [prefix + channel.name] + tree.get(channel.category.name, [])
 
         for channel in ctx.guild.voice_channels:
             if channel.category is None:
-                tree["No category"] = [channel.name + " (Text)"] + tree.get("No category", [])
-                continue
-            tree[channel.category.name] = [channel.name + " (Voice)"] + tree.get(channel.category.name  , [])
+                channel.category.name = "No category"
+            tree[channel.category.name] = ["🔈 " + channel.name] + tree.get(channel.category.name, [])
 
         tree_string = ctx.guild.name + "\n"
         for category, channels in tree.items():
