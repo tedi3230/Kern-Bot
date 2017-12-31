@@ -37,14 +37,14 @@ class Database:
         try:
             self.dsn = os.environ["DATABASE_URL"]
         except KeyError:
-            database_file = open('..\database_secret.txt', mode='r')
+            file_path = os.path.join(os.path.dirname(__file__), '../database_secret.txt')
+            database_file = open(file_path, 'r')
             self.dsn = database_file.read()
             database_file.close()
 
         self.pool = None
         self.prefix_conn = None
         self.prefix_stmt = None
-        print(self.dsn)
 
         lop = asyncio.get_event_loop()
         lop.run_until_complete(self.init())
