@@ -151,9 +151,6 @@ class Admin:
     @commands.command(hidden=True)
     async def servers(self, ctx):
         msg = await ctx.send("Servers I am in: ```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
-        await asyncio.sleep(5)
-        await msg.delete()
-
 
     @commands.is_owner()
     @commands.command(hidden=True, name="eval")
