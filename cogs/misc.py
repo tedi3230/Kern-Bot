@@ -165,7 +165,6 @@ class Misc:
                 start = text.index('<source src="') + len('<source src="')
                 end = text.index('" type="video/mp4">')
                 link = "http://talkobamato.me/" + text[start:end]
-                vid_hash = text[start:end].split('/')[2]+".mp4"
                 return link
 
             while True:
@@ -177,7 +176,6 @@ class Misc:
                     start = text.index('<source src="') + len('<source src="')
                     end = text.index('" type="video/mp4">')
                     link = "http://talkobamato.me/" + text[start:end]
-                    vid_hash = text[start:end].split('/')[2]+".mp4"
                     return link
 
         async def upload_streamable(url):
@@ -191,22 +189,17 @@ class Misc:
         link = await create_video(text)
         url = await upload_streamable(link)
         msg = await ctx.send(url)
-        print('sent')
         while True:
-            print("hi")
-            #NOT WORKING???
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(5):
                     async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
                         assert resp.status == 200
                         js = await resp.json()
                         if js['height'] is not None:
-                            print('exiting')
-                            msg.edit(content=url+'/')
-                            msg.edit(content=url)
+                            await msg.edit(content=url+'/')
+                            await msg.edit(content=url)
                             return
-                        print('nope')
-            await sleep(10)
+            await sleep(5)
 
     @commands.command()
     async def hack(self, ctx, *, url: Url):
