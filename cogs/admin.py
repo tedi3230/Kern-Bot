@@ -72,7 +72,8 @@ class Admin:
                 await message.delete()
                 await ctx.send("Message deleted")
                 await asyncio.sleep(5)
-                if commands.bot_has_permissions(manage_messages=True):
+
+                if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
                     await ctx.message.delete()
                 return
         await ctx.send("No messages were found.")
@@ -95,12 +96,9 @@ class Admin:
         else:
             if commands.bot_has_permissions(manage_messages=True):
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
-                msg = await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages))
+                msg = await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages), delete_after=10)
             else:
-                msg = await ctx.send(":octagonal_sign: This bot does not have the required permissions to delete messages.\nInstead, use: `{} clean <num_messages> True`".format(ctx.prefix))
-
-        await asyncio.sleep(10)
-        await msg.delete()
+                msg = await ctx.send(":octagonal_sign: This bot does not have the required permissions to delete messages.\nInstead, use: `{} clean <num_messages> True`".format(ctx.prefix), delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
@@ -109,12 +107,12 @@ class Admin:
         if msg.author == self.bot.user:
             await msg.delete()
             await ctx.send("Message deleted")
-            if commands.bot_has_permissions(manage_messages=True):
+            if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
                 await asyncio.sleep(5)
                 await ctx.message.delete()
         else:
             await ctx.send("The bot did not send that message.")
-            if commands.bot_has_permissions(manage_messages=True):
+            if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
                 await asyncio.sleep(5)
                 await ctx.message.delete()
 
@@ -212,10 +210,10 @@ class Admin:
 
             if ret is None:
                 if value:
-                    await ctx.send(f'```py\n{value}\n```')
+                    await self.bot.error(ctx, f'```py\n{value}\n```')
             else:
                 self._last_result = ret
-                await ctx.send(f'```py\n{value}{ret}\n```')
+                await self.bot.error(ctx, f'```py\n{value}{ret}\n```')
 
 def setup(bot):
     bot.add_cog(Admin(bot))
