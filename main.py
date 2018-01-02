@@ -59,12 +59,18 @@ bot.add_check(bot_user_check)
 
 bot.prefix = "k "
 
+class ResponseError(Exception):
+    pass
+
+bot.ResponseError = ResponseError
+
 async def embed_error(ctx, error, title="Error:"):
     error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
     await ctx.send(embed=error_embed)
 
 async def embed_success(ctx, success, title="Success"):
-    pass #Not implemented
+    success_embed = discord.Embed(title=title, colour=0xff0000, description=f"{success}")
+    await ctx.send(embed=success_embed)
 
 bot.error = embed_error
 bot.success = embed_success
@@ -152,7 +158,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
         pass
 
-    elif isinstance(error, aiohttp.ClientResponseError):
+    elif isinstance(error, bot.ResponseError):
         await bot.error(ctx, error, "Response Code > 400:")
 
     else:
