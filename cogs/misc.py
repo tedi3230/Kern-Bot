@@ -149,7 +149,7 @@ class Misc:
 
     @commands.command()
     async def obama(self, ctx, *, text: str):
-        if len(text) - 19 > 280:
+        if len(text) - len(ctx.prefix + "obama") > 280:
             await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
             return
         await ctx.trigger_typing()
@@ -158,25 +158,18 @@ class Misc:
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(10):
                     async with session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as page:
+                        if page.status != 200:
+                            await ctx.send(f"Talkobamato.me responded with status {page.status}")
+                            raise AssertionError(f"Talkobamato.me responded with status {page.status}")
                         url = page.url
                         text = await page.text()
+                        print(page.headers)
 
             if text.__contains__('<source src="'):
                 start = text.index('<source src="') + len('<source src="')
                 end = text.index('" type="video/mp4">')
                 link = "http://talkobamato.me/" + text[start:end]
                 return link
-
-            while True:
-                async with aiohttp.ClientSession() as session:
-                    with async_timeout.timeout(30):
-                        async with session.get(url) as r:
-                            text = await r.text()
-                if text.__contains__('<source src="'):
-                    start = text.index('<source src="') + len('<source src="')
-                    end = text.index('" type="video/mp4">')
-                    link = "http://talkobamato.me/" + text[start:end]
-                    return link
 
         async def upload_streamable(url):
             async with aiohttp.ClientSession() as session:
@@ -186,6 +179,7 @@ class Misc:
                         js = await resp.json()
                         return "https://streamable.com/{}".format(js['shortcode'])
 
+
         link = await create_video(text)
         url = await upload_streamable(link)
         msg = await ctx.send(url)
@@ -193,7 +187,9 @@ class Misc:
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(5):
                     async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
-                        assert resp.status == 200
+                        if resp.status != 200:
+                            await ctx.send(f"Stremable responded with status: {resp.status}")
+                            raise AssertionError(f"Streamable responded with status: {resp.status}")
                         js = await resp.json()
                         if js['height'] is not None:
                             await msg.edit(content=url+'/')
