@@ -4,6 +4,7 @@ from os import environ
 from random import choice
 import asyncio
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -151,8 +152,11 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
         pass
 
+    elif isinstance(error, aiohttp.ClientResponseError):
+        await bot.error(ctx, error, "Response Code > 400:")
+
     else:
-        await bot.error(bot.get_channel(bot.bot_logs_id), "{}: {}".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
+        await bot.error(bot.get_channel(bot.bot_logs_id), "```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
         #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
         print('Ignoring exception in command {}:'.format(ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
