@@ -73,7 +73,7 @@ class Admin:
                 await ctx.send("Message deleted")
                 await asyncio.sleep(5)
 
-                if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
+                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                     await ctx.message.delete()
                 return
         await ctx.send("No messages were found.")
@@ -86,7 +86,7 @@ class Admin:
 
         if old:
             total_deleted = 0
-            if commands.bot_has_permissions(manage_messages=True):
+            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
                 total_deleted += len(deleted)
             deleted = await ctx.channel.purge(limit=num_messages, check=is_me, bulk=False)
@@ -94,7 +94,7 @@ class Admin:
             msg = await ctx.send("Messages cleaned `{}/{}`".format(total_deleted, num_messages))
 
         else:
-            if commands.bot_has_permissions(manage_messages=True):
+            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
                 msg = await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages), delete_after=10)
             else:
@@ -107,12 +107,12 @@ class Admin:
         if msg.author == self.bot.user:
             await msg.delete()
             await ctx.send("Message deleted")
-            if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
+            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 await asyncio.sleep(5)
                 await ctx.message.delete()
         else:
             await ctx.send("The bot did not send that message.")
-            if ctx.channel.permissions_for(ctx.guild.me)['manage_messages']:
+            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 await asyncio.sleep(5)
                 await ctx.message.delete()
 
