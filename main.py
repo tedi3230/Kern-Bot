@@ -58,19 +58,11 @@ bot.add_check(bot_user_check)
 
 bot.prefix = "k "
 
-class EmbedError:
-    def __init__(self, ctx, error, title="Error:"):
-        self.ctx = ctx
-        self.error = error
-        self.title = title
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.embed())
+async def embed_error(ctx, error, title="Error:"):
+    error_embed = discord.Embed(title=title, colour=0xff0000, description=f"```{error}```")
+    await ctx.send(embed=error_embed)
 
-    async def embed(self):
-        error_embed = discord.Embed(title=self.title, colour=discord.Colour.red, description=f"```{self.error}```")
-        await self.ctx.send(embed=error_embed)
-
-bot.embed_exception = EmbedError
+bot.embed_exception = embed_error
 
 try:
     token = environ["AUTH_KEY"]
