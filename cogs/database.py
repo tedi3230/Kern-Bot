@@ -46,8 +46,8 @@ class Database:
         self.prefix_conn = None
         self.prefix_stmt = None
 
-        lop = asyncio.get_event_loop()
-        lop.run_until_complete(self.init())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.init())
 
     async def init(self):
         self.pool = await asyncpg.create_pool(self.dsn, ssl=True)
