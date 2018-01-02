@@ -17,6 +17,7 @@ ADD BAN OPTIONS
 
 """
 
+
 async def bot_user_check(ctx):
     return not ctx.author.bot
 
@@ -57,6 +58,14 @@ bot.add_check(bot_user_check)
 
 bot.prefix = "k "
 
+class BotError(Exception):
+    def __init__(self, ctx: commands.Context, message):
+        super().__init__(message)
+
+        error_embed = discord.Embed(title="Error:", colour=discord.Colour.red, description=)
+
+bot.embed_exception = BotError
+
 try:
     token = environ["AUTH_KEY"]
 except KeyError:
@@ -92,6 +101,7 @@ async def on_ready():
 @bot.command(hidden=True, name="reload")
 async def reload_cog(ctx, cog_name: str):
     """stuff"""
+
     bot.unload_extension("cogs." + cog_name)
     print("Cog unloaded.", end=' | ')
     bot.load_extension("cogs." + cog_name)
@@ -119,7 +129,7 @@ async def on_command_error(ctx, error):
     error = getattr(error, 'original', error)
 
     if isinstance(error, commands.CommandNotFound,):
-        print("Command: {} not found.".format(ctx.command))
+        print("Command: {} not found.".format(ctx.invoked_with))
         return
 
     elif isinstance(error, ignored):
