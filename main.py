@@ -134,11 +134,11 @@ async def on_command_error(ctx, error):
 
     error = getattr(error, 'original', error)
 
-    if isinstance(error, commands.CommandNotFound,):
-        print("Command: {} not found.".format(ctx.invoked_with))
-        return
+    # if isinstance(error, commands.CommandNotFound):
+    #     print("Command: {} not found.".format(ctx.invoked_with))
+    #     return
 
-    elif isinstance(error, ignored):
+    if isinstance(error, ignored):
         return
 
     elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
