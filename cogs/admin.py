@@ -1,4 +1,4 @@
-from os import execl, path
+from os import execl, path, sep
 from sys import executable, argv
 import asyncio
 import io
@@ -24,9 +24,16 @@ class Admin:
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self._last_result = None
 
-    @commands.command(hidden=True)
     async def get_path(self, ctx):
         await ctx.send(path.abspath(__file__))
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def stop_vs(self, ctx):
+        if 'heroku' in await self.get_path(ctx):
+            await ctx.send("On VPS")
+        else:
+            await ctx.send("Running locally")
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -183,7 +190,7 @@ class Admin:
         try:
             exec(to_compile, env)
         except Exception as e:
-            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+            return await self.bot.error(ctx, f'```py\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
         try:
@@ -191,7 +198,11 @@ class Admin:
                 ret = await func()
         except Exception as e:
             value = stdout.getvalue()
-            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+            file_path = path.normpath(path.dirname(path.abspath(__file__))) + sep + path.basename(__file__)
+            root_folder = file_path.split(sep)[-3]
+            rel_path = root_folder + file_path.split(root_folder)[1]
+            stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
+            await self.bot.error(ctx, f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
         else:
             value = stdout.getvalue()
             try:
