@@ -60,9 +60,10 @@ bot.prefix = "k "
 
 class BotError(Exception):
     def __init__(self, ctx: commands.Context, message):
-        super().__init__(message)
+        error = super().__init__(message)
 
-        error_embed = discord.Embed(title="Error:", colour=discord.Colour.red, description=)
+        error_embed = discord.Embed(title="Error:", colour=discord.Colour.red, description=f"```{error}```")
+        await ctx.send(embed=error_embed)
 
 bot.embed_exception = BotError
 
