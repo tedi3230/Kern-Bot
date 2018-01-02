@@ -11,13 +11,6 @@ from discord.ext import commands
 import cogs.database_old as db
 #import cogs.database as db
 
-"""Add to your server with: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot
-
-
-ADD BAN OPTIONS
-
-"""
-
 async def bot_user_check(ctx):
     return not ctx.author.bot
 
@@ -55,6 +48,14 @@ bot = commands.Bot(command_prefix=server_prefix,
                    description='Multiple functions, including contests, definitions, and more.')
 
 bot.add_check(bot_user_check)
+
+bot.todo = """TODO: ```
+1. Get a new database working in async, preferably asyncpg
+2. Finish contests cog
+3. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
+4. Hack Command - add fake attack
+5. Server rules (database - rules)```
+"""
 
 bot.prefix = "k "
 
@@ -154,6 +155,7 @@ async def on_command_error(ctx, error):
         print("Cog failed to unload.")
 
     elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
+
         pass
 
     elif isinstance(error, bot.ResponseError):

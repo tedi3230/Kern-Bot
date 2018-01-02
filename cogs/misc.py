@@ -249,6 +249,13 @@ class Misc:
 
         await ctx.send(f"```fix\n{tree_string}```")
 
+    @commands.command()
+    async def invite(self, ctx):
+        await ctx.send("Add to your server: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot")
+
+    @commands.command()
+    async def todo(self, ctx):
+        await ctx.send(self.bot.todo)
 
 
 def setup(bot):
