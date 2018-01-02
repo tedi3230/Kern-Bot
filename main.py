@@ -69,7 +69,7 @@ async def embed_error(ctx, error, title="Error:"):
     return await ctx.send(embed=error_embed)
 
 async def embed_success(ctx, success, title="Success"):
-    success_embed = discord.Embed(title=title, colour=0xff0000, description=f"{success}")
+    success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
     return await ctx.send(embed=success_embed)
 
 commands.Context.error = embed_error
