@@ -18,7 +18,6 @@ ADD BAN OPTIONS
 
 """
 
-
 async def bot_user_check(ctx):
     return not ctx.author.bot
 
@@ -66,14 +65,14 @@ bot.ResponseError = ResponseError
 
 async def embed_error(ctx, error, title="Error:"):
     error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
-    await ctx.send(embed=error_embed)
+    return await ctx.send(embed=error_embed)
 
 async def embed_success(ctx, success, title="Success"):
     success_embed = discord.Embed(title=title, colour=0xff0000, description=f"{success}")
-    await ctx.send(embed=success_embed)
+    return await ctx.send(embed=success_embed)
 
-bot.error = embed_error
-bot.success = embed_success
+commands.Context.error = embed_error
+commands.Context.success = embed_success
 
 try:
     token = environ["AUTH_KEY"]
@@ -132,7 +131,6 @@ async def on_command_error(ctx, error):
     do_send = True
     if hasattr(ctx.command, 'on_error'):
         return
-
     ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure)
 
     error = getattr(error, 'original', error)
@@ -151,7 +149,7 @@ async def on_command_error(ctx, error):
         pass
 
     elif isinstance(error, ModuleNotFoundError):
-        await bot.error(ctx, str(error).split("'")[1].capitalize(), "Cog not found:")
+        await ctx.error(ctx, str(error).split("'")[1].capitalize(), "Cog not found:")
         do_send = False
         print("Cog failed to unload.")
 
@@ -159,10 +157,10 @@ async def on_command_error(ctx, error):
         pass
 
     elif isinstance(error, bot.ResponseError):
-        await bot.error(ctx, error, "Response Code > 400:")
+        await ctx.error(ctx, error, "Response Code > 400:")
 
     else:
-        await bot.error(bot.get_channel(bot.bot_logs_id), "```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
+        await ctx.error(bot.get_channel(bot.bot_logs_id), "```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
         #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
         print('Ignoring exception in command {}:'.format(ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
