@@ -84,7 +84,7 @@ class Admin:
             deleted = await ctx.channel.purge(limit=num_messages, check=is_me, bulk=False)
             total_deleted += len(deleted)
             msg = await ctx.send("Messages cleaned `{}/{}`".format(total_deleted, num_messages))
-        
+
         else:
             if commands.bot_has_permissions(manage_messages=True):
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
@@ -150,7 +150,7 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def servers(self, ctx):
-        msg = await ctx.send("Servers I am in: ```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
+        await ctx.send("Servers I am in: ```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()
     @commands.command(hidden=True, name="eval")
