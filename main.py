@@ -58,14 +58,19 @@ bot.add_check(bot_user_check)
 
 bot.prefix = "k "
 
-class BotError(Exception):
-    def __init__(self, ctx: commands.Context, message):
-        error = super().__init__(message)
+class EmbedError:
+    def __init__(self, ctx, error, title="Error:"):
+        self.ctx = ctx
+        self.error = error
+        self.title = title
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.embed())
 
-        error_embed = discord.Embed(title="Error:", colour=discord.Colour.red, description=f"```{error}```")
-        await ctx.send(embed=error_embed)
+    async def embed(self):
+        error_embed = discord.Embed(title=self.title, colour=discord.Colour.red, description=f"```{self.error}```")
+        await self.ctx.send(embed=error_embed)
 
-bot.embed_exception = BotError
+bot.embed_exception = EmbedError
 
 try:
     token = environ["AUTH_KEY"]
@@ -143,7 +148,7 @@ async def on_command_error(ctx, error):
         pass
 
     elif isinstance(error, ModuleNotFoundError):
-        await ctx.send("Cog not found: `{}`".format(str(error).split("'")[1]))
+        bot.embed_exception(ctx, "Cog not found: `{}`".format(str(error).split("'")[1]))
         do_send = False
         print("Cog failed to unload.")
 
@@ -151,7 +156,8 @@ async def on_command_error(ctx, error):
         pass
 
     else:
-        await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
+        bot.embed_exception(bot.get_channel(bot.bot_logs_id), "```diff\n-{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
+        #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
         print('Ignoring exception in command {}:'.format(ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
         return
