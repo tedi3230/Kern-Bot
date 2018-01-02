@@ -205,7 +205,7 @@ class Misc:
         hundreds = str(self.bot.get_emoji(396890900158218242))
         tens = str(self.bot.get_emoji(396890900753547266))
         ones = str(self.bot.get_emoji(396890900426653697))
-        
+
         fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
         prtcls = [random.choice(protocols) for i in range(len(fake_ports))]
         secures = [random.choice(["'false'", 'true']) for i in range(len(fake_ports))]
