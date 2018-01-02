@@ -188,7 +188,7 @@ class Admin:
         try:
             exec(to_compile, env)
         except Exception as e:
-            return await self.bot.error(ctx, f'```py\n{e}\n```', e.__class__.__name__ + ':')
+            return await ctx.error(ctx, f'```py\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
         try:
@@ -200,7 +200,7 @@ class Admin:
             root_folder = file_path.split(sep)[-3]
             rel_path = root_folder + file_path.split(root_folder)[1]
             stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
-            await self.bot.error(ctx, f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
+            await ctx.error(ctx, f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
         else:
             value = stdout.getvalue()
             try:
@@ -210,10 +210,10 @@ class Admin:
 
             if ret is None:
                 if value:
-                    await self.bot.error(ctx, f'```py\n{value}\n```')
+                    await ctx.error(ctx, f'```py\n{value}\n```')
             else:
                 self._last_result = ret
-                await self.bot.error(ctx, f'```py\n{value}{ret}\n```')
+                await ctx.error(ctx, f'```py\n{value}{ret}\n```')
 
 def setup(bot):
     bot.add_cog(Admin(bot))
