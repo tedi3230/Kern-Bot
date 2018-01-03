@@ -73,7 +73,7 @@ class Misc:
             command = "Help"
             embed = discord.Embed(description="{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(self.bot.description, ctx.prefix), color=0x00ff00)
             for cog in sorted(cogs):
-                embed.add_field(name=cog, value="\n".join(cogs[cog]))
+                embed.add_field(name=cog, value=", ".join(cogs[cog]), inline=False)
 
         elif command.capitalize() in cogs:
             command = command.capitalize()
