@@ -188,7 +188,11 @@ class Admin:
         try:
             exec(to_compile, env)
         except Exception as e:
-            return await ctx.error(ctx, f'```py\n{e}\n```', e.__class__.__name__ + ':')
+            try:
+                await ctx.message.add_reaction("👎")
+            except discord.Forbidden:
+                pass
+            return await ctx.error(f'```py\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
         try:
@@ -200,20 +204,32 @@ class Admin:
             root_folder = file_path.split(sep)[-3]
             rel_path = root_folder + file_path.split(root_folder)[1]
             stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
-            await ctx.error(ctx, f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
+            await ctx.error(f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
+            try:
+                await ctx.message.add_reaction("👎")
+            except discord.Forbidden:
+                pass
         else:
             value = stdout.getvalue()
             try:
-                await ctx.message.add_reaction('\u2705')
-            except:
+                await ctx.message.add_reaction("👍")
+            except discord.Forbidden:
                 pass
 
             if ret is None:
                 if value:
-                    await ctx.error(ctx, f'```py\n{value}\n```')
+                    await ctx.error(f'```py\n{value}\n```')
+                    try:
+                        await ctx.message.add_reaction("👎")
+                    except discord.Forbidden:
+                        pass
             else:
                 self._last_result = ret
-                await ctx.error(ctx, f'```py\n{value}{ret}\n```')
+                await ctx.error(f'```py\n{value}{ret}\n```')
+                try:
+                    await ctx.message.add_reaction("👎")
+                except discord.Forbidden:
+                    pass
 
 def setup(bot):
     bot.add_cog(Admin(bot))
