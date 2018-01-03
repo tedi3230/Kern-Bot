@@ -1,5 +1,7 @@
 import os
 from random import randint
+import ssl
+import json
 
 import asyncio
 
@@ -40,7 +42,6 @@ class Database:
             file_path = os.path.join(os.path.dirname(__file__), '../database_secret.txt')
             database_file = open(file_path, 'r')
             self.dsn = database_file.read()
-            print(self.dsn)
             database_file.close()
 
         self.pool = None
@@ -51,13 +52,16 @@ class Database:
         loops.run_until_complete(self.init())
 
     async def init(self):
-        self.pool = await asyncpg.create_pool(self.dsn, ssl=True)
+        ssl_object = ssl.create_default_context()
+        ssl_object.check_hostname = False
+        ssl_object.verify_mode = ssl.CERT_NONE
+        self.pool = await asyncpg.create_pool(self.dsn, ssl=ssl_object)
         async with self.pool.acquire() as con:
+            if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
+                await con.execute(servers_table)
+            if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions'"):
+                await con.execute(submissions_table)
             self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
-            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers") is None:
-                con.execute(servers_table)
-            if await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions") is None:
-                con.execute(submissions_table)
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
@@ -96,26 +100,21 @@ class Database:
     async def get_prefix(self, server_id: int):
         return await self.pool.fetchval("SELECT prefix FROM servers WHERE server_id = $1", server_id)
 
-    async def add_contest_submission(self, server_id: int, user_id: int, submission_id: int, embed: discord.Embed):
-        await self.pool.execute("INSERT INTO submissions (submission_id, user_id, embed, server_id) VALUES ($1, $2, $3, $4)",
-                                submission_id, user_id, embed.to_dict(), server_id)
+    async def add_contest_submission(self, server_id: int, owner_id: int, submission_id: int, embed: discord.Embed):
+        print(embed.to_dict())
+        await self.pool.execute("""INSERT INTO submissions (submission_id, owner_id, embed, server_id) VALUES ($1, $2, $3, $4)""",
+                                submission_id, owner_id, json.dumps(embed.to_dict()), server_id)
 
     async def get_contest_submission(self, submission_id: int):
         embed = await self.pool.fetchval("SELECT embed FROM submissions WHERE submission_id = $1", submission_id)
-        return discord.Embed.from_data(embed)
+        return discord.Embed.from_data(json.loads(embed))
 
     async def list_contest_submissions(self, server_id: int):
-        await self.pool.fetch("SELECT submission_id, embed FROM submissions WHERE server_id = $1",
+        return await self.pool.fetch("SELECT submission_id, embed FROM submissions WHERE server_id = $1",
                               server_id)
 
     async def remove_contest_submission(self, server_id: int, owner_id: int, submission_id: int):
-        await self.pool.execute('DELETE FROM submissions WHERE submission_id = $1 AND owner_id = $2', submission_id, owner_id)
+        await self.pool.execute('DELETE FROM submissions WHERE submission_id = $1 AND owner_id = $2 AND server_id = $3', submission_id, owner_id, server_id)
 
 def setup(bot):
     bot.add_cog(Database(bot))
-
-if __name__ in "__main__":
-    loop = asyncio.get_event_loop()
-    db = Database('lol')
-    d = loop.run_until_complete(db.list_contest_submissions(336642139381301249))
-    print(d)

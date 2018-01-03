@@ -8,8 +8,7 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-import cogs.database_old as db
-#import cogs.database as db
+import cogs.database as db
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
@@ -30,7 +29,7 @@ def server_prefix(bots, ctx):
     if not ctx.guild:
         return bots.prefix
 
-    prefixes = [bot.prefix, db.get_prefix(ctx.guild.id)]
+    prefixes = [bots.prefix, bot.database.get_prefix(ctx.guild.id)]
 
     return commands.when_mentioned_or(*prefixes)(bots, ctx)
 
@@ -111,6 +110,7 @@ async def on_ready():
     print('------')
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
+    bot.database = db.Database(bot)
     bot.loop.create_task(statusChanger())
 
 @bot.event

@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-import cogs.database_old as db
-#import cogs.database as db
 
 class Contests:
     """Contest functions"""
@@ -46,35 +44,37 @@ class Contests:
             image_url = input_split[3]
         else:
             image_url = ""
-        submissionID = db.generate_id()
+        submissionID = (await self.bot.database.generate_id())
         footerText = "Type {0}allow {1} True to allow this and {0}allow {1} False to prevent the moving on this to voting queue.".format(ctx.prefix, submissionID)
         embed = self.generateEmbed(ctx.author, title, description, footerText, image_url, 0x00ff00)
-        print(db.get_server_channels(ctx.guild.id)[0])
-        if ctx.channel.id == db.get_server_channels(ctx.guild.id)[0]:
-            channel = ctx.guild.get_channel(db.get_server_channels(ctx.guild.id)[1])
+        server_channels = await self.bot.database.get_contest_channels(ctx.guild.id)
+        print(server_channels)
+        if ctx.channel.id == server_channels[0]:
+            channel = ctx.guild.get_channel(server_channels[1])
             message = await channel.send(embed=embed)
-            db.add_submission(submissionID, embed.to_dict(), message.guild.id)
+            await self.bot.database.add_contest_submission(submissionID, embed, message.guild.id)
+            await ctx.send(f"Submissions sent in {channel.mention}")
 
     @commands.command()
     async def list_submissions(self, ctx):
-        "Not implemented yet"
-        pass
+        submissions = (await self.bot.database.list_contest_submissions(ctx.guild.id))
+        await ctx.send(submissions)
 
     @commands.command()
     async def allow(self, ctx, submissionID, allowed="True"):
         """Allows for moderators to approve/reject submissions."""
         #CHECK IF SAME SERVER
-        embed = db.get_submission(submissionID)
+        embed = (await self.bot.database.get_submission(submissionID))
         if allowed.lower() == "true":
             embed.set_footer(text="Type {0}vote {1} 0 to hate it, type {0}vote {1} 5 to really like it.".format(ctx.prefix, submissionID))
             await ctx.send(embed=embed)
         elif allowed.lower() == "false":
             await ctx.send("​Submssions with submissionID of {} has been rejected.".format(submissionID))
-            channel = ctx.guild.get_channel(db.get_server_channels(ctx.guild.id)[1])
-            message = await channel.get_message(db.get_server_channels(ctx.message.guild.id)[1])
+            channel = ctx.guild.get_channel(await self.bot.database.get_server_channels(ctx.guild.id)[1])
+            message = await channel.get_message(await self.bot.database.get_server_channels(ctx.guild.id)[1])
             embed.colour = 0xff0000
             await message.edit(embed=embed)
-            db.del_submission(submissionID)
+            await self.bot.database.remove_contest_submission(submissionID)
         else:
             await ctx.send("​A correct value of true/false was not passed ")
 

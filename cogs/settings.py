@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-import cogs.database_old as db
-#import cogs.database as db
 
 async def settings_perm_check(ctx):
     if commands.is_owner():
@@ -30,7 +28,7 @@ class Settings:
     @get.command(name="channels")
     async def get_channels(self, ctx):
         """Get the channels used for the contests"""
-        channels = db.get_server_channels(ctx.guild.id)
+        channels = (await self.bot.database.get_server_channels(ctx.guild.id))
         if len(channels) == 3:
             await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
         else:
@@ -44,21 +42,19 @@ class Settings:
         elif len(channels) < 3:
             raise TypeError("Too few channels supplied, you need three. Type `{}help settings set channels` for more information".format(ctx.prefix))
         receiveChannelID, allowChannelID, outputChannelID = [channel.id for channel in channels]
-        db.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
+        await self.bot.database.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
         await ctx.send("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
         """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
-        if db.set_prefix(ctx.guild.id, prefix):
-            await ctx.send("Channels are not set. Currently a limitation.")
-        await ctx.send("Set prefix to `{}`".format(db.get_prefix(ctx.guild.id)))
+        await ctx.send("Set prefix to `{}`".format(await self.bot.database.get_prefix(ctx.guild.id)))
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
         """Get the bot's prefix for this server"""
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, db.get_prefix(ctx.guild.id)))
+        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, self.bot.database.get_prefix(ctx.guild.id)))
 
     @commands.is_owner()
     @get.command(hidden=True)
