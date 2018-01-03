@@ -54,7 +54,11 @@ bot.todo = """TODO: ```
 2. Finish contests cog
 3. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
 4. Hack Command - add fake attack
-5. Server rules (database - rules)```
+5. Server rules (database - rules)
+6. Custom context
+7. Pipe command using || via on_message
+8. Stackexchange search - https://api.stackexchange.com/docs
+```
 """
 
 bot.prefix = "k "
@@ -64,16 +68,18 @@ class ResponseError(Exception):
 
 bot.ResponseError = ResponseError
 
-async def embed_error(ctx, error, title="Error:"):
-    error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
-    return await ctx.send(embed=error_embed)
+class Context(commands.Context):
+    async def send_error(self, error, title="Error:", channel: discord.TextChannel=None):
+        error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
+        if channel is None:
+            return await super().send(embed=error_embed)
+        return await channel.send(embed=error_embed)
 
-async def embed_success(ctx, success, title="Success"):
-    success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
-    return await ctx.send(embed=success_embed)
-
-commands.Context.error = embed_error
-commands.Context.success = embed_success
+    async def send_success(self, success, title="Success", channel: discord.TextChannel=None):
+        success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
+        if channel is None:
+            return await super().send(embed=success_embed)
+        return await channel.send(embed=success_embed)
 
 try:
     token = environ["AUTH_KEY"]
@@ -106,6 +112,11 @@ async def on_ready():
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
 
+@bot.event
+async def on_message(message):
+    # implement the pipe commnad
+    await bot.process_commands(message)
+
 @commands.is_owner()
 @bot.command(hidden=True, name="reload")
 async def reload_cog(ctx, cog_name: str):
@@ -136,11 +147,11 @@ async def on_command_error(ctx, error):
 
     error = getattr(error, 'original', error)
 
-    if isinstance(error, commands.CommandNotFound):
-        print("Command: {} not found.".format(ctx.invoked_with))
+    if isinstance(error, ignored):
         return
 
-    elif isinstance(error, ignored):
+    elif isinstance(error, commands.CommandNotFound):
+        print("Command: {} not found.".format(ctx.invoked_with))
         return
 
     elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
@@ -150,19 +161,19 @@ async def on_command_error(ctx, error):
         pass
 
     elif isinstance(error, ModuleNotFoundError):
-        await ctx.error(ctx, str(error).split("'")[1].capitalize(), "Cog not found:")
+        await ctx.error(str(error).split("'")[1].capitalize(), "Cog not found:")
         do_send = False
         print("Cog failed to unload.")
 
     elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
-
         pass
 
     elif isinstance(error, bot.ResponseError):
-        await ctx.error(ctx, error, "Response Code > 400:")
+        await ctx.error(error, "Response Code > 400:")
 
     else:
-        await ctx.error(bot.get_channel(bot.bot_logs_id), "```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
+        ctx.send = bot.get_channel(bot.bot_logs_id).send
+        await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:")
         #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
         print('Ignoring exception in command {}:'.format(ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
