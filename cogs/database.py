@@ -40,14 +40,15 @@ class Database:
             file_path = os.path.join(os.path.dirname(__file__), '../database_secret.txt')
             database_file = open(file_path, 'r')
             self.dsn = database_file.read()
+            print(self.dsn)
             database_file.close()
 
         self.pool = None
         self.prefix_conn = None
         self.prefix_stmt = None
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.init())
+        loops = asyncio.get_event_loop()
+        loops.run_until_complete(self.init())
 
     async def init(self):
         self.pool = await asyncpg.create_pool(self.dsn, ssl=True)
