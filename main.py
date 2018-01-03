@@ -116,7 +116,7 @@ async def on_ready():
 async def on_message(message):
     # implement the pipe commnad
     ctx = await bot.get_context(message, cls=Context)
-    await ctx.invoke(message) #this is bot.process_commands, and so is the above
+    await bot.invoke(ctx) #this is bot.process_commands, and so is the above
 
 @commands.is_owner()
 @bot.command(hidden=True, name="reload")
