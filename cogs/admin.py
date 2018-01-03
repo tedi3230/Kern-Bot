@@ -155,7 +155,7 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def servers(self, ctx):
-        await ctx.send("Servers I am in: ```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
+        await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()
     @commands.command(hidden=True, name="eval")
