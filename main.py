@@ -52,12 +52,13 @@ bot.add_check(bot_user_check)
 bot.todo = """TODO: ```
 1. Get a new database working in async, preferably asyncpg
 2. Finish contests cog
-3. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
-4. Hack Command - add fake attack
-5. Server rules (database - rules)
-6. Custom context
-7. Pipe command using || via on_message
-8. Stackexchange search - https://api.stackexchange.com/docs
+3. Use logging module
+4. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
+5. Hack Command - add fake attack
+6. Server rules (database - rules) - custom titles
+7. Custom context
+8. Pipe command using || via on_message
+9. Stackexchange search - https://api.stackexchange.com/docs
 ```
 """
 
