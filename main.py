@@ -68,14 +68,14 @@ class ResponseError(Exception):
 
 bot.ResponseError = ResponseError
 
-class Context(commands.Context):
-    async def send_error(self, error, title="Error:", channel: discord.TextChannel=None):
+class CustomContext(commands.Context):
+    async def error(self, error, title="Error:", channel: discord.TextChannel=None):
         error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
         if channel is None:
             return await super().send(embed=error_embed)
         return await channel.send(embed=error_embed)
 
-    async def send_success(self, success, title="Success", channel: discord.TextChannel=None):
+    async def success(self, success, title="Success", channel: discord.TextChannel=None):
         success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
         if channel is None:
             return await super().send(embed=success_embed)
@@ -115,7 +115,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     # implement the pipe commnad
-    ctx = await bot.get_context(message, cls=Context)
+    ctx = await bot.get_context(message, cls=CustomContext)
     await bot.invoke(ctx) #this is bot.process_commands, and so is the above
 
 @commands.is_owner()
