@@ -1,13 +1,32 @@
-import traceback
 from datetime import datetime
-from os import environ
-from random import choice
+from os import environ, listdir
+from os.path import isfile, join
+import traceback
 import asyncio
+from random import choice
 
 import discord
 from discord.ext import commands
 
-import cogs.database as db
+import database as db
+
+class CustomContext(commands.Context):
+    async def error(self, error, title="Error:", channel: discord.TextChannel = None):
+        error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
+        if channel is None:
+            return await super().send(embed=error_embed)
+        return await channel.send(embed=error_embed)
+
+    async def success(self, success, title="Success", channel: discord.TextChannel = None):
+        success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
+        if channel is None:
+            return await super().send(embed=success_embed)
+        return await channel.send(embed=success_embed)
+
+
+class ResponseError(Exception):
+    pass
+
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
@@ -37,21 +56,16 @@ async def server_prefix(bots, message):
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
-initial_extensions = ['dictionary', #database
-                      'contests',
-                      'misc',
-                      'settings',
-                      'admin']
-
-                      #CHANGE THIS TO USE OS.DIRS> REMEMBER TO FILTER OUT THE __PYCHACHE__ folder
-
-
-
 bot = commands.Bot(command_prefix=server_prefix,
                    description='Multiple functions, including contests, definitions, and more.')
 
 bot.add_check(bot_user_check)
 bot.server_prefixes = {}
+bot.prefix = "k"
+bot.ResponseError = ResponseError
+bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
+bot.bot_logs_id = 382780308610744331
+bot.launch_time = datetime.utcnow()
 
 bot.todo = """TODO: ```
 1. Finish contests cog
@@ -66,26 +80,6 @@ bot.todo = """TODO: ```
 ```
 """
 
-bot.prefix = "k"
-
-class ResponseError(Exception):
-    pass
-
-bot.ResponseError = ResponseError
-
-class CustomContext(commands.Context):
-    async def error(self, error, title="Error:", channel: discord.TextChannel = None):
-        error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
-        if channel is None:
-            return await super().send(embed=error_embed)
-        return await channel.send(embed=error_embed)
-
-    async def success(self, success, title="Success", channel: discord.TextChannel = None):
-        success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
-        if channel is None:
-            return await super().send(embed=success_embed)
-        return await channel.send(embed=success_embed)
-
 try:
     token = environ["AUTH_KEY"]
 except KeyError:
@@ -93,36 +87,74 @@ except KeyError:
         lines = [l.strip() for l in file]
         token = lines[0]
 
-bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
-bot.bot_logs_id = 382780308610744331
-bot.launch_time = datetime.utcnow()
-#pylint: disable-msg=w0603
-#pylint: disable-msg=w0702
+async def load_extensions(bots):
+    for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]:
+        try:
+            bots.load_extension("cogs." + extension)
+        except (discord.ClientException, ModuleNotFoundError):
+            print(f'Failed to load extension {extension}.')
+            traceback.print_exc()
+
 @bot.event
 async def on_ready():
-    if __name__ == '__main__':
-        for extension in initial_extensions:
-            try:
-                bot.load_extension("cogs." + extension)
-            except:
-                print(f'Failed to load extension {extension}.')
-                traceback.print_exc()
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     bot.database = db.Database(bot)
+    while not bot.database.ready:
+        await asyncio.sleep(0.5)
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
+    await load_extensions(bot)
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
 
+async def statusChanger():
+    status_messages = [discord.Game(name="for new contests.", type=3),
+                        discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
+    while not bot.is_closed():
+        message = choice(status_messages)
+        await bot.change_presence(game=message)
+        await asyncio.sleep(60)
+
 @bot.event
 async def on_message(message):
-    # implement the pipe commnad
-    ctx = await bot.get_context(message, cls=CustomContext)
-    await bot.invoke(ctx) #this is bot.process_commands, and so is the above
+    if " && " in message.content:
+        cmds_run_before = []
+        failed_to_run = {}
+        messages = message.content.split(" && ")
+        for msg in messages:
+            message.content = msg
+            ctx = await bot.get_context(message, cls=CustomContext)
+            if msg.startswith(ctx.prefix):
+                continue
+            if ctx.valid:
+                if msg.strip(ctx.prefix) not in cmds_run_before:
+                    await bot.invoke(ctx)
+                    cmds_run_before.append(msg.strip(ctx.prefix))
+                else:
+                    failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
+            else:
+                failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
+
+        if failed_to_run:
+            errors = ""
+            for fail, reason in failed_to_run.items():
+                errors += f"{fail}: {reason}\n"
+            await ctx.error(f"```{errors}```", "These failed to run:")
+
+    elif " || " in message.content:
+        messages = message.content.split(" || ")
+        for msg in messages:
+            message.content = msg
+            ctx = await bot.get_context(message, cls=CustomContext) #is a command returned
+            #if not ctx.returns_data: exit somehow
+            await bot.invoke(ctx)
+    else:
+        ctx = await bot.get_context(message, cls=CustomContext) #is a command returned
+        await bot.invoke(ctx)
 
 @commands.is_owner()
 @bot.command(hidden=True, name="reload")
@@ -134,15 +166,6 @@ async def reload_cog(ctx, cog_name: str):
     bot.load_extension("cogs." + cog_name)
     print("Cog loaded.")
     await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
-
-@bot.event
-async def statusChanger():
-    status_messages = [discord.Game(name="for new contests.", type=3),
-                       discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
-    while not bot.is_closed():
-        message = choice(status_messages)
-        await bot.change_presence(game=message)
-        await asyncio.sleep(60)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -183,7 +206,6 @@ async def on_command_error(ctx, error):
         #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
         print('Ignoring exception in command {}:'.format(ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
-        return
 
     if do_send:
         print('Ignoring exception in command {}'.format(ctx.command))
