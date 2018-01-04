@@ -204,7 +204,8 @@ class Admin:
             root_folder = file_path.split(sep)[-3]
             rel_path = root_folder + file_path.split(root_folder)[1]
             stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
-            await ctx.error(f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
+            #await ctx.error(f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
+            await ctx.error(e, e.__class__.__name__ + ":")
             try:
                 return await ctx.message.add_reaction("👎")
             except discord.Forbidden:
@@ -218,16 +219,16 @@ class Admin:
 
             if ret is None:
                 if value:
-                    await ctx.error(f'```py\n{value}\n```')
+                    await ctx.success(f'```py\n{value}\n```')
                     try:
                         await ctx.message.add_reaction("👎")
                     except discord.Forbidden:
                         pass
             else:
                 self._last_result = ret
-                await ctx.error(f'```py\n{value}{ret}\n```')
+                await ctx.success(f'```py\n{value}{ret}\n```')
                 try:
-                    await ctx.message.add_reaction("👎")
+                    await ctx.message.add_reaction("👍")
                 except discord.Forbidden:
                     pass
 
