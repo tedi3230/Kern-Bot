@@ -108,6 +108,10 @@ class Database:
             return "k "
         return prefix
 
+    async def remove_prefix(self, server_id: int):
+        async with self.pool.acquire() as con:
+            await con.execute("UPDATE servers SET prefix = NULL WHERE server_id = $1", server_id)
+
     async def add_contest_submission(self, server_id: int, owner_id: int, submission_id: int, embed: discord.Embed):
         print(embed.to_dict())
         await self.pool.execute("""INSERT INTO submissions (submission_id, owner_id, embed, server_id) VALUES ($1, $2, $3, $4)""",
