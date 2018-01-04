@@ -64,9 +64,12 @@ class Misc:
                 continue
             if not cmd.cog_name in cogs:
                 cogs[cmd.cog_name] = []
-            cogs[cmd.cog_name].append("[{}]".format(", ".join([cmd.qualified_name, *cmd.aliases])))
-
-        for cog in cogs:
+            aliases = ", ".join(cmd.aliases)
+            if not aliases:
+                cogs[cmd.cog_name].append(cmd.qualified_name)
+            else:
+                cogs[cmd.cog_name].append("{} [{}]".format(cmd.qualified_name, ", ".join(cmd.aliases)))
+        for cog in cogs.copy():
             cogs[cog] = sorted(cogs[cog])
 
         if command is None:
