@@ -129,8 +129,5 @@ class Database:
     async def remove_contest_submission(self, server_id: int, owner_id: int, submission_id: int):
         await self.pool.execute('DELETE FROM submissions WHERE submission_id = $1 AND owner_id = $2 AND server_id = $3', submission_id, owner_id, server_id)
 
-# def setup(bot):
-#     bot.add_cog(Database(bot))
-
 if __name__ in '__main__':
     db_hi = Database('lol')
