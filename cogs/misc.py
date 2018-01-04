@@ -158,10 +158,10 @@ class Misc:
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(10):
                     async with session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
-                        if resp.status >= 400: raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                        if resp.status >= 400:
+                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
                         url = resp.url
                         text = await resp.text()
-                        print(resp.headers)
 
             if text.__contains__('<source src="'):
                 start = text.index('<source src="') + len('<source src="')
@@ -173,7 +173,8 @@ class Misc:
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(10):
                     async with session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
-                        if resp.status >= 400: raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                        if resp.status >= 400:
+                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
                         js = await resp.json()
                         return "https://streamable.com/{}".format(js['shortcode'])
 
@@ -185,7 +186,8 @@ class Misc:
             async with aiohttp.ClientSession() as session:
                 with async_timeout.timeout(5):
                     async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
-                        if resp.status >= 400: raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                        if resp.status >= 400:
+                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
                         js = await resp.json()
                         if js['height'] is not None:
                             await msg.edit(content=url+'/')
