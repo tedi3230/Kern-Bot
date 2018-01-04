@@ -31,6 +31,8 @@ async def server_prefix(bots, message):
     if bots.server_prefixes.get(message.guild.id) is None:
         prefix = await bots.database.get_prefix(message.guild.id)
         bots.server_prefixes[message.guild.id] = await bots.database.get_prefix(message.guild.id)
+    else:
+        prefix = bots.server_prefixes[message.guild.id]
 
     prefixes = [bots.prefix, prefix]
 
