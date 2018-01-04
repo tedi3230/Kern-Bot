@@ -35,11 +35,10 @@ servers_table = """
 class Database:
     """Accessing database functions"""
     def __init__(self, bot):
-        self.bot = bot
         try:
             self.dsn = os.environ["DATABASE_URL"]
         except KeyError:
-            file_path = os.path.join(os.path.dirname(__file__), '../database_secret.txt')
+            file_path = os.path.join(os.path.dirname(__file__), 'database_secret.txt')
             database_file = open(file_path, 'r')
             self.dsn = database_file.read()
             database_file.close()
