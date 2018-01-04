@@ -160,7 +160,6 @@ class Misc:
                     async with session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
                         if resp.status >= 400:
                             raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                        url = resp.url
                         text = await resp.text()
 
             if text.__contains__('<source src="'):
