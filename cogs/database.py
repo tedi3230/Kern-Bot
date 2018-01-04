@@ -47,6 +47,7 @@ class Database:
         self.pool = None
         self.prefix_conn = None
         self.prefix_stmt = None
+        self.ready = False
 
         if __name__ in 'main':
             loops = asyncio.get_event_loop()
@@ -59,13 +60,13 @@ class Database:
         ssl_object.check_hostname = False
         ssl_object.verify_mode = ssl.CERT_NONE
         self.pool = await asyncpg.create_pool(self.dsn, ssl=ssl_object)
+        self.ready = True
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions'"):
                 await con.execute(submissions_table)
             self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
-        print("Database ready")
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
