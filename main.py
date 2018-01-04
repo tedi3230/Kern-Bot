@@ -34,7 +34,7 @@ async def server_prefix(bots, message):
     else:
         prefix = bots.server_prefixes[message.guild.id]
 
-    prefixes = [bots.prefix, bots.prefix + " ", prefix, prefix + " "]
+    prefixes = [bots.prefix + " ", prefix + " ", bots.prefix, prefix]
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
