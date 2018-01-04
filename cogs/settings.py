@@ -49,12 +49,14 @@ class Settings:
     async def set_prefix(self, ctx, *, prefix: str):
         """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
-        await ctx.send("Set prefix to `{}`".format(await self.bot.database.get_prefix(ctx.guild.id)))
+        self.bot.server_prefixes[ctx.guild.id] = prefix
+        await ctx.send("Set prefix to `{}`".format(await self.bot.database.set_prefix(ctx.guild.id, prefix)))
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
         """Get the bot's prefix for this server"""
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, self.bot.database.get_prefix(ctx.guild.id)))
+        prefix = self.bot.server_prefixes.get(ctx.guild.id, "k ")
+        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, prefix))
 
     @commands.is_owner()
     @get.command(hidden=True)
