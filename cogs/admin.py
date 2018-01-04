@@ -1,10 +1,9 @@
-from os import execl, path, sep
+from os import execl, path
 from sys import executable, argv
 import asyncio
 import io
 import textwrap
 from contextlib import redirect_stdout
-import traceback
 
 import discord
 from discord.ext import commands
@@ -91,14 +90,14 @@ class Admin:
                 total_deleted += len(deleted)
             deleted = await ctx.channel.purge(limit=num_messages, check=is_me, bulk=False)
             total_deleted += len(deleted)
-            msg = await ctx.send("Messages cleaned `{}/{}`".format(total_deleted, num_messages))
+            await ctx.send("Messages cleaned `{}/{}`".format(total_deleted, num_messages))
 
         else:
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
-                msg = await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages), delete_after=10)
+                await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages), delete_after=10)
             else:
-                msg = await ctx.send(":octagonal_sign: This bot does not have the required permissions to delete messages.\nInstead, use: `{} clean <num_messages> True`".format(ctx.prefix), delete_after=10)
+                await ctx.send(":octagonal_sign: This bot does not have the required permissions to delete messages.\nInstead, use: `{} clean <num_messages> True`".format(ctx.prefix), delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
@@ -130,7 +129,7 @@ class Admin:
         pass
 
     @perms.command(name="user")
-    async def perms_user(self, ctx, *, member: discord.Member, here: str=""):
+    async def perms_user(self, ctx, *, member: discord.Member, here: str = ""):
         if here == "here":
             perms = ", ".join([perm[0] for perm in ctx.chanel.permissions_for(member) if perm[1]])
             if member == ctx.guild.me:
@@ -200,11 +199,6 @@ class Admin:
                 ret = await func()
         except Exception as e:
             value = stdout.getvalue()
-            file_path = path.normpath(path.dirname(path.abspath(__file__))) + sep + path.basename(__file__)
-            root_folder = file_path.split(sep)[-3]
-            rel_path = root_folder + file_path.split(root_folder)[1]
-            stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
-            #await ctx.error(f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
             await ctx.error(e, e.__class__.__name__ + ":")
             try:
                 return await ctx.message.add_reaction("👎")
