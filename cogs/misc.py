@@ -64,7 +64,7 @@ class Misc:
                 continue
             if not cmd.cog_name in cogs:
                 cogs[cmd.cog_name] = []
-            cogs[cmd.cog_name].append(" / ".join([cmd.qualified_name, *cmd.aliases]))
+            cogs[cmd.cog_name].append("[{}]".format(", ".join([cmd.qualified_name, *cmd.aliases])))
 
         for cog in cogs:
             cogs[cog] = sorted(cogs[cog])
