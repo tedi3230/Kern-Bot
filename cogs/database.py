@@ -48,8 +48,11 @@ class Database:
         self.prefix_conn = None
         self.prefix_stmt = None
 
-        loops = asyncio.get_event_loop()
-        loops.run_until_complete(self.init())
+        if __name__ in 'main':
+            loops = asyncio.get_event_loop()
+            loops.run_until_complete(self.init())
+        else:
+            bot.loop.create_task(self.init())
 
     async def init(self):
         ssl_object = ssl.create_default_context()
@@ -62,6 +65,7 @@ class Database:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions'"):
                 await con.execute(submissions_table)
             self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
+        print('Database Connected')
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
@@ -96,9 +100,13 @@ class Database:
                     SET prefix = $1"""
 
         await self.pool.execute(sql, prefix, server_id)
+        return prefix
 
     async def get_prefix(self, server_id: int):
-        return await self.pool.fetchval("SELECT prefix FROM servers WHERE server_id = $1", server_id)
+        prefix = await self.pool.fetchval("SELECT prefix FROM servers WHERE server_id = $1", server_id)
+        if prefix is None:
+            return "k "
+        return prefix
 
     async def add_contest_submission(self, server_id: int, owner_id: int, submission_id: int, embed: discord.Embed):
         print(embed.to_dict())
@@ -116,5 +124,8 @@ class Database:
     async def remove_contest_submission(self, server_id: int, owner_id: int, submission_id: int):
         await self.pool.execute('DELETE FROM submissions WHERE submission_id = $1 AND owner_id = $2 AND server_id = $3', submission_id, owner_id, server_id)
 
-def setup(bot):
-    bot.add_cog(Database(bot))
+# def setup(bot):
+#     bot.add_cog(Database(bot))
+
+if __name__ in '__main__':
+    db_hi = Database('lol')
