@@ -13,8 +13,7 @@ import cogs.database as db
 async def bot_user_check(ctx):
     return not ctx.author.bot
 
-
-def server_prefix(bots, ctx):
+async def server_prefix(bots, message):
     """A callable Prefix for our bot.
 
     This allow for per server prefixes.
@@ -26,12 +25,16 @@ def server_prefix(bots, ctx):
     Returns:
         string -- The prefix to be used by the bot for receiving commands.
     """
-    if not ctx.guild:
+    if not message.guild:
         return bots.prefix
 
-    prefixes = [bots.prefix, bot.database.get_prefix(ctx.guild.id)]
+    if bots.server_prefixes.get(message.guild.id) is None:
+        prefix = await bots.database.get_prefix(message.guild.id)
+        bots.server_prefixes[message.guild.id] = await bots.database.get_prefix(message.guild.id)
 
-    return commands.when_mentioned_or(*prefixes)(bots, ctx)
+    prefixes = [bots.prefix, prefix]
+
+    return commands.when_mentioned_or(*prefixes)(bots, message)
 
 initial_extensions = ['dictionary', #database
                       'contests',
@@ -47,6 +50,7 @@ bot = commands.Bot(command_prefix=server_prefix,
                    description='Multiple functions, including contests, definitions, and more.')
 
 bot.add_check(bot_user_check)
+bot.server_prefixes = {}
 
 bot.todo = """TODO: ```
 1. Get a new database working in async, preferably asyncpg
@@ -75,7 +79,7 @@ class CustomContext(commands.Context):
             return await super().send(embed=error_embed)
         return await channel.send(embed=error_embed)
 
-    async def success(self, success, title="Success", channel: discord.TextChannel=None):
+    async def success(self, success, title="Success", channel: discord.TextChannel = None):
         success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
         if channel is None:
             return await super().send(embed=success_embed)
@@ -104,14 +108,14 @@ async def on_ready():
                 traceback.print_exc()
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
+    bot.database = db.Database(bot)
+    await bot.user.edit(username="Kern")
+    await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
+    bot.loop.create_task(statusChanger())
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
-    await bot.user.edit(username="Kern")
-    await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
-    bot.database = db.Database(bot)
-    bot.loop.create_task(statusChanger())
 
 @bot.event
 async def on_message(message):
