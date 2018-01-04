@@ -20,7 +20,7 @@ class Admin:
     """Administration commands."""
     def __init__(self, bot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
+        self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None
 
     async def get_path(self, ctx):
