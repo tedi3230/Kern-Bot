@@ -206,9 +206,9 @@ class Admin:
             stack_trace = str(traceback.format_exc()).replace(file_path, rel_path)
             await ctx.error(f'```py\n{value}{stack_trace}\n```', e.__class__.__name__ + ':')
             try:
-                await ctx.message.add_reaction("👎")
+                return await ctx.message.add_reaction("👎")
             except discord.Forbidden:
-                pass
+                return
         else:
             value = stdout.getvalue()
             try:
