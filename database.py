@@ -70,12 +70,11 @@ class Database:
         """Generate the ID needed to index the submissions"""
         submission_id_list = await self.pool.fetchrow("SELECT submission_id FROM submissions")
         submission_id = "{:06}".format(randint(0, 999999))
-        print(submission_id_list)
         if not submission_id_list:
             return submission_id
         while submission_id in submission_id_list:
             submission_id = "{:06}".format(randint(0, 999999))
-        return submission_id
+        return int(submission_id)
 
     async def set_contest_channels(self, server_id: int, *channels):
         sql = """INSERT INTO servers (server_id, receive_channel_id, allow_channel_id, vote_channel_id)
@@ -113,8 +112,8 @@ class Database:
 
     async def add_contest_submission(self, server_id: int, owner_id: int, submission_id: int, embed: discord.Embed):
         async with self.pool.acquire() as con:
-            await con.execute("""INSERT INTO submissions (submission_id, owner_id, embed, server_id) VALUES ($1, $2, $3, $4)""",
-                              submission_id, owner_id, json.dumps(embed.to_dict()), server_id)
+            await con.execute("""INSERT INTO submissions (server_id, owner_id, submission_id, embed) VALUES ($1, $2, $3, $4)""",
+                              server_id, owner_id, submission_id, json.dumps(embed.to_dict()))
 
     async def get_contest_submission(self, submission_id: int):
         async with self.pool.acquire() as con:
