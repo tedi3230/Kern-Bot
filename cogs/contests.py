@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import json
 
 class Contests:
     """Contest functions"""
@@ -8,14 +9,14 @@ class Contests:
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
     #pylint: disable-msg=too-many-arguments
-    def generateEmbed(self, messageAuthor: discord.User, title, description, footerText, image_url="", colour=0x00ff00):
+    def generateEmbed(self, message_author: discord.User, title, description, footer_text, image_url="", colour=0x00ff00):
         """Generates a discord embed object off the given parameters
 
         Arguments:
-            messageAuthor {discord.User} -- Allows for the mention and user's logo to be added to the embed
+            message_author {discord.User} -- Allows for the mention and user's logo to be added to the embed
             title {string} -- Title of the embed, the first heading
             description {string} -- The description of this object
-            footerText {string} -- The text shown in the footer, usually for commands that operate upon this
+            footer_text {string} -- The text shown in the footer, usually for commands that operate upon this
 
         Keyword Arguments:
             colour {hex} -- Used for the bar on the left's colour (default: {0x00ff00} -- green)
@@ -24,41 +25,56 @@ class Contests:
         Returns:
             [discord.Embed] -- The embed object generated.
         """
-        embed = discord.Embed(title="Submission by:", description=messageAuthor.mention, colour=colour)
+        embed = discord.Embed(colour=colour)
+        embed.set_author(name=f"Author: {message_author.display_name}", icon_url=message_author.avatar_url)
         embed.add_field(name="Title:", value=title, inline=False)
         embed.add_field(name="Description:", value=description, inline=False)
         embed.set_image(url=image_url)
-        embed.set_footer(text=footerText)
-        embed.set_thumbnail(url=messageAuthor.avatar_url)
+        embed.set_footer(text=footer_text)
+        embed.set_thumbnail(url=message_author.avatar_url)
         return embed
     #pylint: enable-msg=too-many-arguments
 
     @commands.command()
     async def submit(self, ctx, *, args):
-        """Submits an item into a contest. ;submit <title> | <description> | [imageURL]. Note the spaces"""
+        """Submits an item into a contest. {}submit <title> | <description> | [imageURL]. Note the spaces"""
         input_split = tuple(args.split(" | "))
+        print(input_split)
         if len(input_split) != 2 and len(input_split) != 3:
-            raise TypeError("Not all arguments passed")
+            raise commands.MissingRequiredArgument("Not all arguments passed")
         title, description = input_split[0:2]
         if len(input_split) == 3:
-            image_url = input_split[3]
+            image_url = input_split[2]
         else:
             image_url = ""
-        submissionID = (await self.bot.database.generate_id())
-        footerText = "Type {0}allow {1} True to allow this and {0}allow {1} False to prevent the moving on this to voting queue.".format(ctx.prefix, submissionID)
-        embed = self.generateEmbed(ctx.author, title, description, footerText, image_url, 0x00ff00)
+        submission_id = (await self.bot.database.generate_id())
+        footer_text = "Type `{0}allow {1} True` to allow this and `{0}allow {1} False` to prevent the moving on this to voting queue.".format(ctx.prefix, submission_id)
+        embed = self.generateEmbed(ctx.author, title, description, footer_text, image_url, 0x00ff00)
         server_channels = await self.bot.database.get_contest_channels(ctx.guild.id)
-        print(server_channels)
+        if server_channels is None:
+            return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
         if ctx.channel.id == server_channels[0]:
             channel = ctx.guild.get_channel(server_channels[1])
-            message = await channel.send(embed=embed)
-            await self.bot.database.add_contest_submission(submissionID, embed, message.guild.id)
-            await ctx.send(f"Submissions sent in {channel.mention}")
+            if 
+            await channel.send(embed=embed)
+            await self.bot.database.add_contest_submission(ctx.guild.id, ctx.author.id, submission_id, embed)
+            await ctx.send(f"Submission sent in {channel.mention}")
 
     @commands.command()
     async def list_submissions(self, ctx):
-        submissions = (await self.bot.database.list_contest_submissions(ctx.guild.id))
-        await ctx.send(submissions)
+        submissions = await self.bot.database.list_contest_submissions(ctx.guild.id)
+        if not submissions:
+            return await ctx.error(f"The server `{ctx.guild.name}` has no contest submissions.", "No submissions")
+        else:
+            compiled = str()
+            for submission in submissions:
+                embed = discord.Embed.from_data(json.loads(submission['embed']))
+                s_id = submission['submission_id']
+                author = embed.author.name.replace("Author: ", "")
+                compiled += f"**{embed.fields[0].value}** by {author} [id: {s_id}]\n"
+            embed = discord.Embed(title=f"Submissions for {ctx.guild}", description=compiled, colour=discord.Colour.blurple())
+            await ctx.send(embed=embed)
+            return [submission['submission_id'] for submission in submissions]
 
     @commands.command()
     async def allow(self, ctx, submissionID, allowed="True"):
