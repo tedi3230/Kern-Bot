@@ -66,7 +66,6 @@ class Database:
                 await con.execute(servers_table)
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions'"):
                 await con.execute(submissions_table)
-            self.prefix_stmt = await con.prepare("SELECT prefix FROM servers WHERE server_id = $1")
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
