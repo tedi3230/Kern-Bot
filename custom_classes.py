@@ -10,17 +10,17 @@ class CustomContext(commands.Context):
         if prefix == self.prefix:
             return "`" + self.prefix
         return prefix
-    async def error(self, error, title="Error:", channel: discord.TextChannel = None):
+    async def error(self, error, title="Error:", channel: discord.TextChannel = None, *args, **kwargs):
         error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
         if channel is None:
-            return await super().send(embed=error_embed)
-        return await channel.send(embed=error_embed)
+            return await super().send(embed=error_embed, *args, **kwargs)
+        return await channel.send(embed=error_embed, *args, **kwargs)
 
-    async def success(self, success, title="Success", channel: discord.TextChannel = None):
+    async def success(self, success, title="Success", channel: discord.TextChannel = None, *args, **kwargs):
         success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
         if channel is None:
-            return await super().send(embed=success_embed)
-        return await channel.send(embed=success_embed)
+            return await super().send(embed=success_embed, *args, **kwargs)
+        return await channel.send(embed=success_embed, *args, **kwargs)
 
 class ResponseError(Exception):
     pass
