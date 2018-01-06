@@ -55,7 +55,7 @@ class Contests:
             return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
         if ctx.channel.id == server_channels[0]:
             channel = ctx.guild.get_channel(server_channels[1])
-            if 
+            #if
             await channel.send(embed=embed)
             await self.bot.database.add_contest_submission(ctx.guild.id, ctx.author.id, submission_id, embed)
             await ctx.send(f"Submission sent in {channel.mention}")
