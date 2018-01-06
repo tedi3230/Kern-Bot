@@ -159,17 +159,23 @@ class Misc:
 
         async def create_video(text):
             async with aiohttp.ClientSession() as session:
-                with async_timeout.timeout(10):
+                async with async_timeout.timeout(10):
                     async with session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
                         if resp.status >= 400:
                             raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
                         text = await resp.text()
+                        url = resp.url
 
-            if text.__contains__('<source src="'):
-                start = text.index('<source src="') + len('<source src="')
-                end = text.index('" type="video/mp4">')
-                link = "http://talkobamato.me/" + text[start:end]
-                return link
+            while '<source src="' not in text:
+                async with aiohttp.ClientSession() as session:
+                    async with async_timeout.timeout(10):
+                        async with session.get(url) as resp:
+                            text = await resp.text()
+
+            start = text.index('<source src="') + len('<source src="')
+            end = text.index('" type="video/mp4">')
+            link = "http://talkobamato.me/" + text[start:end]
+            return link
 
         async def upload_streamable(url):
             async with aiohttp.ClientSession() as session:
