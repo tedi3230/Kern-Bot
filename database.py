@@ -48,8 +48,7 @@ class Database:
         self.prefix_conn = None
         self.prefix_stmt = None
         self.ready = False
-
-        if __name__ in 'main':
+        if __name__ in '__main__':
             loops = asyncio.get_event_loop()
             loops.run_until_complete(self.init())
         else:
