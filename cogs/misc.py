@@ -78,7 +78,7 @@ class Misc:
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
                     if not cmd.hidden:
-                        embed.add_field(name=cmd.name, value=cmd.help, inline=True)
+                        embed.add_field(name=cmd.name, value=cmd.help, inline=False)
 
         else:
             embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
