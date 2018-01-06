@@ -1,4 +1,4 @@
-from os import execl, path
+from os import execl, path, system
 from sys import executable, argv
 import asyncio
 import io
@@ -23,16 +23,21 @@ class Admin:
         self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None
 
-    async def get_path(self, ctx):
-        await ctx.send(path.abspath(__file__))
+    @commands.group(hidden=True)
+    async def vps(self, ctx):
+        pass
 
     @commands.is_owner()
-    @commands.command(hidden=True)
-    async def stop_vs(self, ctx):
-        if 'heroku' in await self.get_path(ctx):
-            await ctx.send("On VPS")
-        else:
-            await ctx.send("Running locally")
+    @vps.command()
+    async def stop(self, ctx):
+        await ctx.send("Stopping VPS instance")
+        system('heroku ps:scale worker=0 --app discord-kern-bot')
+
+    @commands.is_owner()
+    @vps.command()
+    async def start(self, ctx):
+        await ctx.send("Starting VPS instance")
+        system('heroku ps:scale worker=1 --app discord-kern-bot')
 
     @commands.is_owner()
     @commands.command(hidden=True)
