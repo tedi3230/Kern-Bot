@@ -8,7 +8,6 @@ class CustomContext(commands.Context):
         prefix = self.prefix.replace(user.mention, '@' + user.name + " `")
         print(prefix)
         if prefix == self.prefix:
-            print('here')
             return "`" + self.prefix
         return prefix
     async def error(self, error, title="Error:", channel: discord.TextChannel = None):
