@@ -28,7 +28,7 @@ class Settings:
     @get.command(name="channels")
     async def get_channels(self, ctx):
         """Get the channels used for the contests"""
-        channels = (await self.bot.database.get_server_channels(ctx.guild.id))
+        channels = (await self.bot.database.get_contest_channels(ctx.guild.id))
         if len(channels) == 3:
             await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
         else:
@@ -40,10 +40,10 @@ class Settings:
         if len(channels) == 1:
             channels *= 3
         elif len(channels) < 3:
-            raise TypeError("Too few channels supplied, you need three. Type `{}help settings set channels` for more information".format(ctx.prefix))
-        receiveChannelID, allowChannelID, outputChannelID = [channel.id for channel in channels]
-        await self.bot.database.set_server_channels(ctx.guild.id, receiveChannelID, allowChannelID, outputChannelID)
-        await ctx.send("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
+            raise TypeError("Too few channels supplied, you need three. Type `{}help set channels` for more information".format(ctx.prefix))
+        receive_channel_id, allow_channel_id, output_channel_id = [channel.id for channel in channels]
+        await self.bot.database.set_contest_channels(ctx.guild.id, receive_channel_id, allow_channel_id, output_channel_id)
+        await ctx.success("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
