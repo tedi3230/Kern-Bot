@@ -140,8 +140,8 @@ class Dictionary:
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['define', 'd'])
-    async def meaning(self, ctx, *, term):
+    @commands.command(aliases=['meaning', 'd'])
+    async def define(self, ctx, *, term):
         """Return an embed of definitions for the word passed. Includes image and more."""
         await ctx.trigger_typing()
         data = await self._get_dic_request(self.dictionary_base_URL.format(term.lower()))
