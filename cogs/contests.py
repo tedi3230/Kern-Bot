@@ -55,10 +55,11 @@ class Contests:
             return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
         if ctx.channel.id == server_channels[0]:
             channel = ctx.guild.get_channel(server_channels[1])
-            #if
-            await channel.send(embed=embed)
+            if ctx.author.id in [sub['owner_id'] for sub in await self.bot.database.list_contest_submissions(ctx.guild.id)]:
+                return await ctx.error("You already have a contest submitted. To change your submission, delete it and resubmit.", "Error submitting:")
             await self.bot.database.add_contest_submission(ctx.guild.id, ctx.author.id, submission_id, embed)
-            await ctx.send(f"Submission sent in {channel.mention}")
+            await channel.send(embed=embed)
+            await ctx.success(f"Submission sent in {channel.mention}")
 
     @commands.command()
     async def list_submissions(self, ctx):
