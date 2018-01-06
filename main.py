@@ -9,26 +9,7 @@ import discord
 from discord.ext import commands
 
 import database as db
-
-class CustomContext(commands.Context):
-    async def error(self, error, title="Error:", channel: discord.TextChannel = None):
-        error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
-        if channel is None:
-            return await super().send(embed=error_embed)
-        return await channel.send(embed=error_embed)
-
-    async def success(self, success, title="Success", channel: discord.TextChannel = None):
-        success_embed = discord.Embed(title=title, colour=0x00ff00, description=f"{success}")
-        if channel is None:
-            return await super().send(embed=success_embed)
-        return await channel.send(embed=success_embed)
-
-
-class ResponseError(Exception):
-    pass
-
-class myStringView(commands.view.StringView):
-    pass
+import custom_classes as cc
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
@@ -64,16 +45,16 @@ bot = commands.Bot(command_prefix=server_prefix,
 bot.add_check(bot_user_check)
 bot.server_prefixes = {}
 bot.prefix = "k"
-bot.ResponseError = ResponseError
+bot.ResponseError = cc.ResponseError
 bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
 bot.bot_logs_id = 382780308610744331
 bot.launch_time = datetime.utcnow()
 
 bot.todo = """TODO: ```
 01. Finish contests cog
-02. fix overloading error with define (make a total of 15 definition)
-03. Use logging module
-04. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
+02. Fix the error with overload in define function (total = 15)
+03. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
+04. Use logging module
 05. Hack Command - add fake attack
 06. Server rules (database - rules) - custom titles
 07. Custom context
@@ -129,7 +110,7 @@ async def on_message(message):
         messages = message.content.split(" && ")
         for msg in messages:
             message.content = msg
-            ctx = await bot.get_context(message, cls=CustomContext)
+            ctx = await bot.get_context(message, cls=cc.CustomContext)
             if msg.startswith(ctx.prefix):
                 continue
             if ctx.valid:
@@ -151,7 +132,7 @@ async def on_message(message):
             await ctx.error(f"```{errors}```", "These failed to run:")
 
     else:
-        ctx = await bot.get_context(message, cls=CustomContext) #is a command returned
+        ctx = await bot.get_context(message, cls=cc.CustomContext) #is a command returned
         await bot.invoke(ctx)
 
 @commands.is_owner()

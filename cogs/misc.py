@@ -2,7 +2,6 @@ from datetime import datetime
 from os import environ, path
 import inspect
 from asyncio import sleep
-from urllib.parse import urlparse
 import random
 
 import aiohttp
@@ -13,22 +12,9 @@ from tabulate import tabulate
 import discord
 from discord.ext import commands
 
+import custom_classes as cc
+
 protocols = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp']
-
-class FakeChannel:
-    def __init__(self, name):
-        self.name = name
-
-class Url(commands.Converter):
-    async def convert(self, ctx, argument):
-        url = str(argument)
-        if not url.startswith('http://'):
-            url = "http://" + url
-        if "." not in url:
-            url += (".com")  # A bad assumption
-        url = urlparse(url).geturl()
-
-        return url
 
 class Misc:
     """Miscellaneous functions"""
@@ -204,7 +190,7 @@ class Misc:
             await sleep(5)
 
     @commands.command()
-    async def hack(self, ctx, *, url: Url):
+    async def hack(self, ctx, *, url: cc.Url):
         "Starts a fake hacking instance on a specified URL."
         loading = str(self.bot.get_emoji(395834326450831370))
         thousands = str(self.bot.get_emoji(396890900783038499))
@@ -239,7 +225,7 @@ class Misc:
         tree = {}
         for channel in ctx.guild.text_channels:
             if channel.category is None:
-                channel.category = FakeChannel("No category")
+                channel.category = cc.FakeChannel("No category")
             prefix = "📨 "
             if channel.is_nsfw():
                 prefix += "❌ "
