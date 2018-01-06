@@ -71,15 +71,14 @@ bot.launch_time = datetime.utcnow()
 
 bot.todo = """TODO: ```
 01. Finish contests cog
-02. fix overloading error with define
+02. fix overloading error with define (make a total of 15 definition)
 03. Use logging module
-04. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
+04. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
 05. Hack Command - add fake attack
 06. Server rules (database - rules) - custom titles
 07. Custom context
-08. Pipe command using || via on_message
-09. Stackexchange search - https://api.stackexchange.com/docs
-10. Make prefixes a list (for multiple)
+08. Stackexchange search - https://api.stackexchange.com/docs
+09. Make prefixes a list (for multiple)
 ```
 """
 
