@@ -3,6 +3,9 @@ from discord.ext import commands
 from urllib.parse import urlparse
 
 class CustomContext(commands.Context):
+    def clean_prefix(self, ctx):
+        user = ctx.bot.user
+        return ctx.prefix.replace(user.mention, '@' + user.name)
     async def error(self, error, title="Error:", channel: discord.TextChannel = None):
         error_embed = discord.Embed(title=title, colour=0xff0000, description=f"{error}")
         if channel is None:
