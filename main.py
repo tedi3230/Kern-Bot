@@ -27,6 +27,8 @@ class CustomContext(commands.Context):
 class ResponseError(Exception):
     pass
 
+class myStringView(commands.view.StringView):
+    pass
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
@@ -68,15 +70,16 @@ bot.bot_logs_id = 382780308610744331
 bot.launch_time = datetime.utcnow()
 
 bot.todo = """TODO: ```
-1. Finish contests cog
-2. Use logging module
-3. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
-4. Hack Command - add fake attack
-5. Server rules (database - rules) - custom titles
-6. Custom context
-7. Pipe command using || via on_message
-8. Stackexchange search - https://api.stackexchange.com/docs
-9. Make prefixes a list (for multiple)
+01. Finish contests cog
+02. fix overloading error with define
+03. Use logging module
+04. Finish and neaten up the help command (possibly use  HelpFormater). Add docstrings to all commands
+05. Hack Command - add fake attack
+06. Server rules (database - rules) - custom titles
+07. Custom context
+08. Pipe command using || via on_message
+09. Stackexchange search - https://api.stackexchange.com/docs
+10. Make prefixes a list (for multiple)
 ```
 """
 
@@ -137,7 +140,10 @@ async def on_message(message):
                 else:
                     failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
             else:
-                failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
+                if ctx.prefix is not None:
+                    failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
+                else:
+                    break
 
         if failed_to_run:
             errors = ""
@@ -145,13 +151,6 @@ async def on_message(message):
                 errors += f"{fail}: {reason}\n"
             await ctx.error(f"```{errors}```", "These failed to run:")
 
-    elif " || " in message.content:
-        messages = message.content.split(" || ")
-        for msg in messages:
-            message.content = msg
-            ctx = await bot.get_context(message, cls=CustomContext) #is a command returned
-            #if not ctx.returns_data: exit somehow
-            await bot.invoke(ctx)
     else:
         ctx = await bot.get_context(message, cls=CustomContext) #is a command returned
         await bot.invoke(ctx)
