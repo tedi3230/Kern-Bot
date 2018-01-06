@@ -123,7 +123,7 @@ async def on_message(message):
                 if ctx.prefix is not None:
                     failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
                 else:
-                    break
+                    pass
 
         if failed_to_run:
             errors = ""
@@ -155,7 +155,6 @@ async def on_command_error(ctx, error):
     ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure)
 
     error = getattr(error, 'original', error)
-
     if isinstance(error, ignored):
         return
 
