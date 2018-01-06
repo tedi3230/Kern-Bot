@@ -187,7 +187,7 @@ async def on_command_error(ctx, error):
         traceback.print_exception(type(error), error, error.__traceback__)
 
     if do_send:
-        print('Ignoring exception in command {}'.format(ctx.command))
+        print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
 
 try:
     bot.run(token, reconnect=True)
