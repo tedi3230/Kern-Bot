@@ -123,7 +123,7 @@ class Database:
 
     async def list_contest_submissions(self, server_id: int):
         async with self.pool.acquire() as con:
-            submissions = await con.fetch("SELECT submission_id, embed FROM submissions WHERE server_id = $1",
+            submissions = await con.fetch("SELECT owner_id, submission_id, embed FROM submissions WHERE server_id = $1",
                                       server_id)
         return submissions
 
