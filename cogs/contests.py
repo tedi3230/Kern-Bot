@@ -60,6 +60,8 @@ class Contests:
             await self.bot.database.add_contest_submission(ctx.guild.id, ctx.author.id, submission_id, embed)
             await channel.send(embed=embed)
             await ctx.success(f"Submission sent in {channel.mention}")
+        else:
+            await ctx.error("Incorrect channel to submit in", delete_after=10)
 
     @commands.command()
     async def list_submissions(self, ctx):
