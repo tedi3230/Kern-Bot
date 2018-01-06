@@ -1,6 +1,7 @@
 from os import environ, path
 import re
 import json
+from random import sample
 
 import aiohttp
 import async_timeout
@@ -160,14 +161,18 @@ class Dictionary:
 
         embed = discord.Embed(
             colour=0x00ff00, url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
-
-        for lexical_category, definitions in category_list.items():
+        for lexical_category, base_definitions in category_list.items():
             value = ""
-            for definition in definitions:
+            print(len(base_definitions), type(base_definitions))
+            if len(base_definitions) > 5:
+                sample_size = 5
+            else:
+                sample_size = len(base_definitions)
+            definitions = sample(base_definitions, sample_size)
+            for definition in base_definitions:
                 for domain in definition[1]:
                     value += "*{}*, ".format(domain)
                 mean = definition[2]
-                print(repr(value))
                 if len(mean) > 0:
                     value += definition[2][0].capitalize()
                 for example in definition[3]:
