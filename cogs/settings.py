@@ -35,7 +35,7 @@ class Settings:
         if None in channels:
             await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
         else:
-            await ctx.error("Channels are not set up, use {}settings channels set <receiveChannel> <allowChannel> <outputChannel>.".format(ctx.prefix), "Configuration Error:")
+            await ctx.error("Channels are not set up", "Configuration Error:")
 
     @_set.command(name="channels")
     async def set_channels(self, ctx, *channels: discord.TextChannel):
