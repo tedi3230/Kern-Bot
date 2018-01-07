@@ -4,7 +4,7 @@ import json
 
 class Contests:
     """Contest functions"""
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
