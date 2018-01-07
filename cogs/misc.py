@@ -14,7 +14,7 @@ from discord.ext import commands
 
 import custom_classes as cc
 
-protocols = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp']
+protocols = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp', 'ipoac']
 
 class Misc:
     """Miscellaneous functions"""
@@ -60,7 +60,7 @@ class Misc:
 
         if command is None:
             command = "Help"
-            embed = discord.Embed(description="{0}\nUse {1}help command` or {1}help cog` for further detail.".format(
+            embed = discord.Embed(description="{0}\nUse `{1}help command` or {1}help cog` for further detail.".format(
                 self.bot.description, ctx.clean_prefix()), color=0x00ff00)
             for cog in sorted(cogs):
                 embed.add_field(name=cog, value=", ".join(cogs[cog]), inline=False)
@@ -139,6 +139,7 @@ class Misc:
 
     @commands.command()
     async def obama(self, ctx, *, text: str):
+        """Makes obama speak the text"""
         if len(text) - len(ctx.prefix + "obama") > 280:
             await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
             return
@@ -219,7 +220,7 @@ class Misc:
 
         await msg.edit(content=f"Port scan complete. Scan report: ```ml\n{table}```\n{loading}Attempting to bruteforce insecure ports: ({open_ports})")
 
-        #Now do fake atatck on unsecure port
+        #Now do fake atatck on unsecure port (note, add a RFC 1149 reference)
 
     @commands.command()
     async def tree(self, ctx):
@@ -254,6 +255,10 @@ class Misc:
     async def todo(self, ctx):
         await ctx.send(self.bot.todo)
 
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def echo(self, ctx, *, text):
+        await ctx.send(text)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
