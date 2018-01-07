@@ -83,8 +83,8 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     bot.database = db.Database(bot)
-    while not bot.database.ready:
-        await asyncio.sleep(0.5)
+    if not bot.database.lock.locked():
+            await bot.database.lock
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
@@ -103,7 +103,9 @@ async def statusChanger():
         await asyncio.sleep(60)
 
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
+    if not bot.database.lock.locked():
+        await bot.database.lock
     if " && " in message.content:
         cmds_run_before = []
         failed_to_run = {}
