@@ -1,4 +1,4 @@
-from os import execl, path, system
+from os import execl, system
 from sys import executable, argv
 import asyncio
 import io
