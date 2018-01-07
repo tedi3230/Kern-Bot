@@ -47,19 +47,20 @@ class Database:
         self.pool = None
         self.prefix_conn = None
         self.prefix_stmt = None
-        self.ready = False
         if __name__ in '__main__':
             loops = asyncio.get_event_loop()
             loops.run_until_complete(self.init())
         else:
+            self.lock = asyncio.Lock()
             bot.loop.create_task(self.init())
 
     async def init(self):
         ssl_object = ssl.create_default_context()
         ssl_object.check_hostname = False
         ssl_object.verify_mode = ssl.CERT_NONE
+        await self.lock.acquire()
         self.pool = await asyncpg.create_pool(self.dsn, ssl=ssl_object)
-        self.ready = True
+        self.lock.release()
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
