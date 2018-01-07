@@ -31,7 +31,7 @@ class Settings:
     @get.command(name="channels")
     async def get_channels(self, ctx):
         """Get the channels used for the contests"""
-        channels = await self.bot.database.get_contest_channels(ctx.guild.id)
+        channels = await self.bot.database.get_contest_channels(ctx)
         if None in channels:
             await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
         else:
@@ -47,7 +47,7 @@ class Settings:
                 "Too few channels supplied, you need to specify 3 or 1. Type `{}help set channels` for more information".format(ctx.prefix))
         receive_channel_id, allow_channel_id, output_channel_id = [
             channel.id for channel in channels]
-        await self.bot.database.set_contest_channels(ctx.guild.id, receive_channel_id, allow_channel_id, output_channel_id)
+        await self.bot.database.set_contest_channels(ctx, receive_channel_id, allow_channel_id, output_channel_id)
         await ctx.success("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
@@ -55,7 +55,7 @@ class Settings:
         """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
         self.bot.server_prefixes[ctx.guild.id] = prefix
-        await ctx.send("Set prefix to `{}`".format(await self.bot.database.set_prefix(ctx.guild.id, prefix)))
+        await ctx.send("Set prefix to `{}`".format(await self.bot.database.set_prefix(ctx, prefix)))
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
