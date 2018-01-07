@@ -11,9 +11,6 @@ from discord.ext import commands
 import database as db
 import custom_classes as cc
 
-async def bot_user_check(ctx):
-    return not ctx.author.bot
-
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
 
@@ -30,8 +27,8 @@ async def server_prefix(bots, message):
         return bots.prefix
 
     if bots.server_prefixes.get(message.guild.id) is None:
-        prefix = await bots.database.get_prefix(message.guild.id)
-        bots.server_prefixes[message.guild.id] = await bots.database.get_prefix(message.guild.id)
+        prefix = await bots.database.get_prefix(message)
+        bots.server_prefixes[message.guild.id] = prefix
     else:
         prefix = bots.server_prefixes[message.guild.id]
 
@@ -39,29 +36,8 @@ async def server_prefix(bots, message):
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
-bot = commands.Bot(command_prefix=server_prefix,
-                   description='Multiple functions, including contests, definitions, and more.')
-
-bot.add_check(bot_user_check)
-bot.server_prefixes = {}
-bot.prefix = "k"
-bot.ResponseError = cc.ResponseError
-bot.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
-bot.bot_logs_id = 382780308610744331
-bot.launch_time = datetime.utcnow()
-
-bot.todo = """TODO: ```
-01. Finish contests cog
-02. Fix the error with overload in define function (total = 15)
-03. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
-04. Use logging module
-05. Hack Command - add fake attack
-06. Server rules (database - rules) - custom titles
-07. Custom context
-08. Stackexchange search - https://api.stackexchange.com/docs
-09. Make prefixes a list (for multiple)
-```
-"""
+bot = cc.Bot(command_prefix=server_prefix,
+             description='Multiple functions, including contests, definitions, and more.')
 
 try:
     token = environ["AUTH_KEY"]
@@ -80,11 +56,9 @@ async def load_extensions(bots):
 
 @bot.event
 async def on_ready():
+    bot.database = db.Database(bot)
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
-    bot.database = db.Database(bot)
-    if not bot.database.lock.locked():
-            await bot.database.lock
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(statusChanger())
@@ -96,7 +70,7 @@ async def on_ready():
 
 async def statusChanger():
     status_messages = [discord.Game(name="for new contests.", type=3),
-                        discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
+                       discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
     while not bot.is_closed():
         message = choice(status_messages)
         await bot.change_presence(game=message)
@@ -104,38 +78,37 @@ async def statusChanger():
 
 @bot.event
 async def on_message(message: discord.Message):
-    if not bot.database.lock.locked():
-        await bot.database.lock
-    if " && " in message.content:
-        cmds_run_before = []
-        failed_to_run = {}
-        messages = message.content.split(" && ")
-        for msg in messages:
-            message.content = msg
-            ctx = await bot.get_context(message, cls=cc.CustomContext)
-            if msg.startswith(ctx.prefix):
-                continue
-            if ctx.valid:
-                if msg.strip(ctx.prefix) not in cmds_run_before:
-                    await bot.invoke(ctx)
-                    cmds_run_before.append(msg.strip(ctx.prefix))
+    async with bot.database.lock:
+        if " && " in message.content:
+            cmds_run_before = []
+            failed_to_run = {}
+            messages = message.content.split(" && ")
+            for msg in messages:
+                message.content = msg
+                ctx = await bot.get_context(message, cls=cc.CustomContext)
+                if msg.startswith(ctx.invoked_with):
+                    continue
+                if ctx.valid:
+                    if msg.strip(ctx.prefix) not in cmds_run_before:
+                        await bot.invoke(ctx)
+                        cmds_run_before.append(msg.strip(ctx.prefix))
+                    else:
+                        failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
                 else:
-                    failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
-            else:
-                if ctx.prefix is not None:
-                    failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
-                else:
-                    pass
+                    if ctx.prefix is not None:
+                        failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
+                    else:
+                        pass
 
-        if failed_to_run:
-            errors = ""
-            for fail, reason in failed_to_run.items():
-                errors += f"{fail}: {reason}\n"
-            await ctx.error(f"```{errors}```", "These failed to run:")
+            if failed_to_run:
+                errors = ""
+                for fail, reason in failed_to_run.items():
+                    errors += f"{fail}: {reason}\n"
+                await ctx.error(f"```{errors}```", "These failed to run:")
 
-    else:
-        ctx = await bot.get_context(message, cls=cc.CustomContext) #is a command returned
-        await bot.invoke(ctx)
+        else:
+            ctx = await bot.get_context(message, cls=cc.CustomContext) #is a command returned
+            await bot.invoke(ctx)
 
 @commands.is_owner()
 @bot.command(hidden=True, name="reload")
@@ -159,6 +132,9 @@ async def on_command_error(ctx, error):
     error = getattr(error, 'original', error)
     if isinstance(error, ignored):
         return
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.error(ctx.error, "Missing Required Argument(s)")
 
     elif isinstance(error, commands.CommandNotFound):
         print("Command: {} not found.".format(ctx.invoked_with))
