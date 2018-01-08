@@ -72,6 +72,7 @@ class Settings:
     async def get_max_rating(self, ctx):
         max_rating = await self.bot.database.get_max_rating(ctx) or 10
         await ctx.send(f"Max rating is {max_rating}")
+        return max_rating
 
 
 def setup(bot):
