@@ -17,17 +17,16 @@ submissions_table = """CREATE TABLE IF NOT EXISTS submissions (
                        embed JSONB NOT NULL,
                        server_id BIGINT NOT NULL,
                        owner_id BIGINT NOT NULL,
-                       rating JSONB
+                       rating INTEGER
                     )"""
-
-# The rating should be a dictionary - then we can have
 
 servers_table = """
                 CREATE TABLE IF NOT EXISTS servers (
                     server_id BIGINT NOT NULL UNIQUE,
                     receive_channel_id BIGINT,
                     vote_channel_id BIGINT,
-                    prefix VARCHAR
+                    prefix VARCHAR,
+                    max_rating INTEGER
                 )
                 """
 
@@ -65,8 +64,10 @@ class Database:
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
+                print("Created servers table")
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'submissions'"):
                 await con.execute(submissions_table)
+                print("Created submissions table")
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
@@ -112,7 +113,7 @@ class Database:
             await con.execute("UPDATE servers SET prefix = NULL WHERE server_id = $1", ctx.guild.id)
 
     async def add_contest_submission(self, ctx, embed: discord.Embed):
-        sub_id = self.generate_id()
+        sub_id = int(await self.generate_id())
         async with self.pool.acquire() as con:
             await con.execute("""INSERT INTO submissions (server_id, owner_id, submission_id, embed) VALUES ($1, $2, $3, $4)""",
                               ctx.guild.id, ctx.author.id, sub_id, json.dumps(embed.to_dict()))
@@ -125,7 +126,7 @@ class Database:
 
     async def list_contest_submissions(self, ctx):
         async with self.pool.acquire() as con:
-            submissions = await con.fetch("SELECT owner_id, submission_id, embed FROM submissions WHERE server_id = $1",
+            submissions = await con.fetch("SELECT owner_id, submission_id, embed, rating FROM submissions WHERE server_id = $1 ORDER BY rating",
                                           ctx.guild.id)
         return submissions
 
@@ -133,13 +134,32 @@ class Database:
         async with self.pool.acquire() as con:
             await con.execute('DELETE FROM submissions WHERE owner_id = $1 AND server_id = $2', ctx.author.id, ctx.guild.id)
 
-    async def clear_contest_submission(self, ctx, owner_id):
+    async def clear_contest_submission(self, ctx, submission_id: int):
         async with self.pool.acquire() as con:
-            await con.execute('DELETE FROM submissions WHERE owner_id = $1 AND server_id = $2', owner_id, ctx.guild.id)
+            await con.execute('DELETE FROM submissions WHERE submission_id = $1 AND server_id = $2', submission_id, ctx.guild.id)
 
     async def purge_contest_submissions(self, ctx):
         async with self.pool.acquire() as con:
             await con.execute("DELETE FROM submissions WHERE server_id = $1", ctx.guild.id)
+
+    async def set_max_rating(self, ctx, max_rating: int):
+        async with self.pool.acquire() as con:
+            await con.execute("UPDATE servers SET max_rating = $1 WHERE server_id = $2", max_rating, ctx.guild.id)
+
+    async def get_max_rating(self, ctx):
+        async with self.pool.acquire() as con:
+            return await con.fetchval("SELECT max_rating FROM servers WHERE server_id = $1", ctx.guild.id)
+
+    async def add_submission_rating(self, ctx, rating: int, submission_id: int):
+        async with self.pool.acquire() as con:
+            max_rating = await self.get_max_rating(ctx) or 10
+            if int(rating) > int(max_rating):
+                raise ValueError("The rating was greater than the maximum rating allowed (defaults to 10).")
+            await con.execute("UPDATE submissions SET rating = $1 WHERE submission_id = $2 AND server_id = $3", rating, submission_id, ctx.guild.id)
+
+    async def get_submission_rating(self, ctx, submission_id: int):
+        async with self.pool.acquire() as con:
+            return await con.fetchval("SELECT rating FROM submissions WHERE submission_id = $1 AND server_id = $2", submission_id, ctx.guild.id)
 
 
 if __name__ in '__main__':
