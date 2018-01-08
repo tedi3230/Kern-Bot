@@ -31,14 +31,17 @@ servers_table = """
                 )
                 """
 
+
 class Database:
     """Accessing database functions"""
+
     def __init__(self, bot):
         self.bot = bot
         try:
             self.dsn = os.environ["DATABASE_URL"]
         except KeyError:
-            file_path = os.path.join(os.path.dirname(__file__), 'database_secret.txt')
+            file_path = os.path.join(os.path.dirname(
+                __file__), 'database_secret.txt')
             database_file = open(file_path, 'r')
             self.dsn = database_file.read()
             database_file.close()
@@ -109,9 +112,11 @@ class Database:
             await con.execute("UPDATE servers SET prefix = NULL WHERE server_id = $1", ctx.guild.id)
 
     async def add_contest_submission(self, ctx, embed: discord.Embed):
+        sub_id = self.generate_id()
         async with self.pool.acquire() as con:
             await con.execute("""INSERT INTO submissions (server_id, owner_id, submission_id, embed) VALUES ($1, $2, $3, $4)""",
-                              ctx.guild.id, ctx.author.id, self.generate_id(), json.dumps(embed.to_dict()))
+                              ctx.guild.id, ctx.author.id, sub_id, json.dumps(embed.to_dict()))
+        return sub_id
 
     async def get_contest_submission(self, submission_id: int):
         async with self.pool.acquire() as con:
@@ -135,6 +140,7 @@ class Database:
     async def purge_contest_submissions(self, ctx):
         async with self.pool.acquire() as con:
             await con.execute("DELETE FROM submissions WHERE server_id = $1", ctx.guild.id)
+
 
 if __name__ in '__main__':
     db_hi = Database('lol')
