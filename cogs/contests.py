@@ -1,5 +1,5 @@
 import json
-
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -105,6 +105,23 @@ class Contests:
         """Allows for users with manage_server perms to remove submission that are deemed invalid"""
         await self.bot.database.clear_contest_submission(ctx, owner.id)
         await ctx.send(f"Submission by {owner.display_name} successfully deleted.")
+
+    @commands.check(manage_server_check)
+    @commands.command()
+    async def purge(self, ctx):
+        """Purges all submissions"""
+        length = len(await self.bot.database.list_contest_submissions(ctx))
+        await ctx.send("Are you sure? [Y/n] This deletes {} submissions".format(length))
+        def check(m):
+            return m.author == ctx.author
+        try:
+            message = await self.bot.wait_for('message', check=check, timeout=30.0)
+        except asyncio.TimeoutError:
+            return await ctx.send("You spent too long too reply.")
+        if 'y' not in message.lower():
+            return
+        await self.bot.database.purge_contest_submissions(ctx)
+        await ctx.send("All {} submissions successfully deleted.".format(length))
 
 def setup(bot):
     bot.add_cog(Contests(bot))

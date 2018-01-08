@@ -132,5 +132,9 @@ class Database:
         async with self.pool.acquire() as con:
             await con.execute('DELETE FROM submissions WHERE owner_id = $1 AND server_id = $2', owner_id, ctx.guild.id)
 
+    async def purge_contest_submissions(self, ctx):
+        async with self.pool.acquire() as con:
+            await con.execute("DELETE FROM submissions WHERE server_id = $1", ctx.guild.id)
+
 if __name__ in '__main__':
     db_hi = Database('lol')
