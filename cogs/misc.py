@@ -3,7 +3,6 @@ from os import environ, path
 import inspect
 from asyncio import sleep
 import random
-from collections import OrderedDict
 
 import aiohttp
 import async_timeout
