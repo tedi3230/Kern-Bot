@@ -34,10 +34,8 @@ class Contests:
         Returns:
             [discord.Embed] -- The embed object generated.
         """
-        embed = discord.Embed(colour=colour)
+        embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_author(name=f"Author: {message_author.display_name}", icon_url=message_author.avatar_url)
-        embed.add_field(name="Title:", value=title, inline=False)
-        embed.add_field(name="Description:", value=description, inline=False)
         if image_url is not None:
             embed.set_image(url=image_url)
         embed.set_thumbnail(url=message_author.avatar_url)
@@ -66,62 +64,67 @@ class Contests:
             if ctx.author.id in [sub['owner_id'] for sub in await self.bot.database.list_contest_submissions(ctx)]:
                 return await ctx.error("You already have a contest submitted. To change your submission, delete it and resubmit.", "Error submitting:")
             submission_id = await self.bot.database.add_contest_submission(ctx, embed)
-            footer_text = "Type `{0}allow {1} True` to allow this and `{0}allow {1} False` to prevent the moving on this to voting queue.".format(ctx.prefix, submission_id)
+            footer_text = "Type `{0}vote {1} X` to vote for this. X is a number".format(ctx.prefix, submission_id)
             embed.set_footer(text=footer_text)
             await channel.send(embed=embed)
-            await ctx.success(f"Submission sent in {channel.mention}")
+            if ctx.channel.id != server_channels[1]:
+                await ctx.success(f"Submission sent in {channel.mention}")
         else:
             await ctx.error("Incorrect channel to submit in", delete_after=10)
 
-    @commands.command()
-    async def list_submissions(self, ctx):
+    @commands.command(name="list", aliases=['list_submissions'])
+    async def list_s(self, ctx):
         submissions = await self.bot.database.list_contest_submissions(ctx)
         if not submissions:
             return await ctx.error(f"The server `{ctx.guild.name}` has no contest submissions.", "No submissions")
         compiled = str()
-        for submission in submissions:
+        for index, submission in enumerate(submissions):
             embed = discord.Embed.from_data(json.loads(submission['embed']))
             s_id = submission['submission_id']
-            author = embed.author.name.replace("Author: ", "")
-            compiled += f"**{embed.fields[0].value}** by {author} [id: {s_id}]\n"
-        embed = discord.Embed(title=f"Submissions for {ctx.guild}", description=compiled, colour=discord.Colour.blurple())
-        await ctx.send(embed=embed)
+            author = ctx.guild.get_member(submission['owner_id'])
+            rating = submission['rating'] or "NIL"
+            compiled += f"{index + 1}). **{embed.fields[0].value}** by {author.mention} [id: {s_id}]. **Rating:** `{rating}` points.\n"
+        max_points = await self.bot.database.get_max_rating(ctx)
+        await ctx.neutral(compiled, f"Submissions for {ctx.guild} [/{max_points}]")
         return [submission['submission_id'] for submission in submissions]
 
     @commands.command()
-    async def vote(self, ctx, submission_id):
-        "Not implemented yet."
-        pass
+    async def vote(self, ctx, rating: int, submission_id: int):
+        """Votes on a submission"""
+        await self.bot.database.add_submission_rating(ctx, rating, submission_id)
+        await ctx.success(f"Successfully voted on submission {submission_id}")
 
     @commands.command()
     async def remove(self, ctx):
         """Removes your submission"""
         await self.bot.database.remove_contest_submission(ctx)
-        await ctx.send(f"{ctx.author.mention} Your submission was successfully removed.")
+        await ctx.success(f"{ctx.author.mention} Your submission was successfully removed.")
 
     @commands.check(manage_server_check)
     @commands.command()
-    async def clear(self, ctx, owner: discord.Member):
-        """Allows for users with manage_server perms to remove submission that are deemed invalid"""
-        await self.bot.database.clear_contest_submission(ctx, owner.id)
-        await ctx.send(f"Submission by {owner.display_name} successfully deleted.")
+    async def clear(self, ctx, submission_id: int):
+        """Allows for users with manage_server perms to remove submissions that are deemed invalid"""
+        await self.bot.database.clear_contest_submission(ctx, submission_id)
+        await ctx.success(f"Submission with id {submission_id} successfully deleted.")
 
     @commands.check(manage_server_check)
     @commands.command()
     async def purge(self, ctx):
         """Purges all submissions"""
         length = len(await self.bot.database.list_contest_submissions(ctx))
+        if length == 0:
+            return await ctx.error(f"The server `{ctx.guild.name}` has no contest submission, so you cannot purge them.", "No submissions to purge:")
         await ctx.send("Are you sure? [Y/n] This deletes {} submissions".format(length))
         def check(m):
             return m.author == ctx.author
         try:
             message = await self.bot.wait_for('message', check=check, timeout=30.0)
         except asyncio.TimeoutError:
-            return await ctx.send("You spent too long too reply.")
-        if 'y' not in message.lower():
-            return
+            return await ctx.send("Time limit to reply exceeded.")
+        if 'y' not in message.content.lower():
+            return await ctx.send("Ok! Cancelling purge.")
         await self.bot.database.purge_contest_submissions(ctx)
-        await ctx.send("All {} submissions successfully deleted.".format(length))
+        await ctx.success("{} submission(s) has been successfully purged.".format(length))
 
 def setup(bot):
     bot.add_cog(Contests(bot))
