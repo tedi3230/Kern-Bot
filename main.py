@@ -86,8 +86,8 @@ async def on_message(message: discord.Message):
             for msg in messages:
                 message.content = msg
                 ctx = await bot.get_context(message, cls=cc.CustomContext)
-                if msg.startswith(ctx.invoked_with):
-                    continue
+                # if msg.startswith(ctx.prefix):
+                #     continue                                      #WHAT IS THIS?
                 if ctx.valid:
                     if msg.strip(ctx.prefix) not in cmds_run_before:
                         await bot.invoke(ctx)
@@ -151,17 +151,22 @@ async def on_command_error(ctx, error):
         do_send = False
         print("Cog failed to unload.")
 
-    elif isinstance(error, discord.errors.HTTPException) and "Invalid Form Body" in str(error):
-        pass
+    elif isinstance(error, discord.errors.HTTPException):
+        if "Invalid Form Body" in str(error):
+            pass
 
     elif isinstance(error, bot.ResponseError):
         await ctx.error(error, "Response Code > 400:")
 
+    elif isinstance(error, ValueError):
+        if ctx.command in ['vote']:
+            await ctx.error(error, "Error while voting: ")
+
     else:
         await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.get_channel(bot.bot_logs_id))
-        #await bot.get_channel(bot.bot_logs_id).send("{}\nIgnoring exception in command `{}`:```diff\n-{}: {}```".format(bot.owner.mention, ctx.command, type(error).__qualname__, error))
-        print('Ignoring exception in command {}:'.format(ctx.command))
+        print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
+        do_send = False
 
     if do_send:
         print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
