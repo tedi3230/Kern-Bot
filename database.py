@@ -26,7 +26,6 @@ servers_table = """
                 CREATE TABLE IF NOT EXISTS servers (
                     server_id BIGINT NOT NULL UNIQUE,
                     receive_channel_id BIGINT,
-                    allow_channel_id BIGINT,
                     vote_channel_id BIGINT,
                     prefix VARCHAR
                 )
@@ -77,17 +76,16 @@ class Database:
         return int(submission_id)
 
     async def set_contest_channels(self, ctx, *channels):
-        sql = """INSERT INTO servers (server_id, receive_channel_id, allow_channel_id, vote_channel_id)
-                 VALUES ($1, $2, $3, $4)
+        sql = """INSERT INTO servers (server_id, receive_channel_id, vote_channel_id)
+                 VALUES ($1, $2, $3)
                  ON CONFLICT (server_id) DO UPDATE
                     SET receive_channel_id = excluded.receive_channel_id,
-                        allow_channel_id = excluded.allow_channel_id,
                         vote_channel_id = excluded.vote_channel_id;"""
         async with self.pool.acquire() as con:
             await con.execute(sql, ctx.guild.id, *channels)
 
     async def get_contest_channels(self, ctx):
-        sql = """SELECT receive_channel_id, allow_channel_id, vote_channel_id FROM servers
+        sql = """SELECT receive_channel_id, vote_channel_id FROM servers
                  WHERE server_id = $1"""
         async with self.pool.acquire() as con:
             channels = await con.fetchrow(sql, ctx.guild.id)
