@@ -3,6 +3,7 @@ from os import environ, path
 import inspect
 from asyncio import sleep
 import random
+from collections import OrderedDict
 
 import aiohttp
 import async_timeout
@@ -224,26 +225,20 @@ class Misc:
 
     @commands.command()
     async def tree(self, ctx):
-        tree = {}
-        for channel in ctx.guild.text_channels:
-            if channel.category is None:
-                channel.category = cc.FakeChannel("No category")
-            prefix = "📨 "
-            if channel.is_nsfw():
-                prefix += "❌ "
-            tree[channel.category.name] = [prefix + channel.name] + tree.get(channel.category.name, [])
-
-        for channel in ctx.guild.voice_channels:
-            if channel.category is None:
-                channel.category.name = "No category"
-            tree[channel.category.name] = ["🔊 " + channel.name] + tree.get(channel.category.name, [])
-
         tree_string = ctx.guild.name + "\n"
-        for category, channels in tree.items():
-            channels.sort()
-            tree_string += f"|-- {category.upper()}\n"
-            for channel in channels:
-                tree_string += f"|  |--{channel}\n"
+        cat_list = ctx.guild.by_category()
+        for cat_tup in cat_list:
+            if cat_tup[0] is not None:
+                tree_string += f"|-- {cat_tup[0].name.upper()}\n"
+            for channel in cat_tup[1]:
+                prefix = str()
+                if isinstance(channel, discord.TextChannel):
+                    prefix += "📨"
+                    if channel.is_nsfw():
+                        prefix += "⚠"
+                elif isinstance(channel, discord.VoiceChannel):
+                    prefix += "🔊"
+                tree_string += "|  |--{}\n".format(prefix + " " + channel.name.lower())
 
         await ctx.send(f"```fix\n{tree_string}```")
 
