@@ -1,15 +1,12 @@
 import discord
 from discord.ext import commands
-
-
-async def settings_perm_check(ctx):
+async def manage_server_check(ctx):
     if commands.is_owner():
         return True
     elif commands.has_permissions(manage_server=True):
         return True
-    await ctx.send("You do not have valid permissions to do this. (Manage Server Permission).")
+    await ctx.error("You do not have valid permissions to do this. (Manage Server Permission).", "Permissions Error")
     return False
-
 
 class Settings:
     """Sets and gets the settings for the bot"""
@@ -22,7 +19,7 @@ class Settings:
         """Commands related to determining the value of settings."""
         pass
 
-    @commands.check(settings_perm_check)
+    @commands.check(manage_server_check)
     @commands.group(name="set")
     async def _set(self, ctx):
         """Commands related to the changing of settings."""
@@ -33,7 +30,7 @@ class Settings:
         """Get the channels used for the contests"""
         channels = await self.bot.database.get_contest_channels(ctx)
         if None in channels:
-            await ctx.send("​Channels for {}: <#{}>, <#{}>, and <#{}>.".format(ctx.guild.name, *channels))
+            await ctx.send("​Channels for {}: <#{}> and <#{}>.".format(ctx.guild.name, *channels))
         else:
             await ctx.error("Channels are not set up", "Configuration Error:")
 
@@ -41,14 +38,12 @@ class Settings:
     async def set_channels(self, ctx, *channels: discord.TextChannel):
         """Set the channels used for the contests"""
         if len(channels) == 1:
-            channels *= 3
-        elif len(channels) < 3:
-            raise TypeError(
-                "Too few channels supplied, you need to specify 3 or 1. Type `{}help set channels` for more information".format(ctx.prefix))
-        receive_channel_id, allow_channel_id, output_channel_id = [
-            channel.id for channel in channels]
-        await self.bot.database.set_contest_channels(ctx, receive_channel_id, allow_channel_id, output_channel_id)
-        await ctx.success("​Set channels to {} {} {}".format(*[channel.mention for channel in channels]))
+            channels *= 2
+        elif len(channels) > 2:
+            raise TypeError("set channels takes 2 positional arguments but {} were given".format(len(channels)))
+        receive_channel_id, output_channel_id = [channel.id for channel in channels]
+        await self.bot.database.set_contest_channels(ctx, receive_channel_id, output_channel_id)
+        await ctx.success("​Set channels to {} {}".format(*[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
