@@ -18,7 +18,7 @@ class Contests:
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
     #pylint: disable-msg=too-many-arguments
-    def generateEmbed(self, message_author: discord.User, title, description, footer_text, image_url=None, colour=0x00ff00):
+    def generateEmbed(self, message_author: discord.User, title, description, image_url=None, colour=0x00ff00):
         """Generates a discord embed object off the given parameters
 
         Arguments:
@@ -40,7 +40,6 @@ class Contests:
         embed.add_field(name="Description:", value=description, inline=False)
         if image_url is not None:
             embed.set_image(url=image_url)
-        embed.set_footer(text=footer_text)
         embed.set_thumbnail(url=message_author.avatar_url)
         return embed
     #pylint: enable-msg=too-many-arguments
@@ -58,8 +57,7 @@ class Contests:
             image_url = input_split[2]
         else:
             image_url = ""
-        footer_text = "Type `{0}allow {1} True` to allow this and `{0}allow {1} False` to prevent the moving on this to voting queue.".format(ctx.prefix, submission_id)
-        embed = self.generateEmbed(ctx.author, title, description, footer_text, image_url, 0x00ff00)
+        embed = self.generateEmbed(ctx.author, title, description, image_url, 0x00ff00)
         server_channels = await self.bot.database.get_contest_channels(ctx)
         if server_channels is None:
             return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
@@ -67,7 +65,9 @@ class Contests:
             channel = ctx.guild.get_channel(server_channels[1])
             if ctx.author.id in [sub['owner_id'] for sub in await self.bot.database.list_contest_submissions(ctx)]:
                 return await ctx.error("You already have a contest submitted. To change your submission, delete it and resubmit.", "Error submitting:")
-            await self.bot.database.add_contest_submission(ctx, embed)
+            submission_id = await self.bot.database.add_contest_submission(ctx, embed)
+            footer_text = "Type `{0}allow {1} True` to allow this and `{0}allow {1} False` to prevent the moving on this to voting queue.".format(ctx.prefix, submission_id)
+            embed.set_footer(text=footer_text)
             await channel.send(embed=embed)
             await ctx.success(f"Submission sent in {channel.mention}")
         else:
