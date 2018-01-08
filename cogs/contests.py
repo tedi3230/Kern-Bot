@@ -3,6 +3,14 @@ import json
 import discord
 from discord.ext import commands
 
+async def manage_server_check(ctx):
+    if commands.is_owner():
+        return True
+    elif commands.has_permissions(manage_server=True):
+        return True
+    await ctx.error("You do not have valid permissions to do this. (Manage Server Permission).", "Permissions Error")
+    return False
+
 class Contests:
     """Contest functions"""
     def __init__(self, bot: commands.Bot):
@@ -91,7 +99,7 @@ class Contests:
         await self.bot.database.remove_contest_submission(ctx)
         await ctx.send(f"{ctx.author.mention} Your submission was successfully removed.")
 
-    @commands.has_permissions(manage_server=True)
+    @commands.check(manage_server_check)
     @commands.command()
     async def clear(self, ctx, owner: discord.Member):
         """Allows for users with manage_server perms to remove submission that are deemed invalid"""
