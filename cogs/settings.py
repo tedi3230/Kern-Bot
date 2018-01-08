@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+
 async def manage_server_check(ctx):
     if commands.is_owner():
         return True
@@ -10,7 +11,6 @@ async def manage_server_check(ctx):
 
 class Settings:
     """Sets and gets the settings for the bot"""
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,7 +29,7 @@ class Settings:
     async def get_channels(self, ctx):
         """Get the channels used for the contests"""
         channels = await self.bot.database.get_contest_channels(ctx)
-        if None in channels:
+        if None not in channels:
             await ctx.send("​Channels for {}: <#{}> and <#{}>.".format(ctx.guild.name, *channels))
         else:
             await ctx.error("Channels are not set up", "Configuration Error:")
@@ -62,6 +62,16 @@ class Settings:
     @get.command(hidden=True)
     async def permissions(self, ctx):
         await ctx.send()
+
+    @_set.command(name="max_rating")
+    async def set_max_rating(self, ctx, max_rating: int):
+        await self.bot.database.set_max_rating(ctx, max_rating)
+        await ctx.success("Max rating set to {}".format(max_rating))
+
+    @get.command(name="max_rating")
+    async def get_max_rating(self, ctx):
+        max_rating = await self.bot.database.get_max_rating(ctx) or 10
+        await ctx.send(f"Max rating is {max_rating}")
 
 
 def setup(bot):
