@@ -106,9 +106,9 @@ class Admin:
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
-    async def delete_by_id(self, ctx, *message_id: int):
-        for id in message_id:
-            msg = await ctx.get_message(message_id)
+    async def delete_by_id(self, ctx, *message_ids: int):
+        for m_id in message_ids:
+            msg = await ctx.get_message(m_id)
             if msg.author == self.bot.user:
                 await msg.delete()
                 await ctx.send("Message deleted")
