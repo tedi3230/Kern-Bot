@@ -71,9 +71,9 @@ class Misc:
         pattern = re.compile('|'.join(transformations.keys()))
         raw = pattern.sub(replace, msg.content)
 
-        embed = discord.Embed(description=f"\n\n{raw}\n\n", timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
+        embed = discord.Embed(description=f"​\n​\n{raw}\n​\n​", timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-        embed.set_author(name="Message by: {}".format(msg.author.mention), icon_url=msg.author.avatar_url)
+        embed.set_author(name="Message by: {}".format(msg.author, icon_url=msg.author.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name="help")
