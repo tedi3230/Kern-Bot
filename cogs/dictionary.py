@@ -201,7 +201,7 @@ class Dictionary:
             url_term), url='https://en.oxforddictionaries.com/definition/{}'.format("_".join(term.split())))
 
         embed.set_thumbnail(url=await self._get_image(term))
-        embed.set_footer(text="Requested by: {} | Results provided by the Oxford Dictionary".format(
+        embed.set_footer(text="Requested by: {} • Results provided by the Oxford Dictionary".format(
             ctx.message.author), icon_url='https://en.oxforddictionaries.com/apple-touch-icon-180x180.png')
         await ctx.send(embed=embed)
 
