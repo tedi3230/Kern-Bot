@@ -41,6 +41,13 @@ class Misc:
     async def on_guild_join(self, guild):
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
 
+    @commands.command()
+    async def raw(self, ctx, message_id: int):
+        """Displays the raw code of a message, so you can type it. Just get the message id."""
+        msg = await ctx.get_message(message_id)
+        raw = msg.content.replace('```', r'\```').replace('**', r'\**').replace('*', r'\*').replace('__', r'\__').replace('_', r'\_')
+        await ctx.send(raw)
+
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
         """Shows this message. Does not display details for each command yet."""
