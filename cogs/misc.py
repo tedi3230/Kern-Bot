@@ -69,7 +69,12 @@ class Misc:
             return transformations.get(re.escape(obj.group(0)), '')
 
         pattern = re.compile('|'.join(transformations.keys()))
-        await ctx.send("**Message by: @{} at {}**\n".format(msg.author.name, msg.created_at.strftime(self.bot.time_format)) + pattern.sub(replace, msg.content))
+        raw = pattern.sub(replace, msg.content)
+
+        embed = discord.Embed(description=f"```{raw}```", timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
+        embed.set_footer(text="Original message sent at {} • Requested by: {}".format(msg.created_at.strftime(self.bot.time_format), ctx.message.author), icon_url=ctx.message.author.avatar_url)
+        embed.set_author(name="Message by: {}".format(msg.author.mention), icon_url=msg.author.avatar_url)
+        await ctx.send(embed=embed)
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
