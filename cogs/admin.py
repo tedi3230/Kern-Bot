@@ -106,19 +106,20 @@ class Admin:
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
-    async def delete_by_id(self, ctx, *, message_id: int):
-        msg = await ctx.get_message(message_id)
-        if msg.author == self.bot.user:
-            await msg.delete()
-            await ctx.send("Message deleted")
-            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
-                await asyncio.sleep(5)
-                await ctx.message.delete()
-        else:
-            await ctx.send("The bot did not send that message.")
-            if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
-                await asyncio.sleep(5)
-                await ctx.message.delete()
+    async def delete_by_id(self, ctx, *message_id: int):
+        for id in message_id:
+            msg = await ctx.get_message(message_id)
+            if msg.author == self.bot.user:
+                await msg.delete()
+                await ctx.send("Message deleted")
+                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
+                    await asyncio.sleep(5)
+                    await ctx.message.delete()
+            else:
+                await ctx.send("The bot did not send that message.")
+                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
+                    await asyncio.sleep(5)
+                    await ctx.message.delete()
 
     @commands.command(hidden=True)
     async def roles(self, ctx, *, member: discord.Member = None):
