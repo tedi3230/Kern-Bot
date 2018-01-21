@@ -70,10 +70,12 @@ class Misc:
 
         pattern = re.compile('|'.join(transformations.keys()))
         raw = pattern.sub(replace, msg.content)
+        if raw:
+            raw = f"​\n{raw}\n​"
         embed_text = str()
         if msg.embeds:
-            embed_text += "*There are {} embeds attached;*".format(len(msg.embeds))
-        embed = discord.Embed(description=f"​\n{raw}\n​" + embed_text, timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
+            embed_text += "*Message has {} embed(s).*".format(len(msg.embeds))
+        embed = discord.Embed(description=raw + embed_text, timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         embed.set_author(name="Message by: {}".format(msg.author), icon_url=msg.author.avatar_url)
         await ctx.send(embed=embed)
