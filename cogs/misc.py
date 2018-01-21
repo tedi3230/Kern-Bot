@@ -43,16 +43,22 @@ class Misc:
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
 
     @commands.command()
-    async def raw(self, ctx, message_id: int = None):
-        """Displays the raw code of a message, so you can type it. Just get the message id."""
-        if message_id is not None:
-            msg = await ctx.get_message(message_id)
+    async def raw(self, ctx, *, message: int = None):
+        """Displays the raw code of a message.
+        The message can be a message id, some text, or nothing (in which case it will be the most recent message not by you)."""
+        msg = None
+        if message is not None:
+            msg = await ctx.get_message(int(message))
         else:
             async for message in ctx.history(limit=10):
                 if msg.author == ctx.author:
                     continue
                 msg = message
                 break
+
+        if msg is None:
+            msg = ctx.message
+            msg.content = msg.content.split('raw ')[1]
 
         transformations = {
             re.escape(c): '\\' + c
