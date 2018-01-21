@@ -70,10 +70,15 @@ class Misc:
 
         pattern = re.compile('|'.join(transformations.keys()))
         raw = pattern.sub(replace, msg.content)
-
-        embed = discord.Embed(description=f"​\n​\n{raw}\n​\n​", timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
+        embed_text = str()
+        if msg.embeds is not None:
+            embed_text += "*There are {} embeds attached;*\n".format(len(msg.embeds))
+            for e in msg.embeds:
+                embed_text += f"*{e.title}*, "
+            embed_text = embed_text[:-2]
+        embed = discord.Embed(description=f"​\n​\n{raw}\n​\n​" + embed_text, timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-        embed.set_author(name="Message by: {}".format(msg.author, icon_url=msg.author.avatar_url)
+        embed.set_author(name="Message by: {}".format(msg.author), icon_url=msg.author.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name="help")
