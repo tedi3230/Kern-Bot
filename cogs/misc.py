@@ -3,6 +3,7 @@ from os import environ, path
 import inspect
 from asyncio import sleep
 import random
+import re
 
 import aiohttp
 import async_timeout
@@ -45,8 +46,17 @@ class Misc:
     async def raw(self, ctx, message_id: int):
         """Displays the raw code of a message, so you can type it. Just get the message id."""
         msg = await ctx.get_message(message_id)
-        raw = msg.content.replace('```', r'\```').replace('**', r'\**').replace('*', r'\*').replace('__', r'\__').replace('_', r'\_')
-        await ctx.send(raw)
+
+        transformations = {
+            re.escape(c): '\\' + c
+            for c in ('*', '`', '_', '~', '\\', '<')
+        }
+
+        def replace(obj):
+            return transformations.get(re.escape(obj.group(0)), '')
+
+        pattern = re.compile('|'.join(transformations.keys()))
+        await ctx.send(pattern.sub(replace, msg.content))
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
