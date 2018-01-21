@@ -43,9 +43,16 @@ class Misc:
         self.bot_logs.send("Joined {} at {}".format(guild.name, datetime.utcnow().strftime(self.bot.time_format)))
 
     @commands.command()
-    async def raw(self, ctx, message_id: int):
+    async def raw(self, ctx, message_id: int = None):
         """Displays the raw code of a message, so you can type it. Just get the message id."""
-        msg = await ctx.get_message(message_id)
+        if message_id is not None:
+            msg = await ctx.get_message(message_id)
+        else:
+            async for message in ctx.history(limit=10):
+                if msg.author == ctx.author:
+                    continue
+                msg = message
+                break
 
         transformations = {
             re.escape(c): '\\' + c
@@ -56,7 +63,7 @@ class Misc:
             return transformations.get(re.escape(obj.group(0)), '')
 
         pattern = re.compile('|'.join(transformations.keys()))
-        await ctx.send(pattern.sub(replace, msg.content))
+        await ctx.send(f"**Message by: @{msg.author.name} at {0}\n".format(msg.created_at.strftime(self.bot.time_format)) + pattern.sub(replace, msg.content))
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
