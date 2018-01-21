@@ -51,7 +51,7 @@ class Misc:
             msg = await ctx.get_message(int(message))
         else:
             async for message in ctx.history(limit=10):
-                if msg.author == ctx.author:
+                if message.author == ctx.author:
                     continue
                 msg = message
                 break
@@ -69,7 +69,7 @@ class Misc:
             return transformations.get(re.escape(obj.group(0)), '')
 
         pattern = re.compile('|'.join(transformations.keys()))
-        await ctx.send(f"**Message by: @{msg.author.name} at {0}\n".format(msg.created_at.strftime(self.bot.time_format)) + pattern.sub(replace, msg.content))
+        await ctx.send("**Message by: @{} at {}**\n".format(msg.author.name, msg.created_at.strftime(self.bot.time_format)) + pattern.sub(replace, msg.content))
 
     @commands.command(name="help")
     async def _help(self, ctx, command: str = None):
