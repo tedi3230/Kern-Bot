@@ -71,7 +71,7 @@ class Misc:
         pattern = re.compile('|'.join(transformations.keys()))
         raw = pattern.sub(replace, msg.content)
         embed_text = str()
-        if msg.embeds is not None:
+        if not msg.embeds:
             embed_text += "*There are {} embeds attached;*\n".format(len(msg.embeds))
             for e in msg.embeds:
                 embed_text += f"*{e.title}*, "
