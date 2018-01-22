@@ -99,7 +99,7 @@ class Misc:
 
         if command is None:
             command = "Help"
-            embed = discord.Embed(description="{0}\nUse `{1}help command` or {1}help cog` for further detail.".format(
+            embed = discord.Embed(description="{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(
                 self.bot.description, ctx.clean_prefix()), color=0x00ff00)
             for cog in sorted(cogs):
                 embed.add_field(name=cog, value=", ".join(cogs[cog]), inline=False)
