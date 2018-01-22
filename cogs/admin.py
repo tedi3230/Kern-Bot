@@ -55,7 +55,7 @@ class Admin:
     @commands.command(hidden=True)
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
-        if ctx.channel == self.bot_logs:
+        if ctx.channel != self.bot_logs:
             await ctx.send("Suiciding.")
         await self.bot_logs.send("Shutting down bot.")
         await self.bot.change_presence(status=discord.Status.offline)
