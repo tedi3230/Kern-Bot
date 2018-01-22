@@ -46,18 +46,21 @@ class CustomContext(commands.Context):
         return prefix
     async def error(self, error, title="Error:", channel: discord.TextChannel = None, *args, **kwargs):
         error_embed = discord.Embed(title=title, colour=0xff0000, description=error)
+        error_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
         if channel is None:
             return await super().send(embed=error_embed, *args, **kwargs)
         return await channel.send(embed=error_embed, *args, **kwargs)
 
     async def success(self, success, title="Success", channel: discord.TextChannel = None, *args, **kwargs):
         success_embed = discord.Embed(title=title, colour=0x00ff00, description=success)
+        success_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
         if channel is None:
             return await super().send(embed=success_embed, *args, **kwargs)
         return await channel.send(embed=success_embed, *args, **kwargs)
 
     async def neutral(self, text, title, channel: discord.TextChannel = None, *args, **kwargs):
         neutral_embed = discord.Embed(title=title, colour=discord.Colour.blurple(), description=text)
+        neutral_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
         if channel is None:
             return await super().send(embed=neutral_embed, *args, **kwargs)
         return await channel.send(embed=neutral_embed, *args, **kwargs)
