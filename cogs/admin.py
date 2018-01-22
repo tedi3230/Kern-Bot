@@ -40,7 +40,7 @@ class Admin:
         system('heroku ps:scale worker=1 --app discord-kern-bot')
 
     @commands.is_owner()
-    @commands.command(hidden=True)
+    @commands.command(hidden=True, aliases=['restart'])
     async def rebirth(self, ctx):
         """Owner of this bot only command; Restart the bot"""
         if ctx.channel != self.bot_logs:
@@ -52,7 +52,7 @@ class Admin:
         execl(executable, 'python "' + "".join(argv) + '"')
 
     @commands.is_owner()
-    @commands.command(hidden=True)
+    @commands.command(hidden=True, aliases=['shutdown'])
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
         if ctx.channel != self.bot_logs:
