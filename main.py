@@ -46,7 +46,8 @@ except KeyError:
         token = lines[0]
 
 async def load_extensions(bots):
-    for extension in bots.extensions:
+    await asyncio.sleep(2)
+    for extension in bots.extensions.copy().keys():
         try:
             bots.load_extension("cogs." + extension)
         except (discord.ClientException, ModuleNotFoundError):
