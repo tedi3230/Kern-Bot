@@ -41,10 +41,10 @@ class Admin:
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def restart(self, ctx):
+    async def rebirth(self, ctx):
         """Owner of this bot only command; Restart the bot"""
         if ctx.channel != self.bot_logs:
-            await ctx.send("Restarting bot.")
+            await ctx.send("Suciding then being reborn.")
         await self.bot_logs.send("Restarting bot.")
         await self.bot.change_presence(status=discord.Status.offline)
         print("\nRestarting...\n")
@@ -53,10 +53,10 @@ class Admin:
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def shutdown(self, ctx):
+    async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
         if ctx.channel == self.bot_logs:
-            await ctx.send("Shutting Down.")
+            await ctx.send("Suiciding.")
         await self.bot_logs.send("Shutting down bot.")
         await self.bot.change_presence(status=discord.Status.offline)
         print("\nShutting Down...\n")
