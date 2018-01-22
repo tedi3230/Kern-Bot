@@ -46,7 +46,7 @@ except KeyError:
         token = lines[0]
 
 async def load_extensions(bots):
-    for extension in bots.extension:
+    for extension in bots.extensions:
         try:
             bots.load_extension("cogs." + extension)
         except (discord.ClientException, ModuleNotFoundError):
@@ -85,8 +85,6 @@ async def on_message(message: discord.Message):
             for msg in messages:
                 message.content = msg
                 ctx = await bot.get_context(message, cls=cc.CustomContext)
-                # if msg.startswith(ctx.prefix):
-                #     continue                                      #WHAT IS THIS?
                 if ctx.valid:
                     if msg.strip(ctx.prefix) not in cmds_run_before:
                         await bot.invoke(ctx)
