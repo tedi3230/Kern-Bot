@@ -1,6 +1,5 @@
 from datetime import datetime
-from os import environ, listdir
-from os.path import isfile, join
+from os import environ
 import traceback
 import asyncio
 from random import choice
@@ -47,7 +46,7 @@ except KeyError:
         token = lines[0]
 
 async def load_extensions(bots):
-    for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]:
+    for extension in bots.extension:
         try:
             bots.load_extension("cogs." + extension)
         except (discord.ClientException, ModuleNotFoundError):
@@ -111,7 +110,11 @@ async def on_message(message: discord.Message):
             await bot.invoke(ctx)
 
 @commands.is_owner()
-@bot.command(hidden=True, name="reload")
+@bot.group(hidden=True)
+async def cogs(ctx):
+    pass
+
+@cogs.command(name="reload")
 async def reload_cog(ctx, cog_name: str):
     """Reload the cog `cog_name`"""
 
@@ -120,6 +123,18 @@ async def reload_cog(ctx, cog_name: str):
     bot.load_extension("cogs." + cog_name)
     print("Cog loaded.")
     await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
+
+@cogs.command(name="list")
+async def cogs_list(ctx):
+    """List the loaded cogs"""
+    des = ""
+    for ext, enabled in bot.extensions.items():
+        if enabled:
+            des += ":white_small_square: {}\n".format(ext)
+        else:
+            des += ":black_small_square: {}\n".format(ext)
+    e = discord.Embed(title="Cogs: ", description=des, colour=discord.Colour.blurple())
+    e.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
 
 @bot.event
 async def on_command_error(ctx, error):
