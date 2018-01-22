@@ -117,7 +117,6 @@ async def cogs(ctx):
 @cogs.command(name="reload")
 async def reload_cog(ctx, cog_name: str):
     """Reload the cog `cog_name`"""
-
     bot.unload_extension("cogs." + cog_name)
     print("Cog unloaded.", end=' | ')
     bot.load_extension("cogs." + cog_name)
@@ -133,8 +132,27 @@ async def cogs_list(ctx):
             des += ":white_small_square: {}\n".format(ext)
         else:
             des += ":black_small_square: {}\n".format(ext)
-    e = discord.Embed(title="Cogs: ", description=des, colour=discord.Colour.blurple())
-    e.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+    await ctx.neutral(des, "Cogs:")
+
+@cogs.command(name="unload", aliases=['disable', 'remove'])
+async def cogs_unload(ctx, cog_name: str):
+    """Unloads a cog"""
+    if bot.extensions[cog_name.lower()]:
+        bot.extensions[cog_name.lower()] = False
+        bot.unload_extension("cogs." + cog_name)
+        await ctx.success(f"`{cog_name} unloaded.`")
+    else:
+        await ctx.neutral(f"`{cog_name} already unloaded..`")
+
+@cogs.command(name="load", aliases=['enable', 'add'])
+async def cogs_load(ctx, cog_name: str):
+    """Loads a cog"""
+    if not bot.extensions[cog_name.lower()]:
+        bot.extensions[cog_name.lower()] = True
+        bot.unload_extension("cogs." + cog_name)
+        await ctx.success(f"`{cog_name} loaded.`")
+    else:
+        await ctx.neutral(f"`{cog_name} already loaded..`")
 
 @bot.event
 async def on_command_error(ctx, error):
