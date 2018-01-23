@@ -1,6 +1,5 @@
 from datetime import datetime
 from os import environ, path
-import inspect
 from asyncio import sleep
 import random
 import re
@@ -23,7 +22,6 @@ class Misc:
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
-        self.bot.remove_command("help")
         self.process = psutil.Process()
 
         try:
