@@ -1,8 +1,10 @@
 from datetime import datetime
 from os import environ, path
 from asyncio import sleep
+import inspect
 import random
 import re
+from collections import OrderedDict
 
 import aiohttp
 import async_timeout
@@ -23,6 +25,7 @@ class Misc:
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.process = psutil.Process()
+        self.bot.remove_command('help')
 
         try:
             self.streamable_user = environ["STREAM_USER"]
@@ -242,6 +245,60 @@ class Misc:
     @commands.command(hidden=True)
     async def echo(self, ctx, *, text):
         await ctx.send(text)
+
+    def make_commands(self):
+        cogs_dict = OrderedDict()
+        for cog in self.bot.exts:
+            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog.capitalize()) if not cmd.hidden]
+        for cmd in [cmd for cmd in self.bot.commands]:
+            if cmd.cog_name is None and not cmd.hidden:
+                cogs_dict['None'] = cogs_dict.get('None', []) + [[cmd.name] + cmd.aliases]
+        cogs_dict = OrderedDict([(key, val) for key, val in cogs_dict.items() if val])
+        return cogs_dict
+
+    @commands.command(name="help")
+    async def _help(self, ctx, command: str = None):
+        """Shows this message."""
+        cogs_dict = self.make_commands()
+        print(cogs_dict)
+        embed = discord.Embed(color=discord.Colour.green())
+        if command is None:
+            command = "Help"
+            embed.description = "{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(self.bot.description, ctx.clean_prefix())
+            for cog, cmds in cogs_dict.items():
+                commands_l = []
+                for cmd in cmds:
+                    if len(cmd) > 1:
+                        commands_l += ["{} [{}]".format(cmd[0], ", ".join(cmd[1:]))]
+                    else:
+                        commands_l += [cmd[0]]
+                print(cog.capitalize(), ", ".join(commands_l))
+                embed.add_field(name=cog.capitalize(), value=", ".join(commands_l), inline=False)
+
+        elif command in self.bot.exts:
+            #actually a cog
+            command = command.capitalize()
+            embed.description = inspect.cleandoc(self.bot.get_cog(command).__doc__)
+            for cmd in self.bot.get_cog_commands(command):
+                if not cmd.hidden:
+                    embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
+
+        elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
+            cmd_group = self.bot.get_command(command)
+            embed.description = cmd_group.help.format(ctx.prefix)
+            if isinstance(cmd_group, commands.Group):
+                for cmd in cmd_group.commands:
+                    if not cmd.hidden:
+                        embed.add_field(name=cmd.name, value=cmd.help, inline=False)
+
+        else:
+            embed.description = "The parsed cog or command `{}` does not exist.".format(command)
+            command = "Error"
+
+        embed.timestamp = datetime.utcnow()
+        embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
+        embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Misc(bot))

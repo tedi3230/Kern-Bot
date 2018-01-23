@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
+from collections import OrderedDict
 
 import discord
 from discord.ext import commands
@@ -31,9 +32,9 @@ class Bot(commands.Bot):
                     09. Make prefixes a list (for multiple)
                     ```
                     """
-        self.exts = {}
-        for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]:
-            self.exts[extension] = True
+        self.exts = OrderedDict()
+        for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
+            self.exts[e] = True
 
     class ResponseError(Exception):
         pass

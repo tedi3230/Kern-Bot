@@ -3,7 +3,6 @@ from os import environ
 import traceback
 import asyncio
 from random import choice
-import inspect
 
 import discord
 from discord.ext import commands
@@ -38,7 +37,6 @@ async def server_prefix(bots, message):
 
 bot = cc.Bot(command_prefix=server_prefix,
              description='Multiple functions, including contests, definitions, and more.')
-bot.remove_command("help")
 
 try:
     token = environ["AUTH_KEY"]
@@ -49,22 +47,23 @@ except KeyError:
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
-    for extension in bots.extensions.copy().keys():
+    for extension in bots.exts:
         try:
             bots.load_extension("cogs." + extension)
         except (discord.ClientException, ModuleNotFoundError):
             print(f'Failed to load extension {extension}.')
             traceback.print_exc()
+            await bot.close()
 
 @bot.event
 async def on_ready():
+    await load_extensions(bot)
     bot.database = db.Database(bot)
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
     bot.loop.create_task(status_changer())
-    await load_extensions(bot)
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
@@ -113,11 +112,7 @@ async def on_message(message: discord.Message):
             await bot.invoke(ctx)
 
 @commands.is_owner()
-@bot.group(hidden=True)
-async def cogs(ctx):
-    pass
-
-@cogs.command(name="reload")
+@bot.command(name="reload", hidden=True)
 async def reload_cog(ctx, cog_name: str):
     """Reload the cog `cog_name`"""
     bot.unload_extension("cogs." + cog_name)
@@ -125,39 +120,6 @@ async def reload_cog(ctx, cog_name: str):
     bot.load_extension("cogs." + cog_name)
     print("Cog loaded.")
     await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
-
-@cogs.command(name="list")
-async def cogs_list(ctx):
-    """List the loaded cogs"""
-    des = ""
-    for ext, enabled in bot.exts.items():
-        if enabled:
-            des += ":white_small_square: {}\n".format(ext)
-        else:
-            des += ":black_small_square: {}\n".format(ext)
-    await ctx.neutral(des, "Cogs:")
-
-@cogs.command(name="unload", aliases=['disable', 'remove'])
-async def cogs_unload(ctx, cog_name: str):
-    """Unloads a cog"""
-    if bot.exts[cog_name.lower()]:
-        bot.unload_extension("cogs." + cog_name)
-        bot.exts[cog_name.lower()] = False
-        print("Cog unloaded.")
-        await ctx.success(f"`Cog {cog_name} unloaded.`")
-    else:
-        await ctx.neutral(f"`Cog {cog_name} already unloaded.`", "Nothing happened")
-
-@cogs.command(name="load", aliases=['enable', 'add'])
-async def cogs_load(ctx, cog_name: str):
-    """Loads a cog"""
-    if not bot.exts[cog_name.lower()]:
-        bot.load_extension("cogs." + cog_name)
-        bot.exts[cog_name.lower()] = True
-        print("Cog loaded.")
-        await ctx.success(f"`Cog {cog_name} loaded.`")
-    else:
-        await ctx.neutral(f"`Cog {cog_name} already loaded.`", "Nothing happened")
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -209,58 +171,9 @@ async def on_command_error(ctx, error):
     if do_send:
         print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
 
-@bot.command(name="help")
-async def _help(ctx, command: str = None):
-    """Shows this message."""
-    cogs_dict = {}
-    for cmd in bot.commands:
-        print('hio')
-        if cmd.hidden:
-            continue
-        if not cmd.cog_name in cogs_dict:
-            cogs_dict[cmd.cog_name] = []
-        aliases = ", ".join(cmd.aliases)
-        if not aliases:
-            cogs_dict[cmd.cog_name].append(cmd.qualified_name)
-        else:
-            cogs_dict[cmd.cog_name].append("{} [{}]".format(cmd.qualified_name, ", ".join(cmd.aliases)))
-    for cog in cogs_dict.copy():
-        cogs_dict[cog] = sorted(cogs_dict[cog])
-
-    if command is None:
-        print('hiod')
-        command = "Help"
-        embed = discord.Embed(description="{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(
-            bot.description, ctx.clean_prefix()), color=0x00ff00)
-        for cog in sorted(cogs_dict):
-            embed.add_field(name=cog, value=", ".join(cogs_dict[cog]), inline=False)
-
-    elif command.capitalize() in cogs_dict:
-        command = command.capitalize()
-        embed = discord.Embed(description=inspect.cleandoc(bot.get_cog(command).__doc__), colour=0x00ff00)
-        for cmd in bot.get_cog_commands(command):
-            if not cmd.hidden:
-                embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
-
-    elif bot.get_command(command) in bot.commands and not bot.get_command(command).hidden:
-        cmd_group = bot.get_command(command)
-        embed = discord.Embed(description=cmd_group.help.format(ctx.prefix), color=0x00ff00)
-        if isinstance(cmd_group, commands.Group):
-            for cmd in cmd_group.commands:
-                if not cmd.hidden:
-                    embed.add_field(name=cmd.name, value=cmd.help, inline=False)
-
-    else:
-        embed = discord.Embed(description="The parsed cog or command `{}` does not exist.".format(command), color=0xff0000)
-        command = "Error"
-
-    embed.timestamp = datetime.utcnow()
-    embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
-    embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-    print(cogs_dict)
-    await ctx.send(embed=embed)
 
 try:
     bot.run(token, reconnect=True)
+    #bot.loop.create_task(load_extensions)
 except (KeyboardInterrupt, EOFError):
     pass
