@@ -205,7 +205,7 @@ class Admin:
                 ret = await func()
         except Exception as e:
             value = stdout.getvalue()
-            await ctx.error(e, e.__class__.__name__ + ":")
+            await ctx.error(e, e.__class__.__name__ + ":", rqst_by=False)
             try:
                 return await ctx.message.add_reaction("👎")
             except discord.Forbidden:
@@ -219,14 +219,14 @@ class Admin:
 
             if ret is None:
                 if value:
-                    await ctx.success(f'```py\n{value}\n```', "Returns:")
+                    await ctx.success(f'```py\n{value}\n```', "Returns:", rqst_by=False)
                     try:
                         await ctx.message.add_reaction("👎")
                     except discord.Forbidden:
                         pass
             else:
                 self._last_result = ret
-                await ctx.success(f'```py\n{value}{ret}\n```', "Returns:")
+                await ctx.success(f'```py\n{value}{ret}\n```', "Returns:", rqst_by=False)
                 try:
                     await ctx.message.add_reaction("👍")
                 except discord.Forbidden:
