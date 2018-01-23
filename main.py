@@ -3,6 +3,7 @@ from os import environ
 import traceback
 import asyncio
 from random import choice
+import inspect
 
 import discord
 from discord.ext import commands
@@ -37,6 +38,7 @@ async def server_prefix(bots, message):
 
 bot = cc.Bot(command_prefix=server_prefix,
              description='Multiple functions, including contests, definitions, and more.')
+bot.remove_command("help")
 
 try:
     token = environ["AUTH_KEY"]
@@ -61,14 +63,14 @@ async def on_ready():
     bot.owner = (await bot.application_info()).owner
     await bot.user.edit(username="Kern")
     await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
-    bot.loop.create_task(statusChanger())
+    bot.loop.create_task(status_changer())
     await load_extensions(bot)
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
 
-async def statusChanger():
+async def status_changer():
     status_messages = [discord.Game(name="for new contests.", type=3),
                        discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
     while not bot.is_closed():
@@ -78,6 +80,8 @@ async def statusChanger():
 
 @bot.event
 async def on_message(message: discord.Message):
+    if bot.database is None:
+        return
     async with bot.database.lock:
         if " && " in message.content:
             cmds_run_before = []
@@ -126,7 +130,7 @@ async def reload_cog(ctx, cog_name: str):
 async def cogs_list(ctx):
     """List the loaded cogs"""
     des = ""
-    for ext, enabled in bot.extensions.items():
+    for ext, enabled in bot.exts.items():
         if enabled:
             des += ":white_small_square: {}\n".format(ext)
         else:
@@ -136,22 +140,24 @@ async def cogs_list(ctx):
 @cogs.command(name="unload", aliases=['disable', 'remove'])
 async def cogs_unload(ctx, cog_name: str):
     """Unloads a cog"""
-    if bot.extensions[cog_name.lower()]:
-        bot.extensions[cog_name.lower()] = False
+    if bot.exts[cog_name.lower()]:
         bot.unload_extension("cogs." + cog_name)
+        bot.exts[cog_name.lower()] = False
+        print("Cog unloaded.")
         await ctx.success(f"`Cog {cog_name} unloaded.`")
     else:
-        await ctx.neutral(f"`Cog {cog_name} already unloaded..`")
+        await ctx.neutral(f"`Cog {cog_name} already unloaded.`", "Nothing happened")
 
 @cogs.command(name="load", aliases=['enable', 'add'])
 async def cogs_load(ctx, cog_name: str):
     """Loads a cog"""
-    if not bot.extensions[cog_name.lower()]:
-        bot.extensions[cog_name.lower()] = True
-        bot.unload_extension("cogs." + cog_name)
+    if not bot.exts[cog_name.lower()]:
+        bot.load_extension("cogs." + cog_name)
+        bot.exts[cog_name.lower()] = True
+        print("Cog loaded.")
         await ctx.success(f"`Cog {cog_name} loaded.`")
     else:
-        await ctx.neutral(f"`Cog {cog_name} already loaded..`")
+        await ctx.neutral(f"`Cog {cog_name} already loaded.`", "Nothing happened")
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -204,38 +210,40 @@ async def on_command_error(ctx, error):
         print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
 
 @bot.command(name="help")
-async def _help(self, ctx, command: str = None):
-    """Shows this message. Does not display details for each command yet."""
-    cogs = {}
-    for cmd in self.bot.commands:
+async def _help(ctx, command: str = None):
+    """Shows this message."""
+    cogs_dict = {}
+    for cmd in bot.commands:
+        print('hio')
         if cmd.hidden:
             continue
-        if not cmd.cog_name in cogs:
-            cogs[cmd.cog_name] = []
+        if not cmd.cog_name in cogs_dict:
+            cogs_dict[cmd.cog_name] = []
         aliases = ", ".join(cmd.aliases)
         if not aliases:
-            cogs[cmd.cog_name].append(cmd.qualified_name)
+            cogs_dict[cmd.cog_name].append(cmd.qualified_name)
         else:
-            cogs[cmd.cog_name].append("{} [{}]".format(cmd.qualified_name, ", ".join(cmd.aliases)))
-    for cog in cogs.copy():
-        cogs[cog] = sorted(cogs[cog])
+            cogs_dict[cmd.cog_name].append("{} [{}]".format(cmd.qualified_name, ", ".join(cmd.aliases)))
+    for cog in cogs_dict.copy():
+        cogs_dict[cog] = sorted(cogs_dict[cog])
 
     if command is None:
+        print('hiod')
         command = "Help"
         embed = discord.Embed(description="{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(
-            self.bot.description, ctx.clean_prefix()), color=0x00ff00)
-        for cog in sorted(cogs):
-            embed.add_field(name=cog, value=", ".join(cogs[cog]), inline=False)
+            bot.description, ctx.clean_prefix()), color=0x00ff00)
+        for cog in sorted(cogs_dict):
+            embed.add_field(name=cog, value=", ".join(cogs_dict[cog]), inline=False)
 
-    elif command.capitalize() in cogs:
+    elif command.capitalize() in cogs_dict:
         command = command.capitalize()
-        embed = discord.Embed(description=inspect.cleandoc(self.bot.get_cog(command).__doc__), colour=0x00ff00)
-        for cmd in self.bot.get_cog_commands(command):
+        embed = discord.Embed(description=inspect.cleandoc(bot.get_cog(command).__doc__), colour=0x00ff00)
+        for cmd in bot.get_cog_commands(command):
             if not cmd.hidden:
                 embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
 
-    elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
-        cmd_group = self.bot.get_command(command)
+    elif bot.get_command(command) in bot.commands and not bot.get_command(command).hidden:
+        cmd_group = bot.get_command(command)
         embed = discord.Embed(description=cmd_group.help.format(ctx.prefix), color=0x00ff00)
         if isinstance(cmd_group, commands.Group):
             for cmd in cmd_group.commands:
@@ -249,6 +257,7 @@ async def _help(self, ctx, command: str = None):
     embed.timestamp = datetime.utcnow()
     embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
     embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+    print(cogs_dict)
     await ctx.send(embed=embed)
 
 try:
