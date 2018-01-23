@@ -248,11 +248,11 @@ class Misc:
 
     def make_commands(self):
         cogs_dict = OrderedDict()
-        for cog in self.bot.exts:
-            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog.capitalize()) if not cmd.hidden]
-        for cmd in [cmd for cmd in self.bot.commands]:
+        for cog in self.bot.cogs:
+            cogs_dict[cog.name] = cogs_dict.get(cog.name, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
+        for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden:
-                cogs_dict['None'] = cogs_dict.get('None', []) + [[cmd.name] + cmd.aliases]
+                cogs_dict['No Category'] = cogs_dict.get('No Category', []) + [[cmd.name] + cmd.aliases]
         cogs_dict = OrderedDict([(key, val) for key, val in cogs_dict.items() if val])
         return cogs_dict
 
