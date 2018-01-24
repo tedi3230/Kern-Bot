@@ -55,7 +55,7 @@ class CustomContext(commands.Context):
         user = self.bot.user
         prefix = self.prefix.replace(user.mention, '@' + user.name)
         return prefix
-    async def error(self, error, title="Error:", channel: discord.TextChannel = None, rqst_by=True, *args, **kwargs):
+    async def error(self, error, *args, title="Error:", channel: discord.TextChannel = None, rqst_by=True, **kwargs):
         error_embed = discord.Embed(title=str(title), colour=0xff0000, description=str(error))
         if rqst_by:
             error_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
@@ -64,7 +64,7 @@ class CustomContext(commands.Context):
             return await super().send(embed=error_embed, *args, **kwargs)
         return await channel.send(embed=error_embed, *args, **kwargs)
 
-    async def success(self, success, title="Success:", channel: discord.TextChannel = None, rqst_by=True, *args, **kwargs):
+    async def success(self, success, *args, title="Success:", channel: discord.TextChannel = None, rqst_by=True, **kwargs):
         success_embed = discord.Embed(title=title, colour=0x00ff00, description=success)
         if rqst_by:
             success_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
@@ -73,7 +73,7 @@ class CustomContext(commands.Context):
             return await super().send(embed=success_embed, *args, **kwargs)
         return await channel.send(embed=success_embed, *args, **kwargs)
 
-    async def neutral(self, text, title, channel: discord.TextChannel = None, rqst_by=True, *args, **kwargs):
+    async def neutral(self, text, *args, title, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
         neutral_embed = discord.Embed(title=title, colour=discord.Colour.blurple(), description=text)
         if rqst_by:
             neutral_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
