@@ -60,6 +60,11 @@ async def on_connect():
     bot.database = db.Database(bot)
 
 @bot.event
+async def on_guild_join(guild: discord.Guild):
+    e = discord.Embed(title="Joined {}".format(guild.name), description=datetime.utcnow().strftime(bot.time_format), colour=discord.Colour.green())
+    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+
+@bot.event
 async def on_ready():
     await load_extensions(bot)
     await bot.change_presence(status=discord.Status.online)
