@@ -56,13 +56,17 @@ async def load_extensions(bots):
             await bot.close()
 
 @bot.event
+async def on_connect():
+    bot.database = db.Database(bot)
+
+@bot.event
 async def on_ready():
     await load_extensions(bot)
-    bot.database = db.Database(bot)
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     await bot.user.edit(username="Kern")
-    await bot.get_channel(bot.bot_logs_id).send("Bot Online at {}".format(datetime.utcnow().strftime(bot.time_format)))
+    e = discord.Embed(title="Bot Online:", description=datetime.utcnow().strftime(bot.time_format), colour=discord.Colour.green())
+    await bot.get_channel(bot.bot_logs_id).send(embed=e)
     bot.loop.create_task(status_changer())
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
