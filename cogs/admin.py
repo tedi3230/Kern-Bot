@@ -205,7 +205,7 @@ class Admin:
                 ret = await func()
         except Exception as e:
             value = stdout.getvalue()
-            await ctx.error(str(e), e.__class__.__name__ + ":", rqst_by=False)
+            await ctx.error(f'```py\n{e}\n```', e.__class__.__name__ + ":", rqst_by=False)
             try:
                 return await ctx.message.add_reaction("👎")
             except discord.Forbidden:
