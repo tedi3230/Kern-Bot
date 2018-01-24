@@ -3,12 +3,15 @@ from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 from collections import OrderedDict
+import asyncio
+from concurrent.futures import FIRST_COMPLETED
 
 import discord
 from discord.ext import commands
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
+
 
 class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -36,6 +39,14 @@ class Bot(commands.Bot):
         for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
             self.exts[e] = True
 
+    async def wait(self, events, *, check=None, timeout=None):
+        to_wait = [self.wait_for(event, check=check) for event in events]
+        done, pending = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
+        r = done.pop().result()
+        if isinstance(r, tuple):
+            return r
+        return (r, )
+
     class ResponseError(Exception):
         pass
 
@@ -45,7 +56,7 @@ class CustomContext(commands.Context):
         prefix = self.prefix.replace(user.mention, '@' + user.name)
         return prefix
     async def error(self, error, title="Error:", channel: discord.TextChannel = None, rqst_by=True, *args, **kwargs):
-        error_embed = discord.Embed(title=title, colour=0xff0000, description=error)
+        error_embed = discord.Embed(title=str(title), colour=0xff0000, description=str(error))
         if rqst_by:
             error_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
         error_embed.timestamp = datetime.utcnow()
