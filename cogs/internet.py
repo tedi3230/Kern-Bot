@@ -85,10 +85,10 @@ class Internet:
         await ctx.neutral(results, f"YouTube Search Results for: {keyword}")
 
     @youtube.command()
-    async def trending(self, ctx):
+    async def trending(self, ctx, num_results=5):
         """Gets current trending videos"""
         url = "https://www.youtube.com/feed/trending"
-        vids = await self.get_youtube_videos(url, 77)
+        vids = await self.get_youtube_videos(url, 77, num_results)
         results = "\n".join([f"{index+1}) {title}" for index, title in enumerate(vids)])
         await ctx.neutral(results, "YouTube Trending")
 
