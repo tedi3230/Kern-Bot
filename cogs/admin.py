@@ -16,13 +16,13 @@ async def message_purge_perm_check(ctx):
     await ctx.send("You do not have valid permissions to do this. (Manage Messages Permission).")
     return False
 
+
 class Admin:
     """Administration commands."""
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None
-
 
     @commands.group(hidden=True)
     async def vps(self, ctx):
