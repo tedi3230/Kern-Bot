@@ -10,7 +10,6 @@ from discord.ext import commands
 
 class Misc:
     """Miscellaneous functions"""
-
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
