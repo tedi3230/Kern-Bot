@@ -136,7 +136,7 @@ class Misc:
 
     def make_commands(self):
         cogs_dict = OrderedDict()
-        for cog in self.bot.cogs:
+        for cog in self.bot.cogs.values():
             cogs_dict[cog.name] = cogs_dict.get(cog.name, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
         for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden:
