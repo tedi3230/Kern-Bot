@@ -28,7 +28,6 @@ protocols = ['ssh',
 
 class Internet:
     """Web functions (that make requests)"""
-
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
@@ -50,12 +49,13 @@ class Internet:
     async def search_youtube(self, ctx, keyword: str):
         """Searches YouTube for a video"""
         url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
-        vids = OrderedDict()
+        vids = []
         results = OrderedDict()
         async with aiohttp.ClientSession() as session:
             async with async_timeout.timeout(10):
                 async with session.get(url) as resp:
                     soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+
         for link in soup.find_all('a', href=True):
             url = link.get('href', "")
             title = link.get('title', "")
@@ -64,13 +64,12 @@ class Internet:
                     url = 'https://www.youtube.com' + url
                 results[title] = url
 
-        for index, vid in enumerate(results.keys()):
-            if index >= 10:
-                break
-            vids[vid] = results[vid]
+        for vid, url in results.items():
+            vids.append(f"[{vid}]({url})")
 
-        t = "\n".join([", ".join([title, url]) for title, url in vids.items()])
-        await ctx.send(t)
+        results = "\n:white_small_square: ".join(vids[:10])
+
+        await ctx.neutral(results, f"YouTube search results for *{keyword}*")
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
