@@ -181,8 +181,4 @@ async def on_command_error(ctx, error):
         print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
 
 
-try:
-    bot.run(token, reconnect=True)
-    #bot.loop.create_task(load_extensions)
-except (KeyboardInterrupt, EOFError):
-    pass
+bot.run(token, reconnect=True)
