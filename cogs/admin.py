@@ -9,9 +9,9 @@ import discord
 from discord.ext import commands
 
 async def message_purge_perm_check(ctx):
-    if commands.is_owner():
+    if ctx.bot.is_owner(ctx.author):
         return True
-    elif commands.has_permissions(manage_messages=True):
+    elif ctx.author.permissions_in(ctx.channel).manage_messages:
         return True
     await ctx.send("You do not have valid permissions to do this. (Manage Messages Permission).")
     return False
@@ -22,6 +22,7 @@ class Admin:
         self.bot = bot
         self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None
+
 
     @commands.group(hidden=True)
     async def vps(self, ctx):
