@@ -65,9 +65,9 @@ class Internet:
         for vid, url in results.items():
             vid = vid.replace("[", "⦋").replace("]", "⦌")
             if vid.isupper():
-                vid = vid[:60] + "..."
-            if len(vid) > 80:
-                vid = vid[:80] + "..."
+                vid = vid[:57] + "..."
+            if len(vid) > 77:
+                vid = vid[:77] + "..."
             vids.append(f"[{vid}]({url})")
 
         return vids[:5]
@@ -89,7 +89,7 @@ class Internet:
         """Gets current trending videos"""
         url = "https://www.youtube.com/feed/trending"
         vids = await self.get_youtube_videos(url)
-        results = "\n".join([f"{index}) {title}" for index, title in enumerate(vids)])
+        results = "\n".join([f"{index+1}) {title}" for index, title in enumerate(vids)])
         await ctx.neutral(results, "YouTube Trending")
 
     @youtube.command()
