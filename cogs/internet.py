@@ -65,7 +65,7 @@ class Internet:
         for vid, url in results.items():
             vid = vid.replace("[", "⦋").replace("]", "⦌")
             if vid.isupper():
-                vid = vid[:cutoff_length * 3/4)] + "..."
+                vid = vid[:cutoff_length * 3/4] + "..."
             if len(vid) > cutoff_length:
                 vid = vid[:cutoff_length] + "..."
             vids.append(f"[{vid}]({url})")
