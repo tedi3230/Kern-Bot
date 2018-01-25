@@ -33,6 +33,7 @@ class Bot(commands.Bot):
                     07. Custom context
                     08. Stackexchange search - https://api.stackexchange.com/docs
                     09. Make prefixes a list (for multiple)
+                    10. Add YouTube command
                     ```
                     """
         self.exts = OrderedDict()
