@@ -26,7 +26,7 @@ protocols = ['ssh',
              'tcp',
              'ipoac']
 
-class WebRequests:
+class Internet:
     """Web functions (that make requests)"""
 
     def __init__(self, bot):
@@ -158,4 +158,4 @@ class WebRequests:
             await sleep(5)
 
 def setup(bot):
-    bot.add_cog(WebRequests(bot))
+    bot.add_cog(Internet(bot))
