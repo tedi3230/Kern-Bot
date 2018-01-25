@@ -76,7 +76,7 @@ class Internet:
     async def youtube(self, ctx, *, keyword: str):
         """Searches YouTube for a video"""
         url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
-        vids = self.get_youtube_videos(url)
+        vids = await self.get_youtube_videos(url)
 
         if len(keyword) > 40:
             keyword = keyword[:40] + "..."
@@ -88,7 +88,7 @@ class Internet:
     async def trending(self, ctx):
         """Gets current trending videos"""
         url = "https://www.youtube.com/feed/trending"
-        vids = self.get_youtube_videos(url)
+        vids = await self.get_youtube_videos(url)
         results = "\n".join([f"{index}) {title}" for index, title in enumerate(vids)])
         await ctx.neutral(results, "YouTube Trending")
 
