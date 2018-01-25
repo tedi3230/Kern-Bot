@@ -136,8 +136,8 @@ class Misc:
 
     def make_commands(self):
         cogs_dict = OrderedDict()
-        for name, cog in self.bot.cogs.items():
-            cogs_dict[name] = cogs_dict.get(name, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
+        for cog in self.bot.cogs:
+            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
         for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden:
                 cogs_dict['No Category'] = cogs_dict.get('No Category', []) + [[cmd.name] + cmd.aliases]
@@ -148,7 +148,6 @@ class Misc:
     async def _help(self, ctx, command: str = None):
         """Shows this message."""
         cogs_dict = self.make_commands()
-        print(cogs_dict)
         embed = discord.Embed(color=discord.Colour.green())
         if command is None:
             command = "Help"
@@ -160,7 +159,6 @@ class Misc:
                         commands_l += ["{} [{}]".format(cmd[0], ", ".join(cmd[1:]))]
                     else:
                         commands_l += [cmd[0]]
-                print(cog.capitalize(), ", ".join(commands_l))
                 embed.add_field(name=cog.capitalize(), value=", ".join(commands_l), inline=False)
 
         elif command in self.bot.exts:
