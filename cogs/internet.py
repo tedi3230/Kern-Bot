@@ -86,6 +86,7 @@ class Internet:
 
     @youtube.command()
     async def trending(self, ctx):
+        """Gets current trending videos"""
         url = "https://www.youtube.com/feed/trending"
         vids = self.get_youtube_videos(url)
         results = "\n".join([f"{index}) {title}" for index, title in enumerate(vids)])
@@ -93,10 +94,12 @@ class Internet:
 
     @youtube.command()
     async def channel(self, ctx, channel):
+        """Get a channel's latest videos"""
         pass
 
     @youtube.command()
     async def playlist(self, ctx, playlist):
+        """Get a playlist's 1st 5 videos"""
         pass
 
     @commands.command()
