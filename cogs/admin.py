@@ -48,7 +48,6 @@ class Admin:
         if ctx.channel != self.bot_logs:
             await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:")
         await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", channel=self.bot_logs)
-        await self.bot_logs.send("Restarting bot.")
         print("\nRestarting...\n")
         await self.bot.logout()
         execl(executable, 'python "' + "".join(argv) + '"')
