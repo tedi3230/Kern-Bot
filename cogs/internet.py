@@ -45,12 +45,10 @@ class Internet:
             self.streamable_user = auth[0].strip('\n')
             self.streamable_password = auth[1]
 
-    @commands.command(name="youtube")
-    async def search_youtube(self, ctx, *, keyword: str):
-        """Searches YouTube for a video"""
-        url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
-        vids = []
+    async def get_youtube_videos(self, url):
         results = OrderedDict()
+        vids = []
+
         async with aiohttp.ClientSession() as session:
             async with async_timeout.timeout(10):
                 async with session.get(url) as resp:
@@ -72,11 +70,34 @@ class Internet:
                 vid = vid[:80] + "..."
             vids.append(f"[{vid}]({url})")
 
+        return vids[:5]
+
+    @commands.group("youtube", invoke_without_command=True)
+    async def youtube(self, ctx, *, keyword: str):
+        """Searches YouTube for a video"""
+        url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
+        vids = self.get_youtube_videos(url)
+
         if len(keyword) > 40:
             keyword = keyword[:40] + "..."
 
-        results = "\n".join(vids[:5])
+        results = "\n".join(vids)
         await ctx.neutral(results, f"YouTube Search Results for: {keyword}")
+
+    @youtube.command()
+    async def trending(self, ctx):
+        url = "https://www.youtube.com/feed/trending"
+        vids = self.get_youtube_videos(url)
+        results = "\n".join([f"{index}) {title}" for index, title in enumerate(vids)])
+        await ctx.neutral(results, "YouTube Trending")
+
+    @youtube.command()
+    async def channel(self, ctx, channel):
+        pass
+
+    @youtube.command()
+    async def playlist(self, ctx, playlist):
+        pass
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
