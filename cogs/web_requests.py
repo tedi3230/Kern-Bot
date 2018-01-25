@@ -27,7 +27,7 @@ protocols = ['ssh',
              'ipoac']
 
 class WebRequests:
-    """Miscellaneous functions"""
+    """Web functions (that make requests)"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -48,6 +48,7 @@ class WebRequests:
 
     @commands.command(name="youtube")
     async def search_youtube(self, ctx, keyword: str):
+        """Searches YouTube for a video"""
         url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
         vids = OrderedDict()
         results = OrderedDict()
