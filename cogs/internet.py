@@ -46,7 +46,7 @@ class Internet:
             self.streamable_password = auth[1]
 
     @commands.command(name="youtube")
-    async def search_youtube(self, ctx, keyword: str):
+    async def search_youtube(self, ctx, *, keyword: str):
         """Searches YouTube for a video"""
         url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
         vids = []
@@ -65,11 +65,18 @@ class Internet:
                 results[title] = url
 
         for vid, url in results.items():
+            vid = vid.replace("[", "⦋").replace("]", "⦌")
+            if vid.isupper():
+                vid = vid[:60] + "..."
+            if len(vid) > 80:
+                vid = vid[:80] + "..."
             vids.append(f"[{vid}]({url})")
 
-        results = "\n:white_small_square: ".join(vids[:10])
+        if len(keyword) > 40:
+            keyword = keyword[:40] + "..."
 
-        await ctx.neutral(results, f"YouTube search results for *{keyword}*")
+        results = "\n".join(vids[:5])
+        await ctx.neutral(results, f"YouTube Search Results for: {keyword}")
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
