@@ -45,7 +45,7 @@ class Internet:
             self.streamable_user = auth[0].strip('\n')
             self.streamable_password = auth[1]
 
-    async def get_youtube_videos(self, url):
+    async def get_youtube_videos(self, url, cutoff_length=80, results=5):
         results = OrderedDict()
         vids = []
 
@@ -65,12 +65,12 @@ class Internet:
         for vid, url in results.items():
             vid = vid.replace("[", "⦋").replace("]", "⦌")
             if vid.isupper():
-                vid = vid[:57] + "..."
-            if len(vid) > 77:
-                vid = vid[:77] + "..."
+                vid = vid[:cutoff_length * 3/4)] + "..."
+            if len(vid) > cutoff_length:
+                vid = vid[:cutoff_length] + "..."
             vids.append(f"[{vid}]({url})")
 
-        return vids[:5]
+        return vids[:results]
 
     @commands.group("youtube", invoke_without_command=True)
     async def youtube(self, ctx, *, keyword: str):
@@ -88,7 +88,7 @@ class Internet:
     async def trending(self, ctx):
         """Gets current trending videos"""
         url = "https://www.youtube.com/feed/trending"
-        vids = await self.get_youtube_videos(url)
+        vids = await self.get_youtube_videos(url, 77)
         results = "\n".join([f"{index+1}) {title}" for index, title in enumerate(vids)])
         await ctx.neutral(results, "YouTube Trending")
 
