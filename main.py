@@ -53,7 +53,7 @@ async def load_extensions(bots):
         except (discord.ClientException, ModuleNotFoundError):
             print(f'Failed to load extension {extension}.')
             traceback.print_exc()
-            await bot.close()
+            await bot.logout()
 
 @bot.event
 async def on_connect():
