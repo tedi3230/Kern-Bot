@@ -35,7 +35,7 @@ async def server_prefix(bots, message):
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
-bot = cc.Bot(command_prefix=server_prefix,
+bot = cc.KernBot(command_prefix=server_prefix,
              description='Multiple functions, including contests, definitions, and more.')
 
 try:
