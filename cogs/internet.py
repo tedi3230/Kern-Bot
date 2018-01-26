@@ -2,6 +2,7 @@ import random
 from os import environ, path
 from asyncio import sleep
 from collections import OrderedDict
+from datetime import datetime
 
 import aiohttp
 import async_timeout
@@ -26,6 +27,7 @@ protocols = ['ssh',
              'tcp',
              'ipoac']
 
+
 class Internet:
     """Web functions (that make requests)"""
     def __init__(self, bot):
@@ -45,7 +47,7 @@ class Internet:
             self.streamable_user = auth[0].strip('\n')
             self.streamable_password = auth[1]
 
-    async def get_youtube_videos(self, url, cutoff_length=80, results=5):
+    async def get_youtube_videos(self, url, cutoff_length=80, result_length=5):
         results = OrderedDict()
         vids = []
 
@@ -70,7 +72,7 @@ class Internet:
                 vid = vid[:cutoff_length] + "..."
             vids.append(f"[{vid}]({url})")
 
-        return vids[:results]
+        return vids[:result_length]
 
     @commands.group("youtube", invoke_without_command=True)
     async def youtube(self, ctx, *, keyword: str):
@@ -101,6 +103,43 @@ class Internet:
     async def playlist(self, ctx, playlist):
         """Get a playlist's 1st 5 videos"""
         pass
+
+    async def get_demotivators(self):
+        demotivators = {}
+        url = "https://despair.com/collections/posters"
+        async with aiohttp.ClientSession() as session:
+            async with async_timeout.timeout(10):
+                async with session.get(url) as resp:
+                    soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+
+            for div_el in soup.find_all('div', {'class':'column'}):
+                a_el = div_el.a
+                if a_el and a_el.div:
+                    title = a_el['title']
+                    img_url = "http:" + a_el.div.img['data-src']
+                    print(img_url)
+                    product_url = "http://despair.com" + a_el['href']
+                    quote = a_el.find('span', {'class':'price'}).p.string
+                    demotivators[title.lower()] = {'title': title, 'img_url': img_url, 'quote': quote, 'product_url': product_url}
+
+        return demotivators
+
+    @commands.command()
+    async def demotivate(self, ctx, *, search_term):
+        await ctx.trigger_typing()
+        search_term = search_term.lower()
+        demotivators = await self.get_demotivators()
+        dem = demotivators.get(search_term)
+        print(demotivators.keys())
+        if dem is None:
+            return await ctx.error("No demotivator found.")
+        e = discord.Embed(colour=discord.Colour.green(), description=dem['quote'])
+        e.set_author(name=dem['title'], url=dem['product_url'],
+                     icon_url="http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png?3483196325227810892")
+        e.set_footer(text="Data from Despair, Inc • Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+        e.timestamp = datetime.utcnow()
+        e.set_image(url=dem['img_url'])
+        await ctx.send(embed=e)
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
