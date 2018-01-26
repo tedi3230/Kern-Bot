@@ -13,7 +13,7 @@ async def bot_user_check(ctx):
     return not ctx.author.bot
 
 
-class Bot(commands.Bot):
+class KernBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.database = None
@@ -29,11 +29,11 @@ class Bot(commands.Bot):
                     03. Fix the error with overload in define function (total = 15)
                     04. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
                     05. Hack Command - add fake attack
-                    06. Server rules (database - rules) - custom titles
-                    07. Custom context
-                    08. Stackexchange search - https://api.stackexchange.com/docs
-                    09. Make prefixes a list (for multiple)
-                    10. Add YouTube command
+                    06. Server Rules (datbase table Rules). Custom titles as well
+                    07. Stackexchange search - https://api.stackexchange.com/docs
+                    08. Make prefixes a list (for multiple)
+                    09. Add YouTube command
+                    10. Make "Statistics" module https://etn.spacepools.org/#tools + others
                     ```
                     """
         self.exts = OrderedDict()
