@@ -13,7 +13,7 @@ async def manage_server_check(ctx):
 
 class Contests:
     """Contest functions"""
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
