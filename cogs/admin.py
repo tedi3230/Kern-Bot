@@ -14,7 +14,7 @@ async def message_purge_perm_check(ctx):
         return True
     elif ctx.author.permissions_in(ctx.channel).manage_messages:
         return True
-    await ctx.send("You do not have valid permissions to do this. (Manage Messages Permission).")
+    await ctx.error("Manage messages is required to run `{}`".format(ctx.command), "Invalid Permissions")
     return False
 
 
@@ -32,14 +32,14 @@ class Admin:
     @commands.is_owner()
     @vps.command()
     async def stop(self, ctx):
-        await ctx.send("Stopping VPS instance")
         system('heroku ps:scale worker=0 --app discord-kern-bot')
+        await ctx.success("Stopping VPS instance")
 
     @commands.is_owner()
     @vps.command()
     async def start(self, ctx):
-        await ctx.send("Starting VPS instance")
         system('heroku ps:scale worker=1 --app discord-kern-bot')
+        await ctx.success("Starting VPS instance")
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=['restart'])
@@ -65,7 +65,7 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def leave(self, ctx):
-        await ctx.send("Leaving `{}`".format(ctx.guild))
+        await ctx.success("Leaving `{}`".format(ctx.guild))
         await ctx.guild.leave()
 
     @commands.check(message_purge_perm_check)
@@ -74,13 +74,13 @@ class Admin:
         async for message in ctx.channel.history(limit=100):
             if message.author == self.bot.user:
                 await message.delete()
-                await ctx.send("Message deleted")
+                await ctx.success("Message deleted.")
                 await asyncio.sleep(5)
 
                 if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                     await ctx.message.delete()
                 return
-        await ctx.send("No messages were found.")
+        await ctx.error("No messages were found.")
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True)
@@ -95,14 +95,17 @@ class Admin:
                 total_deleted += len(deleted)
             deleted = await ctx.channel.purge(limit=num_messages, check=is_me, bulk=False)
             total_deleted += len(deleted)
-            await ctx.send("Messages cleaned `{}/{}`".format(total_deleted, num_messages))
+            await ctx.success("`{}/{}`".format(total_deleted, num_messages), "Messages Cleaned")
 
         else:
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
-                await ctx.send("Messages cleaned `{}/{}`".format(len(deleted), num_messages), delete_after=10)
+                await ctx.success("`{}/{}`".format(len(deleted), num_messages), "Messages Cleaned", delete_after=10)
             else:
-                await ctx.send(":octagonal_sign: This bot does not have the required permissions to delete messages.\nInstead, use: `{} clean <num_messages> True`".format(ctx.prefix), delete_after=10)
+                await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
+                                    Instead, use: `{} clean <num_messages> True`""".format(ctx.prefix),
+                                    "Invalid Permissions",
+                                    delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
@@ -111,12 +114,12 @@ class Admin:
             msg = await ctx.get_message(m_id)
             if msg.author == self.bot.user:
                 await msg.delete()
-                await ctx.send("Message deleted")
+                await ctx.success("Message deleted")
                 if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                     await asyncio.sleep(5)
                     await ctx.message.delete()
             else:
-                await ctx.send("The bot did not send that message.")
+                await ctx.error("The bot did not send that message.")
                 if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                     await asyncio.sleep(5)
                     await ctx.message.delete()
@@ -125,10 +128,10 @@ class Admin:
     async def roles(self, ctx, *, member: discord.Member = None):
         if member is None:
             roles = ", ".join([role.name.strip('@') for role in ctx.guild.roles])
-            await ctx.send(f"Roles for `{ctx.guild.name}`:```ini\n[{roles}]```")
+            await ctx.success(f"```ini\n[{roles}]```", f"Roles for `{ctx.guild.name}`:")
         else:
             roles = ", ".join([role.name.strip('@') for role in member.roles])
-            await ctx.send(f"Roles for `{member.display_name}`: ```ini\n[{roles}]```")
+            await ctx.success("```ini\n[{roles}]```", f"Roles for `{member.display_name}`:")
 
     @commands.group(hidden=True, aliases=["permissions"])
     async def perms(self, ctx):
@@ -139,13 +142,13 @@ class Admin:
         if here == "here":
             perms = ", ".join([perm[0] for perm in ctx.chanel.permissions_for(member) if perm[1]])
             if member == ctx.guild.me:
-                await ctx.send(f"My permissions in {ctx.channel.mention}: ```ini\n[{perms}]```")
+                await ctx.success(f"```ini\n[{perms}]```", f"My permissions in {ctx.channel.mention}")
             elif here == "":
-                await ctx.send(f"Permissions for member `{member}` in {ctx.channel.mention}: ```ini\n[{perms}]```")
+                await ctx.success(f"In {ctx.channel.mention}: ```ini\n[{perms}]```", f"Permissions for member `{member}`")
         else:
             perms = ", ".join([perm[0] for perm in member.guild_permissions if perm[1]])
             if member == ctx.guild.me:
-                await ctx.send(f"My permissions: ```ini\n[{perms}]```")
+                await ctx.success(f"```ini\n[{perms}]```", f"My permissions: ")
             else:
                 await ctx.send(f"Permissions for member `{member}`: ```ini\n[{perms}]```")
 
