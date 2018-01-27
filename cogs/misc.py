@@ -114,7 +114,7 @@ class Misc:
                 if isinstance(channel, discord.TextChannel):
                     prefix += "📨"
                     if channel.is_nsfw():
-                        prefix += "⚠"
+                        prefix += "⛔"
                 elif isinstance(channel, discord.VoiceChannel):
                     prefix += "🔊"
                 tree_string += "|  |--{}\n".format(prefix + " " + channel.name.lower())
