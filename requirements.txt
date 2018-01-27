@@ -20,4 +20,4 @@ websockets==3.4
 wrapt==1.10.11
 yarl==0.17.0
 tabulate==0.8.2
-fuzzyfinger==2.0.0
+fuzzyfinder==2.0.0
