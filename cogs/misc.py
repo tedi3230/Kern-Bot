@@ -134,6 +134,7 @@ class Misc:
     @commands.command(hidden=True)
     async def echo(self, ctx, *, text):
         await ctx.send(text)
+        print(text)
 
     @commands.command()
     async def source(self, ctx, *, command: str = None):
