@@ -40,21 +40,19 @@ class Dictionary:
                         yield [lexicalEntry.get('lexicalCategory', ''), *[subsense.get(key, []) for key in keys]]
 
     async def _get_dic_request(self, url):
-        async with aiohttp.ClientSession() as session:
-            with async_timeout.timeout(10):
-                async with session.get(url, headers=self.headers) as response:
-                    if not response.status == 200:
-                        return
-                    r_json = await response.json()
-                    return r_json['results']
+        with async_timeout.timeout(10):
+            async with self.bot.session.get(url, headers=self.headers) as response:
+                if not response.status == 200:
+                    return
+                r_json = await response.json()
+                return r_json['results']
 
     async def _get_key(self, term):
         parameters = {'q': term}
-        async with aiohttp.ClientSession() as session:
-            with async_timeout.timeout(10):
-                async with session.post(self.image_base_url, data=parameters) as response:
-                    text_response = await response.text()
-            return re.search(r'vqd=(\d+)\&', text_response, re.M | re.I)
+        with async_timeout.timeout(10):
+            async with self.bot.session.post(self.image_base_url, data=parameters) as response:
+                text_response = await response.text()
+        return re.search(r'vqd=(\d+)\&', text_response, re.M | re.I)
 
     async def _get_image(self, term):
         search_obj = await self._get_key(term)
@@ -66,12 +64,11 @@ class Dictionary:
             ('f', ',,,'),
             ('p', '2')
         )
-        async with aiohttp.ClientSession() as session:
-            with async_timeout.timeout(10):
-                async with session.get(self.image_base_url + "i.js", params=params) as response:
-                    json_response = json.loads(await response.text())
-                    results = json_response['results']
-            return results[0]['image']
+        with async_timeout.timeout(10):
+            async with self.bot.session.get(self.image_base_url + "i.js", params=params) as response:
+                json_response = json.loads(await response.text())
+                results = json_response['results']
+        return results[0]['image']
 
     async def _word_not_found(self, term):
         results = await self._get_dic_request("https://od-api.oxforddictionaries.com/api/v1/search/en?q={}&prefix=false&limit=5".format(term))
