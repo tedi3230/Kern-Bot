@@ -160,16 +160,11 @@ async def on_command_error(ctx, error):
         do_send = False
         print("Cog failed to unload.")
 
-    elif isinstance(error, discord.errors.HTTPException):
-        if "Invalid Form Body" in str(error):
-            pass
-
     elif isinstance(error, bot.ResponseError):
         await ctx.error(error, "Response Code > 400:")
 
-    elif isinstance(error, ValueError):
-        if ctx.command in ['vote']:
-            await ctx.error(error, "Error while voting: ")
+    elif isinstance(error, ValueError) and ctx.command in ['vote']:
+        await ctx.error(error, "Error while voting: ")
 
     else:
         await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.get_channel(bot.bot_logs_id))
