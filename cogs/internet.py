@@ -52,10 +52,9 @@ class Internet:
         results = OrderedDict()
         vids = []
 
-        async with aiohttp.ClientSession() as session:
-            async with async_timeout.timeout(10):
-                async with session.get(url) as resp:
-                    soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+        with async_timeout.timeout(10):
+            async with self.bot.session.get(url) as resp:
+                soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
 
         for link in soup.find_all('a', href=True):
             url = link.get('href', "")
@@ -108,20 +107,18 @@ class Internet:
     async def get_demotivators(self):
         demotivators = {}
         url = "https://despair.com/collections/posters"
-        async with aiohttp.ClientSession() as session:
-            async with async_timeout.timeout(10):
-                async with session.get(url) as resp:
-                    soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+        with async_timeout.timeout(10):
+            async with self.bot.session.get(url) as resp:
+                soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
 
-            for div_el in soup.find_all('div', {'class':'column'}):
-                a_el = div_el.a
-                if a_el and a_el.div:
-                    title = a_el['title']
-                    img_url = "http:" + a_el.div.img['data-src']
-                    print(img_url)
-                    product_url = "http://despair.com" + a_el['href']
-                    quote = a_el.find('span', {'class':'price'}).p.string
-                    demotivators[title.lower()] = {'title': title, 'img_url': img_url, 'quote': quote, 'product_url': product_url}
+        for div_el in soup.find_all('div', {'class':'column'}):
+            a_el = div_el.a
+            if a_el and a_el.div:
+                title = a_el['title']
+                img_url = "http:" + a_el.div.img['data-src']
+                product_url = "http://despair.com" + a_el['href']
+                quote = a_el.find('span', {'class':'price'}).p.string
+                demotivators[title.lower()] = {'title': title, 'img_url': img_url, 'quote': quote, 'product_url': product_url}
 
         return demotivators
 
@@ -184,19 +181,17 @@ class Internet:
         await ctx.trigger_typing()
 
         async def create_video(text):
-            async with aiohttp.ClientSession() as session:
-                async with async_timeout.timeout(10):
-                    async with session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
-                        if resp.status >= 400:
-                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                        text = await resp.text()
-                        url = resp.url
+            with async_timeout.timeout(10):
+                async with self.bot.session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
+                    if resp.status >= 400:
+                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                    text = await resp.text()
+                    url = resp.url
 
             while '<source src="' not in text:
-                async with aiohttp.ClientSession() as session:
-                    async with async_timeout.timeout(10):
-                        async with session.get(url) as resp:
-                            text = await resp.text()
+                with async_timeout.timeout(10):
+                    async with self.bot.session.get(url) as resp:
+                        text = await resp.text()
 
             start = text.index('<source src="') + len('<source src="')
             end = text.index('" type="video/mp4">')
@@ -204,29 +199,27 @@ class Internet:
             return link
 
         async def upload_streamable(url):
-            async with aiohttp.ClientSession() as session:
-                with async_timeout.timeout(10):
-                    async with session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
-                        if resp.status >= 400:
-                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                        js = await resp.json()
-                        return "https://streamable.com/{}".format(js['shortcode'])
+            with async_timeout.timeout(10):
+                async with self.bot.session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
+                    if resp.status >= 400:
+                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                    js = await resp.json()
+                    return "https://streamable.com/{}".format(js['shortcode'])
 
 
         link = await create_video(text)
         url = await upload_streamable(link)
         msg = await ctx.send(url)
         while True:
-            async with aiohttp.ClientSession() as session:
-                with async_timeout.timeout(5):
-                    async with session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
-                        if resp.status >= 400:
-                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                        js = await resp.json()
-                        if js['height'] is not None:
-                            await msg.edit(content=url+'/')
-                            await msg.edit(content=url)
-                            return
+            with async_timeout.timeout(5):
+                async with self.bot.session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
+                    if resp.status >= 400:
+                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                    js = await resp.json()
+                    if js['height'] is not None:
+                        await msg.edit(content=url+'/')
+                        await msg.edit(content=url)
+                        return
             await sleep(5)
 
 def setup(bot):
