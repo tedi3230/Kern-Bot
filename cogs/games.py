@@ -2,6 +2,7 @@ import asyncio
 import html
 from datetime import datetime
 from random import shuffle
+from collections import OrderedDict
 
 import aiohttp
 import async_timeout
@@ -60,7 +61,10 @@ class Games:
             e.timestamp = datetime.utcnow()
             ques = result['incorrect_answers'] + [result['correct_answer']]
             shuffle(ques)
-            ques = {i:j for i, j in enumerate(ques)}
+            if "True" in ques:
+                ques.sort(reverse=True)
+            else:
+                ques = OrderedDict([(i, j) for i, j in enumerate(ques)])
             for index, q in enumerate(ques.values()):
                 e.description += "\n{} {}".format(EMOJIS[index + 1], html.unescape(q))
             msg = await ctx.send(embed=e)
@@ -69,7 +73,7 @@ class Games:
             await msg.add_reaction("⏹")
 
             def same(reaction, member):
-                return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"]
+                return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"] and reaction.message == msg
 
             try:
                 reaction, member = await self.bot.wait_for("reaction_add", check=same, timeout=30)
