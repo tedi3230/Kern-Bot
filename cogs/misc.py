@@ -197,16 +197,16 @@ class Misc:
             command = command.capitalize()
             embed.description = inspect.cleandoc(self.bot.get_cog(command).__doc__)
             for cmd in self.bot.get_cog_commands(command):
-                if not cmd.hidden:
+                if not cmd.hidden or self.bot.is_owner(ctx.author):
                     embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
 
-        elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
+        elif self.bot.get_command(command) in self.bot.commands and (not self.bot.get_command(command).hidden or self.bot.is_owner(ctx.author)):
             cmd_group = self.bot.get_command(command)
             embed.description = cmd_group.help.format(ctx.prefix)
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
-                    if not cmd.hidden:
-                        embed.add_field(name=cmd.name, value=cmd.help, inline=False)
+                    if not cmd.hidden or self.bot.is_owner(ctx.author):
+                        embed.add_field(name=cmd.qualified_name, value=cmd.help, inline=False)
 
         else:
             embed.description = "The parsed cog or command `{}` does not exist.".format(command)
