@@ -72,7 +72,7 @@ class Games:
                 await msg.add_reaction(EMOJIS[index + 1])
             await msg.add_reaction("⏹")
             def same(reaction, member):
-                return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"] and reaction.message == msg
+                return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"] and reaction.message.id == msg.id
 
             try:
                 reaction, member = await self.bot.wait_for("reaction_add", check=same, timeout=30)
