@@ -176,4 +176,13 @@ async def on_command_error(ctx, error):
         print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
 
 
-bot.run(token, reconnect=True)
+loop = asyncio.get_event_loop()
+try:
+    loop.run_until_complete(bot.start(token, reconnect=True))
+except KeyboardInterrupt:
+    loop.run_until_complete(bot.logout())
+    # cancel all tasks lingering
+finally:
+    bot.session.close()
+    bot.database.pool.close()
+    loop.close()
