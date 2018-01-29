@@ -181,8 +181,8 @@ try:
     loop.run_until_complete(bot.start(token, reconnect=True))
 except KeyboardInterrupt:
     loop.run_until_complete(bot.logout())
+    loop.run_until_complete(bot.database.pool.close())
     # cancel all tasks lingering
 finally:
     bot.session.close()
-    bot.database.pool.close()
     loop.close()
