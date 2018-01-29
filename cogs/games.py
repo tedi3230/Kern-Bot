@@ -59,19 +59,18 @@ class Games:
             e = discord.Embed(title=category, description=question, colour=colour)
             e.set_footer(text="Data from Open Trivia Database", icon_url=ctx.author.avatar_url)
             e.timestamp = datetime.utcnow()
-            ques = result['incorrect_answers'] + [result['correct_answer']]
-            shuffle(ques)
-            if "True" in ques:
-                ques.sort(reverse=True)
+            answers = result['incorrect_answers'] + [result['correct_answer']]
+            shuffle(answers)
+            if "True" in answers:
+                answers.sort(reverse=True)
             else:
-                ques = OrderedDict([(i, j) for i, j in enumerate(ques)])
-            for index, q in enumerate(ques.values()):
-                e.description += "\n{} {}".format(EMOJIS[index + 1], html.unescape(q))
+                answers = OrderedDict([(i, j) for i, j in enumerate(answers)])
+            for index, question in enumerate(answers.values()):
+                e.description += "\n{} {}".format(EMOJIS[index + 1], html.unescape(question))
             msg = await ctx.send(embed=e)
-            for index, q in enumerate(ques):
+            for index in range(len(answers)):
                 await msg.add_reaction(EMOJIS[index + 1])
             await msg.add_reaction("⏹")
-
             def same(reaction, member):
                 return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"] and reaction.message == msg
 
@@ -86,7 +85,7 @@ class Games:
                 corrects = {}
                 break
 
-            corrects[ques[int(str(reaction)[0]) - 1]] = html.unescape(result['correct_answer'])
+            corrects[answers[int(str(reaction)[0]) - 1]] = html.unescape(result['correct_answer'])
 
             await msg.delete()
 
