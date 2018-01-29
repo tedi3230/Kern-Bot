@@ -28,7 +28,7 @@ class KernBot(commands.Bot):
                     01. Finish contests cog
                     02. Use logging module
                     03. Fix the error with overload in define function (total = 15)
-                    04. Finish and neaten up the help command (possibly use  HelpFormatter). Add docstrings to all commands
+                    04. Add docstrings to all commands
                     05. Hack Command - add fake attack
                     06. Server Rules (datbase table Rules). Custom titles as well
                     07. Stackexchange search - https://api.stackexchange.com/docs
