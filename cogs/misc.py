@@ -192,7 +192,7 @@ class Misc:
                         commands_l += [cmd[0]]
                 embed.add_field(name=cog.capitalize(), value=", ".join(commands_l), inline=False)
 
-        elif command in cogs_dict.keys():
+        elif command.lower() in [cog.lower() for cog in cogs_dict.keys()]:
             #actually a cog
             command = command.capitalize()
             embed.description = inspect.cleandoc(self.bot.get_cog(command).__doc__)
