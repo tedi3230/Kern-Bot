@@ -27,17 +27,20 @@ class Admin:
 
     @commands.group(hidden=True)
     async def vps(self, ctx):
+        """Commands for controlling the VPS"""
         pass
 
     @commands.is_owner()
     @vps.command()
     async def stop(self, ctx):
+        """Stops the VPS Server"""
         system('heroku ps:scale worker=0 --app discord-kern-bot')
         await ctx.success("Stopping VPS instance")
 
     @commands.is_owner()
     @vps.command()
     async def start(self, ctx):
+        """Starts the VPS server"""
         system('heroku ps:scale worker=1 --app discord-kern-bot')
         await ctx.success("Starting VPS instance")
 
@@ -65,12 +68,14 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def leave(self, ctx):
+        """Leaves this server"""
         await ctx.success("Leaving `{}`".format(ctx.guild))
         await ctx.guild.leave()
 
     @commands.check(message_purge_perm_check)
     @commands.group(hidden=True, invoke_without_command=True)
     async def delete(self, ctx):
+        """Deletes the last message sent by this bot"""
         async for message in ctx.channel.history(limit=100):
             if message.author == self.bot.user:
                 await message.delete()
@@ -85,6 +90,7 @@ class Admin:
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True)
     async def clean(self, ctx, num_messages=200, old: bool = False):
+        """Removes all messages for num_messages by this bot"""
         def is_me(m):
             return m.author == ctx.guild.me
 
@@ -110,6 +116,7 @@ class Admin:
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
     async def delete_by_id(self, ctx, *message_ids: int):
+        """Deletes a message by id. """
         for m_id in message_ids:
             msg = await ctx.get_message(m_id)
             if msg.author == self.bot.user:
@@ -126,6 +133,7 @@ class Admin:
 
     @commands.command(hidden=True)
     async def roles(self, ctx, *, member: discord.Member = None):
+        """Shows the roles of this bot"""
         if member is None:
             roles = ", ".join([role.name.strip('@') for role in ctx.guild.roles])
             await ctx.success(f"```ini\n[{roles}]```", f"Roles for `{ctx.guild.name}`:")
@@ -139,6 +147,7 @@ class Admin:
 
     @perms.command(name="user")
     async def perms_user(self, ctx, *, member: discord.Member, here: str = ""):
+        """Shows the permissions for this member."""
         if here == "here":
             perms = ", ".join([perm[0] for perm in ctx.chanel.permissions_for(member) if perm[1]])
             if member == ctx.guild.me:
@@ -154,6 +163,7 @@ class Admin:
 
     @perms.command(name="role")
     async def perms_role(self, ctx, *, role: discord.Role):
+        """Shows the permissions for a role"""
         everyone_perms = [perm for perm in ctx.guild.roles[0].permissions]
         perms = [perm for perm in role.permissions]
         neg_perms = ", ".join([perm[0] for perm in perms if perm[1] == everyone_perms[1]])
@@ -163,6 +173,7 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def servers(self, ctx):
+        """Sends the servers this bot is in"""
         await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()

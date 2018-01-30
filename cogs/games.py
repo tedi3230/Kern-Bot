@@ -22,7 +22,6 @@ class Games:
     def __init__(self, bot):
         self.bot = bot
 
-#
     async def trivia_categories(self, category):
         with async_timeout.timeout(10):
             async with self.bot.session.get("https://opentdb.com/api_category.php") as resp:

@@ -124,6 +124,7 @@ class Internet:
 
     @commands.command()
     async def demotivate(self, ctx, *, search_term):
+        """Provides an embed with a demotivating quote & poster"""
         await ctx.trigger_typing()
         search_term = search_term.lower()
         demotivators = await self.get_demotivators()
@@ -143,7 +144,7 @@ class Internet:
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
-        "Starts a fake hacking instance on a specified URL."
+        """Starts a fake hacking instance on a specified URL."""
         loading = str(self.bot.get_emoji(395834326450831370))
         thousands = str(self.bot.get_emoji(396890900783038499))
         hundreds = str(self.bot.get_emoji(396890900158218242))

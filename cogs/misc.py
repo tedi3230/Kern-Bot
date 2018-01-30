@@ -96,15 +96,18 @@ class Misc:
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def hug(self, ctx, item: str):
+    async def hug(self, ctx, *, item: str):
+        """Hugs the given item"""
         await ctx.send("«{}»".format(item))
 
     @commands.command()
-    async def kiss(self, ctx, item: str):
+    async def kiss(self, ctx, *, item: str):
+        """Kisses the given item"""
         await ctx.send(":kiss:{}:kiss:".format(item))
 
     @commands.command()
     async def tree(self, ctx):
+        """Provides a directory tree like view of the server's channels"""
         tree_string = ctx.guild.name + "\n"
         cat_list = ctx.guild.by_category()
         for cat_tup in cat_list:
@@ -124,15 +127,18 @@ class Misc:
 
     @commands.command()
     async def invite(self, ctx):
+        """Sends the bot's invite URL"""
         await ctx.send("Add to your server: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot")
 
     @commands.command()
     async def todo(self, ctx):
+        """Sends the bot's todo list"""
         await ctx.send(self.bot.todo)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def echo(self, ctx, *, text):
+        """Echoes the text sent"""
         await ctx.send(text)
         print(text)
 
