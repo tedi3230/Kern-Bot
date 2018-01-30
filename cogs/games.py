@@ -75,7 +75,7 @@ class Games:
                 return ctx.message.author == member and reaction.emoji in list(EMOJIS.values()) + ["⏹"] and reaction.message.id == msg.id
 
             try:
-                reaction, member = await self.bot.wait_for("reaction_add", check=same, timeout=30)
+                reaction, _ = await self.bot.wait_for("reaction_add", check=same, timeout=30)
             except asyncio.TimeoutError:
                 await ctx.error("You took too long to add an emoji.", "Timeout Error", rqst_by=False)
                 break
