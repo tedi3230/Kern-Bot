@@ -198,7 +198,7 @@ class Misc:
             embed.description = inspect.cleandoc(self.bot.get_cog(command).__doc__)
             for cmd in self.bot.get_cog_commands(command):
                 if not cmd.hidden:
-                    c_help = getattr(cmd, "help", "").format(ctx.clean_prefix)
+                    c_help = getattr(cmd, "help", "No description").format(ctx.clean_prefix)
                     embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
@@ -207,7 +207,7 @@ class Misc:
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
                     if not cmd.hidden:
-                        c_help = getattr(cmd, "help", "").format(ctx.clean_prefix)
+                        c_help = getattr(cmd, "help", "No description").format(ctx.clean_prefix)
                         embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         else:
