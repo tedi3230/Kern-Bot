@@ -85,8 +85,8 @@ class Contests:
             return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
         if ctx.channel.id == server_channels[0]:
             channel = ctx.guild.get_channel(server_channels[1])
-            # if ctx.author.id in [sub['owner_id'] for sub in await self.bot.database.list_contest_submissions(ctx)]:
-            #    return await ctx.error("You already have a contest submitted. To change your submission, delete it and resubmit.", "Error submitting:")
+            if ctx.author.id in [sub['owner_id'] for sub in await self.bot.database.list_contest_submissions(ctx)]:
+                raise AlreadySubmitted("You already have a contest submitted. To change your submission, delete it and resubmit.")
             submission_id = await self.bot.database.add_contest_submission(ctx, embed)
             footer_text = "Type `{0}vote {1} X` to vote for this. X is a number".format(
                 ctx.prefix, submission_id)
