@@ -176,7 +176,7 @@ class Misc:
         return cogs_dict
 
     @commands.command(name="help")
-    async def _help(self, ctx, command: str = None):
+    async def _help(self, ctx, *, command: str = None):
         """Shows this message."""
         cogs_dict = self.make_commands()
         embed = discord.Embed(color=discord.Colour.green())
@@ -192,7 +192,7 @@ class Misc:
                         commands_l += [cmd[0]]
                 embed.add_field(name=cog.capitalize(), value=", ".join(commands_l), inline=False)
 
-        elif command in self.bot.exts:
+        elif command in cogs_dict.keys():
             #actually a cog
             command = command.capitalize()
             embed.description = inspect.cleandoc(self.bot.get_cog(command).__doc__)
