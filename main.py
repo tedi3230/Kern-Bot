@@ -167,4 +167,4 @@ loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(bot.start(token, reconnect=True))
 except KeyboardInterrupt:
-    bot.suicide(loop)
+    loop.run_until_complete(bot.suicide())

@@ -50,16 +50,11 @@ class KernBot(commands.Bot):
     async def init(self):
         self.session = aiohttp.ClientSession()
 
-    def suicide(self, loop=None):
-        if loop is None:
-            loop = self.loop
-        try:
-            loop.run_until_complete(self.logout())
-            loop.run_until_complete(self.database.pool.close())
-            # cancel all tasks lingering
-        finally:
-            self.session.close()
-            loop.close()
+    async def suicide(self):
+        await self.database.pool.close()
+        self.session.close()
+        self.status_task.cancel()
+        await self.logout()
 
     async def wait(self, events, *, check=None, timeout=None):
         to_wait = [self.wait_for(event, check=check) for event in events]
@@ -69,13 +64,10 @@ class KernBot(commands.Bot):
     async def status_changer(self):
         status_messages = [discord.Game(name="for new contests.", type=3),
                            discord.Game(name="{} servers.".format(len(self.guilds)), type=3)]
-        try:
-            while not self.is_closed():
-                message = choice(status_messages)
-                await self.change_presence(game=message)
-                await asyncio.sleep(60)
-        except asyncio.CancelledError:
-            return
+        while not self.is_closed():
+            message = choice(status_messages)
+            await self.change_presence(game=message)
+            await asyncio.sleep(60)
 
     class ResponseError(Exception):
         pass
