@@ -79,8 +79,8 @@ class CustomContext(commands.Context):
         return prefix
     async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
         if isinstance(error, Exception):
+            title = error.__class__.__name__
             error = str(error)
-            title = error.__class__
         error_embed = discord.Embed(title=str(title), colour=discord.Colour.red(), description=str(error))
         if rqst_by:
             error_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
