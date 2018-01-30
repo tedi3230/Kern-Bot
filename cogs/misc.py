@@ -35,16 +35,7 @@ class Misc:
             msg = ctx.message
             msg.content = msg.content.split('raw ')[1]
 
-        transformations = {
-            re.escape(c): '\\' + c
-            for c in ('*', '`', '_', '~', '\\', '<')
-        }
-
-        def replace(obj):
-            return transformations.get(re.escape(obj.group(0)), '')
-
-        pattern = re.compile('|'.join(transformations.keys()))
-        raw = pattern.sub(replace, msg.content)
+        raw = await commands.clean_content(escape_markdown=True).convert(ctx, msg.content)
         if raw:
             raw = f"​\n{raw}\n​"
         embed_text = str()
