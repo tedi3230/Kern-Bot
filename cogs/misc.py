@@ -201,7 +201,7 @@ class Misc:
                     if cmd.help is None:
                         c_help = "No description"
                     else:
-                        c_help = cmd.help.format(ctx.clean_prefix)
+                        c_help = cmd.help.format(ctx.clean_prefix())
                     embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
@@ -209,7 +209,7 @@ class Misc:
             if cmd_group.help is None:
                 cmd_group_help = "No description"
             else:
-                cmd_group_help = cmd_group.help.format(ctx.clean_prefix)
+                cmd_group_help = cmd_group.help.format(ctx.clean_prefix())
             embed.description = cmd_group_help
             if isinstance(cmd_group, commands.Group):
                 for cmd in cmd_group.commands:
@@ -217,7 +217,7 @@ class Misc:
                         if cmd.help is None:
                             c_help = "No description"
                         else:
-                            c_help = cmd.help.format(ctx.clean_prefix)
+                            c_help = cmd.help.format(ctx.clean_prefix())
                         embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         else:
