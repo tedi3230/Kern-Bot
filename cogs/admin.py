@@ -143,6 +143,7 @@ class Admin:
 
     @commands.group(hidden=True, aliases=["permissions"])
     async def perms(self, ctx):
+        """Permissions command group top (does nothing)"""
         pass
 
     @perms.command(name="user")
