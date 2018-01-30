@@ -180,9 +180,4 @@ loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(bot.start(token, reconnect=True))
 except KeyboardInterrupt:
-    loop.run_until_complete(bot.logout())
-    loop.run_until_complete(bot.database.pool.close())
-    # cancel all tasks lingering
-finally:
-    bot.session.close()
-    loop.close()
+    bot.suicide(loop)
