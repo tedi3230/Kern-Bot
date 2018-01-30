@@ -3,9 +3,11 @@ from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 from collections import OrderedDict
-import aiohttp
 import asyncio
 from concurrent.futures import FIRST_COMPLETED
+from random import choice
+
+import aiohttp
 
 import discord
 from discord.ext import commands
@@ -43,13 +45,14 @@ class KernBot(commands.Bot):
         self.session = None
         loops = asyncio.get_event_loop()
         loops.run_until_complete(self.init())
+        self.status_task = self.loop.create_task(self.status_changer())
 
     async def init(self):
         self.session = aiohttp.ClientSession()
 
     def suicide(self, loop=None):
         if loop is None:
-                loop = self.loop
+            loop = self.loop
         try:
             loop.run_until_complete(self.logout())
             loop.run_until_complete(self.database.pool.close())
@@ -63,6 +66,17 @@ class KernBot(commands.Bot):
         done, _ = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
         return done.pop().result()
 
+    async def status_changer(self):
+        status_messages = [discord.Game(name="for new contests.", type=3),
+                           discord.Game(name="{} servers.".format(len(self.guilds)), type=3)]
+        try:
+            while not self.is_closed():
+                message = choice(status_messages)
+                await self.change_presence(game=message)
+                await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            return
+
     class ResponseError(Exception):
         pass
 
@@ -72,7 +86,7 @@ class CustomContext(commands.Context):
         prefix = self.prefix.replace(user.mention, '@' + user.name)
         return prefix
     async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
-        if issubclass(error, Exception):
+        if isinstance(error, Exception):
             error = str(error)
             title = error.__class__
         error_embed = discord.Embed(title=str(title), colour=discord.Colour.red(), description=str(error))
@@ -115,5 +129,3 @@ class Url(commands.Converter):
         url = urlparse(url).geturl()
 
         return url
-
-#class HelpFormatter(commands.HelpFormatter)
