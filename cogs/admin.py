@@ -49,7 +49,7 @@ class Admin:
             await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:")
         await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", channel=self.bot_logs)
         print("\nRestarting...\n")
-        await self.bot.logout()
+        await self.bot.suicide()
         execl(executable, 'python "' + "".join(argv) + '"')
 
     @commands.is_owner()
@@ -60,7 +60,7 @@ class Admin:
             await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:")
         await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:", channel=self.bot_logs)
         print("\nShutting Down...\n")
-        await self.bot.logout()
+        await self.bot.suicide()
 
     @commands.is_owner()
     @commands.command(hidden=True)
