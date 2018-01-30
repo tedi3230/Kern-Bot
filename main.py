@@ -72,19 +72,10 @@ async def on_ready():
     await bot.user.edit(username="Kern")
     e = discord.Embed(title="Bot Online:", description=datetime.utcnow().strftime(bot.time_format), colour=discord.Colour.green())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
-    bot.loop.create_task(status_changer())
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
-
-async def status_changer():
-    status_messages = [discord.Game(name="for new contests.", type=3),
-                       discord.Game(name="{} servers.".format(len(bot.guilds)), type=3)]
-    while not bot.is_closed():
-        message = choice(status_messages)
-        await bot.change_presence(game=message)
-        await asyncio.sleep(60)
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -136,7 +127,7 @@ async def on_command_error(ctx, error):
     do_send = True
     if hasattr(ctx.command, 'on_error'):
         return
-    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure)
+    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure, commands.CommandNotFound)
 
     error = getattr(error, 'original', error)
     if isinstance(error, ignored):
@@ -144,10 +135,6 @@ async def on_command_error(ctx, error):
 
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.error(ctx.error, "Missing Required Argument(s)")
-
-    elif isinstance(error, commands.CommandNotFound):
-        print("Command: {} not found.".format(ctx.invoked_with))
-        return
 
     elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
         pass
