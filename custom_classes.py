@@ -47,9 +47,20 @@ class KernBot(commands.Bot):
     async def init(self):
         self.session = aiohttp.ClientSession()
 
+    def suicide(self, loop=None):
+        if loop is None:
+                loop = self.loop
+        try:
+            loop.run_until_complete(self.logout())
+            loop.run_until_complete(self.database.pool.close())
+            # cancel all tasks lingering
+        finally:
+            self.session.close()
+            loop.close()
+
     async def wait(self, events, *, check=None, timeout=None):
         to_wait = [self.wait_for(event, check=check) for event in events]
-        done, pending = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
+        done, _ = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
         return done.pop().result()
 
     class ResponseError(Exception):
@@ -104,3 +115,5 @@ class Url(commands.Converter):
         url = urlparse(url).geturl()
 
         return url
+
+#class HelpFormatter(commands.HelpFormatter)
