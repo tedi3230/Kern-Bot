@@ -74,6 +74,7 @@ class Contests:
 
     @commands.command(name="list", aliases=['list_submissions'])
     async def list_s(self, ctx):
+        """Lists contest submissions for this server"""
         submissions = await self.bot.database.list_contest_submissions(ctx)
         if not submissions:
             return await ctx.error(f"The server `{ctx.guild.name}` has no contest submissions.", "No submissions")
