@@ -1,6 +1,5 @@
 from datetime import datetime
 import inspect
-import re
 from collections import OrderedDict
 import os
 
@@ -18,7 +17,7 @@ class Misc:
         self.bot.remove_command('help')
 
     @commands.command()
-    async def raw(self, ctx, *, message: int = None):
+    async def raw(self, ctx, *, message=None):
         """Displays the raw code of a message.
         The message can be a message id, some text, or nothing (in which case it will be the most recent message not by you)."""
         msg = None
@@ -45,6 +44,14 @@ class Misc:
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         embed.set_author(name="Message by: {}".format(msg.author), icon_url=msg.author.avatar_url)
         await ctx.send(embed=embed)
+
+    @raw.error
+    async def raw_error_handler(self, ctx, error):
+        error = getattr(error, 'original', error)
+        if isinstance(error, discord.NotFound):
+            return await ctx.error("Incorrect message id provided", "Message not found")
+        elif isinstance(error, ValueError):
+            return await ctx.error("Message ID not an integer", "Incorrect argument type")
 
     @commands.command()
     async def ping(self, ctx):
