@@ -4,7 +4,6 @@ from datetime import datetime
 from random import shuffle
 from collections import OrderedDict
 
-import aiohttp
 import async_timeout
 
 import discord
