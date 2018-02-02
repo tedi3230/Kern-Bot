@@ -107,8 +107,7 @@ class Misc:
     async def tree(self, ctx):
         """Provides a directory tree like view of the server's channels"""
         tree_string = ctx.guild.name + "\n"
-        cat_list = ctx.guild.by_category()
-        for cat_tup in cat_list:
+        for cat_tup in ctx.guild.by_category():
             if cat_tup[0] is not None:
                 tree_string += f"|-- {cat_tup[0].name.upper()}\n"
             for channel in cat_tup[1]:
@@ -119,7 +118,7 @@ class Misc:
                         prefix += "⛔"
                 elif isinstance(channel, discord.VoiceChannel):
                     prefix += "🔊"
-                tree_string += "|  |--{}\n".format(prefix + " " + channel.name.lower())
+                tree_string += "|  |--{}\n".format(f"{prefix} {channel.name.lower()}")
 
         await ctx.send(f"```fix\n{tree_string}```")
 
