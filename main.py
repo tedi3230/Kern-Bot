@@ -131,7 +131,7 @@ async def on_command_error(ctx, error):
         if hasattr(bot.get_cog(ctx.command.cog_name), '_' + ctx.command.cog_name + '__error'):
             return
 
-    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure, commands.CommandNotFound)
+    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure, commands.CommandNotFound, discord.Forbidden)
 
     error = getattr(error, 'original', error)
     if isinstance(error, ignored):
