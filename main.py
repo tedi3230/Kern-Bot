@@ -36,7 +36,7 @@ async def server_prefix(bots, message):
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
 bot = cc.KernBot(command_prefix=server_prefix,
-             description='Multiple functions, including contests, definitions, and more.')
+                 description='Multiple functions, including contests, definitions, and more.')
 
 try:
     token = environ["AUTH_KEY"]
@@ -140,11 +140,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.error(ctx.error, "Missing Required Argument(s)")
 
-    elif isinstance(error, TypeError) and ctx.command in ["set", "get"]:
-        pass
-
-    elif isinstance(error, asyncio.TimeoutError) and ctx.command in ['obama', 'meaning', 'synonym', 'antonym']:
-        pass
+    elif isinstance(error, asyncio.TimeoutError):
+        await ctx.error("A web request timed out. This is on our end, not yours.", "Timeout Error")
 
     elif isinstance(error, ModuleNotFoundError):
         await ctx.error(str(error).split("'")[1].capitalize(), "Cog not found:")
