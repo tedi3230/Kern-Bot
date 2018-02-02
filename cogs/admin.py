@@ -149,26 +149,18 @@ class Admin:
     @perms.command(name="user")
     async def perms_user(self, ctx, *, member: discord.Member, here: str = ""):
         """Shows the permissions for this member."""
-        if here == "here":
-            perms = ", ".join([perm[0] for perm in ctx.chanel.permissions_for(member) if perm[1]])
-            if member == ctx.guild.me:
-                await ctx.success(f"```ini\n[{perms}]```", f"My permissions in {ctx.channel.mention}")
-            elif here == "":
-                await ctx.success(f"In {ctx.channel.mention}: ```ini\n[{perms}]```", f"Permissions for member `{member}`")
+        perms = ", ".join([perm for perm in ctx.channel.permissions_for(member)])
+        if member == ctx.guild.me:
+            await ctx.success(f"```ini\n[{perms}]```", f"My permissions: ")
         else:
-            perms = ", ".join([perm[0] for perm in member.guild_permissions if perm[1]])
-            if member == ctx.guild.me:
-                await ctx.success(f"```ini\n[{perms}]```", f"My permissions: ")
-            else:
-                await ctx.send(f"Permissions for member `{member}`: ```ini\n[{perms}]```")
+            await ctx.send(f"Permissions for member `{member}`: ```ini\n[{perms}]```")
 
     @perms.command(name="role")
     async def perms_role(self, ctx, *, role: discord.Role):
         """Shows the permissions for a role"""
-        everyone_perms = [perm for perm in ctx.guild.roles[0].permissions]
         perms = [perm for perm in role.permissions]
-        neg_perms = ", ".join([perm[0] for perm in perms if perm[1] == everyone_perms[1]])
-        pos_perms = ", ".join([perm[0] for perm in perms if perm[1] != everyone_perms[1]])
+        neg_perms = ", ".join([perm[0] for perm in perms if not perm[1]])
+        pos_perms = ", ".join([perm[0] for perm in perms if perm[1]])
         await ctx.send(f"Permissions for role `{role}`: ```ini\n[{pos_perms}]``````css\n[{neg_perms}]```")
 
     @commands.is_owner()
