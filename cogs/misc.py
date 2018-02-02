@@ -85,7 +85,7 @@ class Misc:
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         ram_usage = self.process.memory_full_info().uss / 1024**2
 
-        embed = discord.Embed(title="[Invite Url](https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot)", description="Information about this bot.", color=0x00ff00)
+        embed = discord.Embed(title=f"[Invite Url](https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot)", description="Information about this bot.", color=0x00ff00)
         embed.set_author(name=str(owner), icon_url=owner.avatar_url, url="https://discord.gg/bEYgRmc")
         embed.add_field(name="Server Statistics:", value="Guilds: {}\nChannels: {}\nUsers: {}".format(total_servers, total_channels, total_members))
         embed.add_field(name="Resource Usage:", value="CPU: {:.2f} %\nRAM: {:.2f} MiB".format(cpu_usage, ram_usage))
@@ -126,7 +126,7 @@ class Misc:
     @commands.command()
     async def invite(self, ctx):
         """Sends the bot's invite URL"""
-        await ctx.send("Add to your server: https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot")
+        await ctx.send(f"Add to your server: https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot")
 
     @commands.command()
     async def todo(self, ctx):
