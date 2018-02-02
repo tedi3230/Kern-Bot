@@ -10,8 +10,10 @@ from discord.ext import commands
 
 # Add: https://developer.oxforddictionaries.com/documentation#!/Search/get_search_source_lang, and check for no definitions (key error)
 
+
 class Dictionary:
     """Provides dictionary functionality"""
+
     def __init__(self, bot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
@@ -21,7 +23,8 @@ class Dictionary:
             app_id = environ["APP_ID"]
             app_key = environ["APP_KEY"]
         except KeyError:
-            file_path = path.join(path.dirname(__file__), '../client_secret.txt')
+            file_path = path.join(path.dirname(__file__),
+                                  '../client_secret.txt')
             with open(file_path, encoding="utf-8") as file:
                 lines = [l.strip() for l in file]
                 app_id = lines[1]
