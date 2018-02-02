@@ -207,7 +207,7 @@ class Misc:
                         c_help = cmd.help.format(ctx.clean_prefix())
                     embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
-        elif self.bot.get_command(command) in self.bot.commands and not self.bot.get_command(command).hidden:
+        elif self.bot.get_command(command) in self.bot.commands:
             cmd_group = self.bot.get_command(command)
             if cmd_group.help is None:
                 cmd_group_help = "No description"
