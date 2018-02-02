@@ -14,6 +14,10 @@ class Settings:
     def __init__(self, bot):
         self.bot = bot
 
+    async def __error(self, ctx, error):
+        print(error)
+        pass
+
     @commands.group()
     async def get(self, ctx):
         """Commands related to determining the value of settings."""
