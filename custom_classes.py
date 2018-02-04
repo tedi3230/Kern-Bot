@@ -42,7 +42,6 @@ class KernBot(commands.Bot):
         self.exts = OrderedDict()
         for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
             self.exts[e] = True
-        self.session = None
         loops = asyncio.get_event_loop()
         loops.run_until_complete(self.init())
         self.status_task = self.loop.create_task(self.status_changer())
@@ -53,8 +52,8 @@ class KernBot(commands.Bot):
     async def suicide(self):
         await self.database.pool.close()
         self.session.close()
-        self.status_task.cancel()
         await self.logout()
+        self.status_task.cancel()
 
     async def wait(self, events, *, check=None, timeout=None):
         to_wait = [self.wait_for(event, check=check) for event in events]
@@ -62,14 +61,13 @@ class KernBot(commands.Bot):
         return done.pop().result()
 
     async def status_changer(self):
-        print("Hi")
+        await self.wait_until_ready()
         status_messages = [discord.Game(name="for new contests.", type=3),
                            discord.Game(name="{} servers.".format(len(self.guilds)), type=3)]
         while not self.is_closed():
-            print("Hi2")
             message = choice(status_messages)
             await self.change_presence(game=message)
-            await asyncio.sleep(5)
+            await asyncio.sleep(60)
 
     class ResponseError(Exception):
         pass
