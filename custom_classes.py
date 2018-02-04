@@ -17,10 +17,10 @@ async def bot_user_check(ctx):
 
 
 class KernBot(commands.Bot):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, prefix, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.database = None
-        self.prefix = "k"
+        self.prefix = prefix
         self.server_prefixes = {}
         self.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
         self.bot_logs_id = 382780308610744331
@@ -62,12 +62,14 @@ class KernBot(commands.Bot):
         return done.pop().result()
 
     async def status_changer(self):
+        print("Hi")
         status_messages = [discord.Game(name="for new contests.", type=3),
                            discord.Game(name="{} servers.".format(len(self.guilds)), type=3)]
         while not self.is_closed():
+            print("Hi2")
             message = choice(status_messages)
             await self.change_presence(game=message)
-            await asyncio.sleep(60)
+            await asyncio.sleep(5)
 
     class ResponseError(Exception):
         pass
