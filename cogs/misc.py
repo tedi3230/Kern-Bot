@@ -128,11 +128,6 @@ class Misc:
         """Sends the bot's invite URL"""
         await ctx.send(f"Add to your server: https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot")
 
-    @commands.command()
-    async def todo(self, ctx):
-        """Sends the bot's todo list"""
-        await ctx.send(self.bot.todo)
-
     @commands.is_owner()
     @commands.command(hidden=True)
     async def echo(self, ctx, *, text):

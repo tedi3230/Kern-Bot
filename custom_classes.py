@@ -26,19 +26,6 @@ class KernBot(commands.Bot):
         self.bot_logs_id = 382780308610744331
         self.launch_time = datetime.utcnow()
         super().add_check(bot_user_check)
-        self.todo = """TODO: ```
-                    01. Finish contests cog
-                    02. Use logging module
-                    03. Fix the error with overload in define function (total = 15)
-                    04. Add docstrings to all commands
-                    05. Hack Command - add fake attack
-                    06. Server Rules (datbase table Rules). Custom titles as well
-                    07. Stackexchange search - https://api.stackexchange.com/docs
-                    08. Make prefixes a list (for multiple)
-                    09. Add YouTube command
-                    10. Make "Statistics" module https://etn.spacepools.org/#tools + others
-                    ```
-                    """
         self.exts = OrderedDict()
         for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
             self.exts[e] = True
