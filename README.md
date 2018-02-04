@@ -15,5 +15,35 @@ git clone https://github.com/Modelmat/Kern-Bot.git
 cd Kern-Bot
 #install requirements
 python3 -m pip3 install -r requirements.txt
+#make config files
+touch client_secret.txt
+touch database_secret.txt
+touch streamable_secret.txt
 #run bot
 python3 main.py
+```
+
+# Configuration
+All the lines in each line in the docs will be like this. However, only enter the `ENVIRONMENT_VARIABLE`, ignoring the description. These variables can also be environment variables (acessible by `os.environ`).
+```
+ENVIRONMENT_VARIABLE {Description}
+```
+
+
+`client_secret.txt`
+```
+AUTH_KEY {Bot Token}
+APP_ID {Oxford Dictionary API}
+APP_KEY {Oxford Dictionary API}
+BOT_NAME {Bot's Username}
+BOT_PREFIX {Bot's Command Prefix}
+```
+`database_secret.txt`
+```
+DATABASE_URL {A PostgreSQL DB URL - postgres://user:pass@server.com:port/database}
+```
+`streamable_secret.txt`
+```
+STREAM_USER {Streamable.com username}
+STREAM_PASS {Streamable.com password}
+```
