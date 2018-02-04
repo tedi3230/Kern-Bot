@@ -102,6 +102,5 @@ ENV/
 
 .vscode/*
 .vscode/
-client_secret.txt
-database_secret.txt
-streamable_secret.txt
+*secret*
+todo*
