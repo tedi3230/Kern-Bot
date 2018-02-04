@@ -10,6 +10,7 @@ from discord.ext import commands
 import database as db
 import custom_classes as cc
 
+
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
 
@@ -35,15 +36,21 @@ async def server_prefix(bots, message):
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
-bot = cc.KernBot(command_prefix=server_prefix,
-                 description='Multiple functions, including contests, definitions, and more.')
-
 try:
     token = environ["AUTH_KEY"]
+    name = environ["BOT_NAME"]
+    prefix = environ["BOT_PREFIX"]
 except KeyError:
     with open("client_secret.txt", encoding="utf-8") as file:
         lines = [l.strip() for l in file]
         token = lines[0]
+        name = lines[3]
+        prefix = lines[4]
+
+bot = cc.KernBot(prefix, command_prefix=server_prefix,
+                 description='Multiple functions, including contests, definitions, and more.')
+
+
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
@@ -61,7 +68,9 @@ async def on_connect():
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
-    e = discord.Embed(title="Joined {}".format(guild.name), description=datetime.utcnow().strftime(bot.time_format), colour=discord.Colour.green())
+    e = discord.Embed(title="Joined {}".format(guild.name),
+                      description=datetime.utcnow().strftime(bot.time_format),
+                      colour=discord.Colour.green())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
 
 @bot.event
@@ -69,13 +78,18 @@ async def on_ready():
     await load_extensions(bot)
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
-    await bot.user.edit(username="Kern")
-    e = discord.Embed(title="Bot Online:", description=datetime.utcnow().strftime(bot.time_format), colour=discord.Colour.green())
-    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.user.edit(username=name)
+    e = discord.Embed(title="Bot Online:",
+                      description=datetime.utcnow().strftime(bot.time_format),
+                      colour=discord.Colour.green())
     print('\nLogged in as:')
     print(bot.user.name, "(Bot)")
     print(bot.user.id)
     print('------')
+    while bot.get_channel(bot.bot_logs_id) is None:
+        asyncio.sleep(1)
+    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -97,7 +111,8 @@ async def on_message(message: discord.Message):
                         failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
                 else:
                     if ctx.prefix is not None:
-                        failed_to_run[msg.strip(ctx.prefix)] = "Command not found."
+                        failed_to_run[msg.strip(
+                            ctx.prefix)] = "Command not found."
                     else:
                         pass
 
@@ -108,8 +123,10 @@ async def on_message(message: discord.Message):
                 await ctx.error(f"```{errors}```", "These failed to run:")
 
         else:
-            ctx = await bot.get_context(message, cls=cc.CustomContext) #is a command returned
+            # is a command returned
+            ctx = await bot.get_context(message, cls=cc.CustomContext)
             await bot.invoke(ctx)
+
 
 @commands.is_owner()
 @bot.command(name="reload", hidden=True)
@@ -121,17 +138,20 @@ async def reload_cog(ctx, cog_name: str):
     print("Cog loaded.")
     await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
 
+
 @bot.event
 async def on_command_error(ctx, error):
     # This prevents any commands with local handlers being handled here in on_command_error.
     do_send = True
     if hasattr(ctx.command, 'on_error'):
         return
+    #This prevents any
     if ctx.command is not None:
         if hasattr(bot.get_cog(ctx.command.cog_name), '_' + ctx.command.cog_name + '__error'):
             return
 
-    ignored = (commands.UserInputError, commands.NotOwner, commands.CheckFailure, commands.CommandNotFound, discord.Forbidden)
+    ignored = (commands.UserInputError, commands.NotOwner,
+               commands.CheckFailure, commands.CommandNotFound, discord.Forbidden)
 
     error = getattr(error, 'original', error)
     if isinstance(error, ignored):
@@ -156,12 +176,14 @@ async def on_command_error(ctx, error):
 
     else:
         await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.get_channel(bot.bot_logs_id), rqst_by=False)
-        print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
+        print('Ignoring {} in command {}'.format(type(error).__qualname__,
+                                                 ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)
         do_send = False
 
     if do_send:
-        print('Ignoring {} in command {}'.format(type(error).__qualname__, ctx.command))
+        print('Ignoring {} in command {}'.format(type(error).__qualname__,
+                                                 ctx.command))
 
 
 loop = asyncio.get_event_loop()
