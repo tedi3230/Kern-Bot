@@ -40,10 +40,15 @@ BOT_PREFIX {Bot's Command Prefix}
 ```
 `database_secret.txt`
 ```
-DATABASE_URL {A PostgreSQL DB URL - postgres://user:pass@server.com:port/database}
+DATABASE_URL {A PostgreSQL DB URL}
 ```
 `streamable_secret.txt`
 ```
 STREAM_USER {Streamable.com username}
 STREAM_PASS {Streamable.com password}
+```
+**Example**:
+`database_secret.txt`
+```
+postgres://user:pass@server.com:port/database
 ```
