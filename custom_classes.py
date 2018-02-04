@@ -77,39 +77,35 @@ class CustomContext(commands.Context):
         user = self.bot.user
         prefix = self.prefix.replace(user.mention, '@' + user.name)
         return prefix
-    async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
+
+    def __embed(self, title, description, colour, rqst_by, timestamp):
+        e = discord.Embed(title=str(title), colour=colour, description=str(description))
+        if rqst_by:
+            e.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
+        if timestamp:
+            e.timestamp = datetime.utcnow()
+        return e
+
+    async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         if isinstance(error, Exception):
             title = error.__class__.__name__
             error = str(error)
-        error_embed = discord.Embed(title=str(title), colour=discord.Colour.red(), description=str(error))
-        if rqst_by:
-            error_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
-        error_embed.timestamp = datetime.utcnow()
+        e = self.__embed(title, error, discord.Colour.red(), rqst_by, timestamp)
         if channel is None:
-            return await super().send(embed=error_embed, *args, **kwargs)
-        return await channel.send(embed=error_embed, *args, **kwargs)
+            return await self.send(embed=e, *args, **kwargs)
+        return await channel.send(embed=e, *args, **kwargs)
 
-    async def success(self, success, title="Success:", *args, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
-        success_embed = discord.Embed(title=title, colour=discord.Colour.green(), description=success)
-        if rqst_by:
-            success_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
-        success_embed.timestamp = datetime.utcnow()
+    async def success(self, success, title="Success:", *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
+        e = self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp)
         if channel is None:
-            return await super().send(embed=success_embed, *args, **kwargs)
-        return await channel.send(embed=success_embed, *args, **kwargs)
+            return await super().send(embed=e, *args, **kwargs)
+        return await channel.send(embed=e, *args, **kwargs)
 
-    async def neutral(self, text, title, *args, channel: discord.TextChannel = None, rqst_by=True, **kwargs):
-        neutral_embed = discord.Embed(title=title, colour=discord.Colour.blurple(), description=text)
-        if rqst_by:
-            neutral_embed.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
-        neutral_embed.timestamp = datetime.utcnow()
+    async def neutral(self, text, title, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
+        e = self.__embed(title, text, discord.Colour.blurple(), rqst_by, timestamp)
         if channel is None:
-            return await super().send(embed=neutral_embed, *args, **kwargs)
-        return await channel.send(embed=neutral_embed, *args, **kwargs)
-
-class FakeChannel:
-    def __init__(self, name):
-        self.name = name
+            return await super().send(embed=e, *args, **kwargs)
+        return await channel.send(embed=e, *args, **kwargs)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
