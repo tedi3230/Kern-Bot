@@ -49,8 +49,8 @@ class Admin:
     async def rebirth(self, ctx):
         """Owner of this bot only command; Restart the bot"""
         if ctx.channel != self.bot_logs:
-            await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", rqst_by=False)
-        await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", channel=self.bot_logs, rqst_by=False)
+            await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", rqst_by=False, timestamp=False)
+        await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Restarting:", channel=self.bot_logs, rqst_by=False, timestamp=False)
         print("\nRestarting...\n")
         await self.bot.suicide()
         execl(executable, 'python "' + "".join(argv) + '"')
@@ -60,8 +60,8 @@ class Admin:
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
         if ctx.channel != self.bot_logs:
-            await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:", rqst_by=False)
-        await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:", channel=self.bot_logs, rqst_by=False)
+            await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:", rqst_by=False, timestamp=False)
+        await ctx.success(datetime.utcnow().strftime(self.bot.time_format), "Shutting Down:", channel=self.bot_logs, rqst_by=False, timestamp=False)
         print("\nShutting Down...\n")
         await self.bot.suicide()
 
