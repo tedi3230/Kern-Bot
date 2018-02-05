@@ -2,7 +2,8 @@ from datetime import datetime
 from os import environ
 import traceback
 import asyncio
-from random import choice
+from sys import version_info
+from pkg_resources import get_distribution
 
 import discord
 from discord.ext import commands
@@ -82,10 +83,18 @@ async def on_ready():
     e = discord.Embed(title="Bot Online:",
                       description=datetime.utcnow().strftime(bot.time_format),
                       colour=discord.Colour.green())
-    print('\nLogged in as:')
-    print(bot.user.name, "(Bot)")
-    print(bot.user.id)
-    print('------')
+    print(f"""
+Username: {bot.user.name}
+ID:       {bot.user.id}
+Bot:      {bot.user.bot}
+Guilds:   {len(bot.guilds)}
+Members:  {sum(1 for _ in bot.get_all_members())}
+Channels: {sum(1 for _ in bot.get_all_channels())}
+Python:   {".".join([str(v) for v in version_info[:3]])}
+Discord:  {get_distribution('discord.py').version}
+---------------
+""")
+
     while bot.get_channel(bot.bot_logs_id) is None:
         asyncio.sleep(1)
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
