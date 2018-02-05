@@ -56,7 +56,7 @@ class Admin:
         execl(executable, 'python "' + "".join(argv) + '"')
 
     @commands.is_owner()
-    @commands.command(hidden=True, aliases=['shutdown'])
+    @commands.command(hidden=True, aliases=['shutdown', 'die'])
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
         if ctx.channel != self.bot_logs:
