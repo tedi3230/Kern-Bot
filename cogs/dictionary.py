@@ -3,7 +3,6 @@ import re
 import json
 from random import sample
 
-import aiohttp
 import async_timeout
 import discord
 from discord.ext import commands
