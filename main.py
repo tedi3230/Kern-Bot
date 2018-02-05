@@ -4,6 +4,7 @@ import traceback
 import asyncio
 from sys import version_info
 from pkg_resources import get_distribution
+import async_timeout
 
 import discord
 from discord.ext import commands
@@ -83,6 +84,9 @@ async def on_ready():
     e = discord.Embed(title="Bot Online:",
                       description=datetime.utcnow().strftime(bot.time_format),
                       colour=discord.Colour.green())
+    with async_timeout.timeout(10):
+        async with bot.session.get("https://api.github.com/repos/Rapptz/discord.py/commits/rewrite") as resp:
+            sha = "g" + (await resp.json())['sha'][:7]
     print(f"""
 Username: {bot.user.name}
 ID:       {bot.user.id}
@@ -92,6 +96,7 @@ Members:  {sum(1 for _ in bot.get_all_members())}
 Channels: {sum(1 for _ in bot.get_all_channels())}
 Python:   {".".join([str(v) for v in version_info[:3]])}
 Discord:  {get_distribution('discord.py').version}
+Cur. Com:  {sha}
 ---------------
 """)
 
