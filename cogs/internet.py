@@ -1,3 +1,5 @@
+#pylint: disable-msg=e0611
+#pylint: disable-msg=e0401
 import random
 from os import environ, path
 from asyncio import sleep
@@ -8,14 +10,14 @@ import aiohttp
 import async_timeout
 from bs4 import BeautifulSoup
 from tabulate import tabulate
+
 from fuzzyfinder import fuzzyfinder
 
 import discord
 from discord.ext import commands
-
 import custom_classes as cc
 
-protocols = ['ssh',
+PROTOCOLS = ['ssh',
              'smb',
              'smtp',
              'ftp',
@@ -27,6 +29,17 @@ protocols = ['ssh',
              'telnet',
              'tcp',
              'ipoac']
+TABLE_HEADERS = ["PORT", "PROTOCOL", "SECURE"]
+
+async def gen_data():
+    fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
+    protocols = random.sample(PROTOCOLS, len(fake_ports))
+    secured = [random.choice(["'false'", 'true']) for i in fake_ports]
+    table_data = list(zip(fake_ports, protocols, secured))
+    table = str(tabulate(table_data, TABLE_HEADERS, tablefmt="rst"))
+    open_data = [data[0:2] for data in table_data if data[2]]
+    open_ports = ", ".join([str(data[0]) for data in open_data])
+    return table_data, table, open_ports, open_data
 
 
 class Internet:
@@ -48,12 +61,12 @@ class Internet:
             self.streamable_user = auth[0].strip('\n')
             self.streamable_password = auth[1]
 
-    async def get_youtube_videos(self, url, cutoff_length=80, result_length=5):
+    async def get_youtube_videos(self, page_url, cutoff_length=80, result_length=5):
         results = OrderedDict()
         vids = []
 
         with async_timeout.timeout(10):
-            async with self.bot.session.get(url) as resp:
+            async with self.bot.session.get(page_url) as resp:
                 soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
 
         for link in soup.find_all('a', href=True):
@@ -125,44 +138,32 @@ class Internet:
     @commands.command()
     async def demotivate(self, ctx, *, search_term):
         """Provides an embed with a demotivating quote & poster"""
-        await ctx.trigger_typing()
-        search_term = search_term.lower()
-        demotivators = await self.get_demotivators()
-        dem = demotivators.get(search_term)
-        if dem is None:
-            sugs = list(fuzzyfinder(search_term, demotivators.keys()))
-            if not sugs:
-                return await ctx.error("No demotivator found.")
-            dem = demotivators.get(sugs[0])
-        e = discord.Embed(colour=discord.Colour.green(), description=dem['quote'])
-        e.set_author(name=dem['title'], url=dem['product_url'],
-                     icon_url="http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png?3483196325227810892")
-        e.set_footer(text="Data from Despair, Inc • Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
-        e.timestamp = datetime.utcnow()
-        e.set_image(url=dem['img_url'])
-        await ctx.send(embed=e)
+        async with ctx.typing():
+            search_term = search_term.lower()
+            demotivators = await self.get_demotivators()
+            dem = demotivators.get(search_term)
+            if dem is None:
+                sugs = list(fuzzyfinder(search_term, demotivators.keys()))
+                if not sugs:
+                    return await ctx.error("No demotivator found.")
+                dem = demotivators.get(sugs[0])
+            e = discord.Embed(colour=discord.Colour.green(), description=dem['quote'])
+            e.set_author(name=dem['title'], url=dem['product_url'],
+                         icon_url="http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png?3483196325227810892")
+            e.set_footer(text="Data from Despair, Inc • Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
+            e.timestamp = datetime.utcnow()
+            e.set_image(url=dem['img_url'])
+            await ctx.send(embed=e)
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
         """Starts a fake hacking instance on a specified URL."""
-        loading = str(self.bot.get_emoji(395834326450831370))
-        thousands = str(self.bot.get_emoji(396890900783038499))
-        hundreds = str(self.bot.get_emoji(396890900158218242))
-        tens = str(self.bot.get_emoji(396890900753547266))
-        ones = str(self.bot.get_emoji(396890900426653697))
-
-        fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
-        prtcls = [random.choice(protocols) for i in range(len(fake_ports))]
-        secures = [random.choice(["'false'", 'true']) for i in range(len(fake_ports))]
-        table_data = list(zip(fake_ports, prtcls, secures))
-        headers = ["PORT", "PROTOCOL", "SECURE"]
-        table = str(tabulate(table_data, headers, tablefmt="rst"))
-        open_data = [data[0:2] for data in table_data if data[2]]
-        open_ports = ", ".join([str(data[0]) for data in open_data])
+        loading, th, hu, te, on = self.bot.get_emojis(395834326450831370, 396890900783038499, 396890900158218242, 396890900753547266, 396890900426653697)
+        table_data, table, open_ports, open_data = gen_data()
 
         msg = await ctx.send(f"Looking for open ports in <{url}>")
         content = msg.content
-        await msg.edit(content=f"{content}\nPort: {thousands}{hundreds}{tens}{ones}{loading}")
+        await msg.edit(content=f"{content}\nPort: {th}{hu}{te}{on}{loading}")
         await sleep(10)
 
         if not table_data:
@@ -173,55 +174,52 @@ class Internet:
 
         #Now do fake atatck on unsecure port (note, add a RFC 1149 reference)
 
+    async def create_video(self, text):
+        with async_timeout.timeout(10):
+            async with self.bot.session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
+                if resp.status >= 400:
+                    raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                text = await resp.text()
+                url = resp.url
+
+        while '<source src="' not in text:
+            with async_timeout.timeout(10):
+                async with self.bot.session.get(url) as resp:
+                    text = await resp.text()
+
+        start = text.index('<source src="') + len('<source src="')
+        end = text.index('" type="video/mp4">')
+        link = "http://talkobamato.me/" + text[start:end]
+        return link
+
+    async def upload_streamable(self, url):
+        with async_timeout.timeout(10):
+            async with self.bot.session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
+                if resp.status >= 400:
+                    raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                js = await resp.json()
+                return "https://streamable.com/{}".format(js['shortcode'])
+
     @commands.command()
     async def obama(self, ctx, *, text: str):
         """Makes obama speak the text"""
         if len(text) - len(ctx.prefix + "obama") > 280:
-            await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
-            return
-        await ctx.trigger_typing()
-
-        async def create_video(text):
-            with async_timeout.timeout(10):
-                async with self.bot.session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
-                    if resp.status >= 400:
-                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                    text = await resp.text()
-                    url = resp.url
-
-            while '<source src="' not in text:
-                with async_timeout.timeout(10):
-                    async with self.bot.session.get(url) as resp:
-                        text = await resp.text()
-
-            start = text.index('<source src="') + len('<source src="')
-            end = text.index('" type="video/mp4">')
-            link = "http://talkobamato.me/" + text[start:end]
-            return link
-
-        async def upload_streamable(url):
-            with async_timeout.timeout(10):
-                async with self.bot.session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
-                    if resp.status >= 400:
-                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                    js = await resp.json()
-                    return "https://streamable.com/{}".format(js['shortcode'])
-
-
-        link = await create_video(text)
-        url = await upload_streamable(link)
-        msg = await ctx.send(url)
-        while True:
-            with async_timeout.timeout(5):
-                async with self.bot.session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
-                    if resp.status >= 400:
-                        raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                    js = await resp.json()
-                    if js['height'] is not None:
-                        await msg.edit(content=url+'/')
-                        await msg.edit(content=url)
-                        return
-            await sleep(5)
+            return await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
+        async with ctx.typing():
+            link = await self.create_video(text)
+            url = await self.upload_streamable(link)
+            msg = await ctx.send(url)
+            while True:
+                with async_timeout.timeout(5):
+                    async with self.bot.session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
+                        if resp.status >= 400:
+                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                        js = await resp.json()
+                        if js['height'] is not None:
+                            await msg.edit(content=url+'/')
+                            await msg.edit(content=url)
+                            return
+                await sleep(5)
 
 def setup(bot):
     bot.add_cog(Internet(bot))
