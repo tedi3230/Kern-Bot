@@ -12,7 +12,6 @@ from discord.ext import commands
 import database as db
 import custom_classes as cc
 
-
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
 
@@ -29,27 +28,27 @@ async def server_prefix(bots, message):
         return bots.prefix
 
     if bots.server_prefixes.get(message.guild.id) is None:
-        prefix = await bots.database.get_prefix(message)
-        bots.server_prefixes[message.guild.id] = prefix
+        guild_prefix = await bots.database.get_prefix(message)
+        bots.server_prefixes[message.guild.id] = guild_prefix
     else:
-        prefix = bots.server_prefixes[message.guild.id]
+        guild_prefix = bots.server_prefixes[message.guild.id]
 
-    prefixes = [bots.prefix + " ", prefix + " ", bots.prefix, prefix]
+    prefixes = [bots.prefix + " ", guild_prefix + " ", bots.prefix, guild_prefix]
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
 try:
     token = environ["AUTH_KEY"]
     name = environ["BOT_NAME"]
-    prefix = environ["BOT_PREFIX"]
+    bot_prefix = environ["BOT_PREFIX"]
 except KeyError:
     with open("client_secret.txt", encoding="utf-8") as file:
         lines = [l.strip() for l in file]
         token = lines[0]
         name = lines[3]
-        prefix = lines[4]
+        bot_prefix = lines[4]
 
-bot = cc.KernBot(prefix, command_prefix=server_prefix,
+bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
 
 
