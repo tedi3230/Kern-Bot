@@ -36,8 +36,7 @@ class Contests:
             await ctx.error("An undhandled exception occurred. Don't worry, we know about it now. :thumbsup:")
             await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=self.bot_logs, rqst_by=False)
 
-    #pylint: disable-msg=too-many-arguments
-    def generateEmbed(self, message_author: discord.User, title, description, image_url=None, colour=0x00ff00):
+    def generate_embed(self, message_author: discord.User, title, description, image_url=None, colour=0x00ff00):
         """Generates a discord embed object off the given parameters
 
         Arguments:
@@ -61,7 +60,6 @@ class Contests:
             embed.set_image(url=image_url)
         embed.set_thumbnail(url=message_author.avatar_url)
         return embed
-    #pylint: enable-msg=too-many-arguments
 
     @commands.command()
     async def submit(self, ctx, *, args):
@@ -78,8 +76,8 @@ class Contests:
             image_url = input_split[2]
         else:
             image_url = ""
-        embed = self.generateEmbed(
-            ctx.author, title, description, image_url, 0x00ff00)
+        embed = self.generate_embed(ctx.author, title, description,
+                                    image_url, 0x00ff00)
         server_channels = await self.bot.database.get_contest_channels(ctx)
         if server_channels is None:
             return await ctx.error(f"No server channels are configured. Use {ctx.prefix}set channels to set your channels", title="Configuration Error:")
