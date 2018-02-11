@@ -56,6 +56,12 @@ class KernBot(commands.Bot):
             await self.change_presence(game=message)
             await asyncio.sleep(60)
 
+    def get_emojis(self, *ids):
+        emojis = []
+        for e_id in ids:
+            emojis.append(str(self.get_emoji(e_id)))
+        return emojis
+
     class ResponseError(Exception):
         pass
 
