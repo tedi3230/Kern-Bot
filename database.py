@@ -49,8 +49,7 @@ class Database:
         self.prefix_conn = None
         self.prefix_stmt = None
         if __name__ in '__main__':
-            loops = asyncio.get_event_loop()
-            loops.run_until_complete(self.init())
+            asyncio.get_event_loop().run_until_complete(self.init())
         else:
             self.lock = asyncio.Lock()
             bot.loop.create_task(self.init())
