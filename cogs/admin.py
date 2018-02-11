@@ -110,8 +110,8 @@ class Admin:
             else:
                 await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
                                     Instead, use: `{} clean <num_messages> True`""".format(ctx.prefix),
-                                    "Invalid Permissions",
-                                    delete_after=10)
+                                "Invalid Permissions",
+                                delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
@@ -147,7 +147,7 @@ class Admin:
         pass
 
     @perms.command(name="user")
-    async def perms_user(self, ctx, *, member: discord.Member, here: str = ""):
+    async def perms_user(self, ctx, *, member: discord.Member):
         """Shows the permissions for this member."""
         perms = ", ".join([perm for perm in ctx.channel.permissions_for(member)])
         if member == ctx.guild.me:
