@@ -58,11 +58,6 @@ with requests.Session() as s:
     with s.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
         sha = "g" + r.json()['sha'][:7]
 
-if sha != get_distribution('discord.py').version[-8:]:
-    system("pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]")
-    print("Out of date")
-    execl(executable, 'python "' + "".join(argv) + '"')
-
 async def load_extensions(bots):
     await asyncio.sleep(2)
     for extension in bots.exts:
