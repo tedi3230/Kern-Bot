@@ -1,4 +1,4 @@
-git+git://github.com/Rapptz/discord.py@rewrite
+git+git://github.com/Modelmat/discord.py@rewrite
 psycopg2==2.7.3.2
 aiohttp==2.2.5
 astroid==1.6.0

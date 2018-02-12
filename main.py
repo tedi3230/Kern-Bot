@@ -1,16 +1,19 @@
 from datetime import datetime
-from os import environ
+from os import environ, system, execl
 import traceback
 import asyncio
-from sys import version_info
+from sys import version_info, executable, argv
 from pkg_resources import get_distribution
 import async_timeout
+import requests
 
 import discord
 from discord.ext import commands
 
 import database as db
 import custom_classes as cc
+
+"update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]"
 
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
@@ -50,6 +53,14 @@ except KeyError:
 
 bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
+sha = None
+with requests.Session() as s:
+    with s.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
+        sha = "g" + r.json()['sha'][:7]
+
+if sha != get_distribution('discord.py').version[-8:]:
+    system("pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]")
+    execl(executable, 'python "' + "".join(argv) + '"')
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
@@ -82,7 +93,7 @@ async def on_ready():
                       description=datetime.utcnow().strftime(bot.time_format),
                       colour=discord.Colour.green())
     with async_timeout.timeout(10):
-        async with bot.session.get("https://api.github.com/repos/Rapptz/discord.py/commits/rewrite") as resp:
+        async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as resp:
             sha = "g" + (await resp.json())['sha'][:7]
     print(f"""
 Username: {bot.user.name}
@@ -93,7 +104,7 @@ Members:  {sum(1 for _ in bot.get_all_members())}
 Channels: {sum(1 for _ in bot.get_all_channels())}
 Python:   {".".join([str(v) for v in version_info[:3]])}
 Discord:  {get_distribution('discord.py').version}
-Cur. Com:  {sha}
+Cur. Com:  {bot.sha}
 ---------------
 """)
 
