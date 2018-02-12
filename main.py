@@ -60,6 +60,7 @@ with requests.Session() as s:
 
 if sha != get_distribution('discord.py').version[-8:]:
     system("pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]")
+    print("Out of date")
     execl(executable, 'python "' + "".join(argv) + '"')
 
 async def load_extensions(bots):
