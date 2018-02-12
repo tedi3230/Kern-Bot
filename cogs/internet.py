@@ -1,5 +1,3 @@
-#pylint: disable-msg=e0611
-#pylint: disable-msg=e0401
 import random
 from os import environ, path
 from asyncio import sleep
@@ -11,7 +9,7 @@ import async_timeout
 from bs4 import BeautifulSoup
 from tabulate import tabulate
 
-from fuzzyfinder import fuzzyfinder
+from fuzzyfinder.main import fuzzyfinder
 
 import discord
 from discord.ext import commands
