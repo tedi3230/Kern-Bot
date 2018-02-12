@@ -102,7 +102,7 @@ Members:  {sum(1 for _ in bot.get_all_members())}
 Channels: {sum(1 for _ in bot.get_all_channels())}
 Python:   {".".join([str(v) for v in version_info[:3]])}
 Discord:  {get_distribution('discord.py').version}
-Cur. Com:  {sha}
+Cur. Com: {sha}
 ---------------
 """)
 
