@@ -51,8 +51,6 @@ except KeyError:
 bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
 
-
-
 async def load_extensions(bots):
     await asyncio.sleep(2)
     for extension in bots.exts:
@@ -102,7 +100,6 @@ Cur. Com:  {sha}
     while bot.get_channel(bot.bot_logs_id) is None:
         asyncio.sleep(1)
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
-
 
 @bot.event
 async def on_message(message: discord.Message):

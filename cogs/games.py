@@ -8,6 +8,7 @@ import async_timeout
 
 import discord
 from discord.ext import commands
+from custom_classes import KernBot
 
 def rgb(r, g, b):
     return discord.Colour.from_rgb(r, g, b)
@@ -18,7 +19,7 @@ EMOJIS = {1: '1\u20e3', 2: '2\u20e3', 3: '3\u20e3', 4: '4\u20e3'}
 
 
 class Games:
-    def __init__(self, bot):
+    def __init__(self, bot: KernBot):
         self.bot = bot
 
     async def trivia_categories(self, category):
@@ -108,5 +109,5 @@ class Games:
         else:
             await ctx.error(error, rqst_by=False)
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Games(bot))

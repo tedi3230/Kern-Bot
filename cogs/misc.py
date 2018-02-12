@@ -8,9 +8,11 @@ import psutil
 import discord
 from discord.ext import commands
 
+from custom_classes import KernBot
+
 class Misc:
     """Miscellaneous functions"""
-    def __init__(self, bot):
+    def __init__(self, bot: KernBot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.process = psutil.Process()

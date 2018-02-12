@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from custom_classes import KernBot
+
 async def manage_server_check(ctx):
     if commands.is_owner():
         return True
@@ -11,7 +13,7 @@ async def manage_server_check(ctx):
 
 class Settings:
     """Sets and gets the settings for the bot"""
-    def __init__(self, bot):
+    def __init__(self, bot: KernBot):
         self.bot = bot
 
     async def __error(self, ctx, error):

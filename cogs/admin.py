@@ -9,6 +9,8 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
+from custom_classes import KernBot
+
 async def message_purge_perm_check(ctx):
     if ctx.bot.is_owner(ctx.author):
         return True
@@ -20,7 +22,7 @@ async def message_purge_perm_check(ctx):
 
 class Admin:
     """Administration commands."""
-    def __init__(self, bot):
+    def __init__(self, bot: KernBot):
         self.bot = bot
         self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None

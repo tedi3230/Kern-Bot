@@ -7,13 +7,15 @@ import async_timeout
 import discord
 from discord.ext import commands
 
+from custom_classes import KernBot
+
 # Add: https://developer.oxforddictionaries.com/documentation#!/Search/get_search_source_lang, and check for no definitions (key error)
 
 
 class Dictionary:
     """Provides dictionary functionality"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: KernBot):
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.dictionary_base_url = 'https://od-api.oxforddictionaries.com/api/v1/entries/en/{}'
