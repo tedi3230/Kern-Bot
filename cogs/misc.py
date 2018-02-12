@@ -79,8 +79,6 @@ class Misc:
     @commands.command(aliases=['stats'])
     async def info(self, ctx):
         """Returns information about the bot."""
-        owner = (await self.bot.application_info()).owner
-
         total_members = sum(1 for _ in self.bot.get_all_members())
         total_servers = len(self.bot.guilds)
         total_channels = sum(1 for _ in self.bot.get_all_channels())
@@ -89,7 +87,7 @@ class Misc:
         invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot"
         embed = discord.Embed(title=f"Invite Url", url=invite_url,
                               description="Information about this bot.", color=0x00ff00)
-        embed.set_author(name=str(owner), icon_url=owner.avatar_url, url="https://discord.gg/bEYgRmc")
+        embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url, url="https://discord.gg/bEYgRmc")
         embed.add_field(name="Server Statistics:", value="Guilds: {}\nChannels: {}\nUsers: {}".format(total_servers, total_channels, total_members))
         embed.add_field(name="Resource Usage:", value="CPU: {:.2f} %\nRAM: {:.2f} MiB".format(cpu_usage, ram_usage))
         embed.add_field(name="Uptime:", value=self.get_uptime())
