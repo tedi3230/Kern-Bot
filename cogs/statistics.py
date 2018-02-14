@@ -1,4 +1,7 @@
+#pylint: disable-msg=C0413
 import io
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import discord
