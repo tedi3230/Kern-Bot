@@ -80,6 +80,13 @@ async def on_guild_join(guild: discord.Guild):
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
 
 @bot.event
+async def on_guild_remove(guild: discord.Guild):
+    e = discord.Embed(title="Left {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
+                      colour=discord.Colour.green(),
+                      timestamp=datetime.utcnow())
+    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+
+@bot.event
 async def on_ready():
     await load_extensions(bot)
     await bot.change_presence(status=discord.Status.online)
