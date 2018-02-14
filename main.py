@@ -74,9 +74,9 @@ async def on_connect():
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
-    e = discord.Embed(title="Joined {}".format(guild.name),
-                      description=datetime.utcnow().strftime(bot.time_format),
-                      colour=discord.Colour.green())
+    e = discord.Embed(title="Joined {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
+                      colour=discord.Colour.green(),
+                      timestamp=datetime.utcnow())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
 
 @bot.event
@@ -85,9 +85,9 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     await bot.user.edit(username=name)
-    e = discord.Embed(title="Bot Online:",
-                      description=datetime.utcnow().strftime(bot.time_format),
-                      colour=discord.Colour.green())
+    e = discord.Embed(title=f"Bot Online @ {datetime.utcnow().strftime('%H:%M:%S UTC')}",
+                      colour=discord.Colour.green(),
+                      timestamp=datetime.utcnow())
     print(f"""
 Username: {bot.user.name}
 ID:       {bot.user.id}
