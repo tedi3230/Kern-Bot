@@ -134,8 +134,6 @@ async def on_message(message: discord.Message):
                     if ctx.prefix is not None:
                         failed_to_run[msg.strip(
                             ctx.prefix)] = "Command not found."
-                    else:
-                        pass
 
             if failed_to_run:
                 errors = ""
