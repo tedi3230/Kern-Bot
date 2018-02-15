@@ -32,7 +32,7 @@ class KernBot(commands.Bot):
         self.launch_time = datetime.utcnow()
         super().add_check(bot_user_check)
         self.exts = OrderedDict()
-        self.statistics = {'currency':{}, 'market_price':{}, 'coins':[]}
+        self.statistics = {'market_price':{}, 'coins':[]}
         for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
             self.exts[e] = True
         loops = asyncio.get_event_loop()
@@ -42,12 +42,9 @@ class KernBot(commands.Bot):
 
     async def init(self):
         self.session = aiohttp.ClientSession()
-        with async_timeout.timeout(10):
-            async with self.session.get("https://api.fixer.io/latest?base=USD") as resp:
-                self.statistics['currency'] = (await resp.json())['rates']
         with async_timeout.timeout(30):
-            async with self.session.get("https://www.cryptocompare.com/api/data/coinlist/") as resp:
-                self.statistics['coins'] = {k.lower():v for k, v in (await resp.json())['Data'].items()}
+            async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
+                self.statistics['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
 
     async def suicide(self):
         await self.database.pool.close()
