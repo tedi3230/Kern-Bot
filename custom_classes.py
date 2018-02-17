@@ -112,7 +112,7 @@ class CustomContext(commands.Context):
                 new_content += "```"
             new_content += "\n\n*Output Truncated for Discord*"
             raise MessageExceededMaxLength("Message exceeded max length allowed by discord. Cutting message off and sending.")
-        await super().send(new_content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        return await super().send(new_content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
