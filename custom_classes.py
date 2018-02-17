@@ -4,9 +4,10 @@ from os.path import isfile, join
 from datetime import datetime
 from collections import OrderedDict
 import asyncio
-import async_timeout
+import warnings
 from concurrent.futures import FIRST_COMPLETED
 from random import choice
+import async_timeout
 
 import aiohttp
 
@@ -111,7 +112,8 @@ class CustomContext(commands.Context):
             if content.endswith('```'):
                 new_content += "```"
             new_content += "\n\n*Output Truncated for Discord*"
-            raise MessageExceededMaxLength("Message exceeded max length allowed by discord. Cutting message off and sending.")
+            warnings.warn("Message exceeded max length allowed by discord. Cutting message off and sending.",
+                          MessageExceededMaxLength)
         return await super().send(new_content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
