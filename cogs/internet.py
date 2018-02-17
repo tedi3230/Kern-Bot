@@ -30,7 +30,7 @@ PROTOCOLS = ['ssh',
              'ipoac']
 TABLE_HEADERS = ["PORT", "PROTOCOL", "SECURE"]
 
-async def gen_data():
+def gen_data():
     fake_ports = sorted([random.randint(0, 65535) for i in range(random.randint(0, 10))])
     protocols = random.sample(PROTOCOLS, len(fake_ports))
     secured = [random.choice(["'false'", 'true']) for i in fake_ports]
@@ -182,13 +182,7 @@ class Internet:
         start = text.index('<source src="') + len('<source src="')
         end = text.index('" type="video/mp4">')
         link = "http://talkobamato.me/" + text[start:end]
-
-        buf = io.BytesIO()
-        with async_timeout.timeout(10):
-            async with self.bot.session.get(link) as resp:
-                buf.write(await resp.read())
-        buf.seek(0)
-        return discord.File(buf, filename="obama_speaks.mp4")
+        return link
 
     @commands.command()
     async def obama(self, ctx, *, text: str):
@@ -197,8 +191,8 @@ class Internet:
         if len(text) - len(ctx.prefix + "obama") > 280:
             return await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
         async with ctx.typing():
-            video = await self.create_video(text)
-            await ctx.send(file=video)
+            link = await self.create_video(text)
+            await ctx.send(link)
 
 
 
