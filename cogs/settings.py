@@ -65,7 +65,7 @@ class Settings:
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
         """Get the bot's prefix for this server"""
-        prefix = self.bot.server_prefixes.get(ctx.guild.id, "k ")
+        prefix = self.bot.server_prefixes.get(ctx.guild.id, self.bot.prefix)
         await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, prefix))
 
     @commands.is_owner()
