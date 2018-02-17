@@ -86,7 +86,7 @@ class Dictionary:
                             value="\n".join(similar_words))
         return embed
 
-    @commands.command(aliases=['synonyms', 's'])
+    @commands.command(aliases=['synonyms'])
     async def synonym(self, ctx, *, term):
         """Return an embed of synonyms for the word passed.
         ```{0}synonym <term>```"""
@@ -115,7 +115,7 @@ class Dictionary:
 
             await ctx.send(embed=embed)
 
-    @commands.command(aliases=['antonyms', 'a'])
+    @commands.command(aliases=['antonyms'])
     async def antonym(self, ctx, *, term):
         """Return an embed of antonyms for the word passed.
         ```{0}antonym <term>```"""
@@ -144,7 +144,7 @@ class Dictionary:
 
             await ctx.send(embed=embed)
 
-    @commands.command(aliases=['meaning', 'd'])
+    @commands.command(aliases=['meaning'])
     async def define(self, ctx, *, term):
         """Return an embed of definitions for the word passed. Includes image and more.
         ```{0}define <term>```"""
