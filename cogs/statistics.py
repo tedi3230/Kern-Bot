@@ -1,5 +1,6 @@
 #pylint: disable-msg=C0413
 import io
+from datetime import datetime, timedelta
 import async_timeout
 import matplotlib
 matplotlib.use('Agg')
@@ -8,13 +9,24 @@ import matplotlib.pyplot as plt
 import discord
 from discord.ext import commands
 
+def get_delta(time_period, limit):
+    if time_period == "day":
+        return timedelta(days=limit // 4)
+    elif time_period == "hour":
+        return timedelta(hours=limit // 4)
+    elif time_period == "minute":
+        return timedelta(minutes=limit // 4)
+    return timedelta(minute=10)
+
 class UpperConv(commands.Converter):
     async def convert(self, ctx, argument):
         return argument.upper()
 
+
 class IntConv(commands.Converter):
     async def convert(self, ctx, argument):
         return int(argument)
+
 
 class Statistics:
     def __init__(self, bot):
@@ -22,7 +34,8 @@ class Statistics:
 
     async def get_data(self, time_period, coin, currency, limit):
         if self.bot.statistics['market_price'].get(coin) is None or \
-           self.bot.statistics['market_price'].get(time_period) is None:
+           self.bot.statistics['market_price'][coin].get(time_period) is None or \
+           self.bot.statistics['market_price'][coin][time_period]['timestamp'] < datetime.utcnow():
             with async_timeout.timeout(10):
                 async with self.bot.session.get(f"https://min-api.cryptocompare.com/data/histo{time_period}?fsym={coin}&tsym={currency}&limit={limit}") as resp:
                     js = await resp.json()
@@ -32,7 +45,8 @@ class Statistics:
             self.bot.statistics['market_price'][coin] = {
                 time_period: {
                     'high': [[-i, v['high']] for i, v in enumerate(vals)],
-                    'low': [[-i, v['low']] for i, v in enumerate(vals)]
+                    'low': [[-i, v['low']] for i, v in enumerate(vals)],
+                    'timestamp': datetime.utnow() + get_delta(time_period, limit),
                 },
             }
         return self.bot.statistics['market_price'][coin][time_period]
