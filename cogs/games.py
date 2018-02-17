@@ -48,7 +48,8 @@ class Games:
 
     @commands.command()
     async def trivia(self, ctx, *, category: str = None):
-        """Provides a trivia functionality. 5 questions. Can pass a category"""
+        """Provides a trivia functionality. 5 questions. Can pass a category
+        ```{0}trivia [category]```"""
         results = await self.get_trivia_results(category)
         corrects = {} #{correct:yours}
         for result in results:

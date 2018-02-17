@@ -65,7 +65,8 @@ class Contests:
 
     @commands.command()
     async def submit(self, ctx, *, args):
-        """Submits an item into a contest. {}submit <title> | <description> | [imageURL]. Note the spaces"""
+        """Submits an item into a contest. Please note the spaces.
+        ```{0}submit <title> | <description> | [imageURL]```"""
         input_split = tuple(args.split(" | "))
         if len(input_split) == 1:
             raise TypeError(
@@ -129,7 +130,8 @@ class Contests:
     @commands.check(manage_server_check)
     @commands.command()
     async def clear(self, ctx, submission_id: int):
-        """Allows for users with manage_server perms to remove submissions that are deemed invalid"""
+        """Allows for users with manage_server perms to remove submissions that are deemed invalid
+        ```{0}clear <submission_id>```"""
         await self.bot.database.clear_contest_submission(ctx, submission_id)
         await ctx.success(f"Submission with id {submission_id} successfully deleted.")
 

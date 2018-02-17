@@ -92,7 +92,8 @@ class Admin:
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True)
     async def clean(self, ctx, num_messages=200, old: bool = False):
-        """Removes all messages for num_messages by this bot"""
+        """Removes all messages for num_messages by this bot
+        ```{0}delete clean [num_messages: 200] [old: False]```"""
         def is_me(m):
             return m.author == ctx.guild.me
 
@@ -111,14 +112,15 @@ class Admin:
                 await ctx.success("`{}/{}`".format(len(deleted), num_messages), "Messages Cleaned", delete_after=10)
             else:
                 await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
-                                    Instead, use: `{} clean <num_messages> True`""".format(ctx.prefix),
+                                    Instead, use: `{}clean <num_messages> True`""".format(ctx.prefix),
                                 "Invalid Permissions",
                                 delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
     async def delete_by_id(self, ctx, *message_ids: int):
-        """Deletes a message by id. """
+        """Deletes message from list of ids/id
+        ```{0}delete id <message_id> [message_id]...```"""
         for m_id in message_ids:
             msg = await ctx.get_message(m_id)
             if msg.author == self.bot.user:
@@ -135,7 +137,8 @@ class Admin:
 
     @commands.command(hidden=True)
     async def roles(self, ctx, *, member: discord.Member = None):
-        """Shows the roles of this bot"""
+        """Shows the roles of the bot or member
+        ```{0}roles [member: bot]```"""
         if member is None:
             roles = ", ".join([role.name.strip('@') for role in ctx.guild.roles])
             await ctx.success(f"```ini\n[{roles}]```", f"Roles for `{ctx.guild.name}`:")
@@ -150,7 +153,8 @@ class Admin:
 
     @perms.command(name="user")
     async def perms_user(self, ctx, *, member: discord.Member):
-        """Shows the permissions for this member."""
+        """Shows the permissions for this member.
+        ```{0}perms user [member: bot]```"""
         perms = ", ".join([perm for perm in ctx.channel.permissions_for(member)])
         if member == ctx.guild.me:
             await ctx.success(f"```ini\n[{perms}]```", f"My permissions: ")
@@ -159,7 +163,8 @@ class Admin:
 
     @perms.command(name="role")
     async def perms_role(self, ctx, *, role: discord.Role):
-        """Shows the permissions for a role"""
+        """Shows the permissions for a role
+        ```{0}perms role <role>```"""
         perms = [perm for perm in role.permissions]
         neg_perms = ", ".join([perm[0] for perm in perms if not perm[1]])
         pos_perms = ", ".join([perm[0] for perm in perms if perm[1]])
@@ -174,7 +179,8 @@ class Admin:
     @commands.is_owner()
     @commands.command(hidden=True, name="eval")
     async def k_eval(self, ctx, *, body: str):
-        """Evaluates code"""
+        """Evaluates code
+        ```{0}eval <code>```"""
         def cleanup_code(content):
             if content.startswith('```') and content.endswith('```'):
                 return '\n'.join(content.split('\n')[1:-1])

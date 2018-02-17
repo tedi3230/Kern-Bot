@@ -21,7 +21,8 @@ class Misc:
     @commands.command()
     async def raw(self, ctx, *, message=None):
         """Displays the raw code of a message.
-        The message can be a message id, some text, or nothing (in which case it will be the most recent message not by you)."""
+        The message can be a message id, some text, or nothing (in which case it will be the most recent message not by you).
+        ```{0}raw <message>```"""
         msg = None
         if message is not None:
             msg = await ctx.get_message(int(message))
@@ -96,12 +97,14 @@ class Misc:
 
     @commands.command()
     async def hug(self, ctx, *, item: str):
-        """Hugs the given item"""
+        """Hugs the given item
+        ```{0}hug <item>```"""
         await ctx.send("«{}»".format(item))
 
     @commands.command()
     async def kiss(self, ctx, *, item: str):
-        """Kisses the given item"""
+        """Kisses the given item
+        ```{0}kiss <item>```"""
         await ctx.send(":kiss:{}:kiss:".format(item))
 
     @commands.command()
@@ -131,7 +134,8 @@ class Misc:
     @commands.is_owner()
     @commands.command(hidden=True)
     async def echo(self, ctx, *, text):
-        """Echoes the text sent"""
+        """Echoes the text sent
+        ```{0}echo <text>```"""
         await ctx.send(text)
         print(text)
 
@@ -141,6 +145,7 @@ class Misc:
         To display the source code of a subcommand you can separate it by
         periods, e.g. tag.create for the create subcommand of the tag command
         or by spaces.
+        ```{0}source <command>```
         """
         source_url = 'https://github.com/Modelmat/Kern-Bot'
         if command is None:
@@ -176,7 +181,8 @@ class Misc:
 
     @commands.command(name="help")
     async def _help(self, ctx, *, command: str = None):
-        """Shows this message."""
+        """Shows this message.
+        ```{0}help [command]```"""
         cogs_dict = self.make_commands()
         embed = discord.Embed(color=discord.Colour.green())
         if command is None:

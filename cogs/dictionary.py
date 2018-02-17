@@ -88,7 +88,8 @@ class Dictionary:
 
     @commands.command(aliases=['synonyms', 's'])
     async def synonym(self, ctx, *, term):
-        """Return an embed of synonyms for the word passed."""
+        """Return an embed of synonyms for the word passed.
+        ```{0}synonym <term>```"""
         async with ctx.typing():
             data = await self._get_dic_request(self.dictionary_base_url.format(term.lower()) + "/synonyms")
             if data is None:
@@ -116,7 +117,8 @@ class Dictionary:
 
     @commands.command(aliases=['antonyms', 'a'])
     async def antonym(self, ctx, *, term):
-        """Return an embed of antonyms for the word passed."""
+        """Return an embed of antonyms for the word passed.
+        ```{0}antonym <term>```"""
         async with ctx.typing():
             data = await self._get_dic_request(self.dictionary_base_url.format(term.lower()) + "/antonyms")
             if data is None:
@@ -144,7 +146,8 @@ class Dictionary:
 
     @commands.command(aliases=['meaning', 'd'])
     async def define(self, ctx, *, term):
-        """Return an embed of definitions for the word passed. Includes image and more."""
+        """Return an embed of definitions for the word passed. Includes image and more.
+        ```{0}define <term>```"""
         async with ctx.typing():
             data = await self._get_dic_request(self.dictionary_base_url.format(term.lower()))
             if data is None:
