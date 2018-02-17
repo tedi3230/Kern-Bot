@@ -1,4 +1,5 @@
 import random
+import io
 from os import environ, path
 from asyncio import sleep
 from collections import OrderedDict
@@ -87,7 +88,8 @@ class Internet:
 
     @commands.group("youtube", invoke_without_command=True)
     async def youtube(self, ctx, *, keyword: str):
-        """Searches YouTube for a video"""
+        """Searches YouTube for a video
+        ```{0}youtube <keyword>```"""
         url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
         vids = await self.get_youtube_videos(url)
 
@@ -99,20 +101,23 @@ class Internet:
 
     @youtube.command()
     async def trending(self, ctx, num_results=5):
-        """Gets current trending videos"""
+        """Gets current trending videos
+        ```{0}youtube tending [num_results: 5]```"""
         url = "https://www.youtube.com/feed/trending"
         vids = await self.get_youtube_videos(url, 77, num_results)
         results = "\n".join([f"{index+1}) {title}" for index, title in enumerate(vids)])
         await ctx.neutral(results, "YouTube Trending")
 
     @youtube.command()
-    async def channel(self, ctx, channel):
-        """Get a channel's latest videos"""
+    async def channel(self, ctx, channel, num_videos=5):
+        """Get a channel's latest 5 videos
+        ```{0}youtube channel [num_videos: 5]"""
         pass
 
     @youtube.command()
-    async def playlist(self, ctx, playlist):
-        """Get a playlist's 1st 5 videos"""
+    async def playlist(self, ctx, playlist, num_videos=5):
+        """Get a playlist's 1st 5 videos
+        ```{0}youtube playlist [num_videos: 5]"""
         pass
 
     async def get_demotivators(self):
@@ -135,7 +140,8 @@ class Internet:
 
     @commands.command()
     async def demotivate(self, ctx, *, search_term):
-        """Provides an embed with a demotivating quote & poster"""
+        """Provides an embed with a demotivating quote & poster
+        ```{0}demotivate <search_term>```"""
         async with ctx.typing():
             search_term = search_term.lower()
             demotivators = await self.get_demotivators()
@@ -155,7 +161,8 @@ class Internet:
 
     @commands.command()
     async def hack(self, ctx, *, url: cc.Url):
-        """Starts a fake hacking instance on a specified URL."""
+        """Starts a fake hacking instance on a specified URL.
+        ```{0}hack <url>```"""
         loading, th, hu, te, on = self.bot.get_emojis(395834326450831370, 396890900783038499, 396890900158218242, 396890900753547266, 396890900426653697)
         table_data, table, open_ports, open_data = gen_data()
 
@@ -188,36 +195,25 @@ class Internet:
         start = text.index('<source src="') + len('<source src="')
         end = text.index('" type="video/mp4">')
         link = "http://talkobamato.me/" + text[start:end]
-        return link
 
-    async def upload_streamable(self, url):
+        buf = io.BytesIO()
         with async_timeout.timeout(10):
-            async with self.bot.session.get('https://api.streamable.com/import?url={}'.format(url), auth=aiohttp.BasicAuth(self.streamable_user, self.streamable_password)) as resp:
-                if resp.status >= 400:
-                    raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                js = await resp.json()
-                return "https://streamable.com/{}".format(js['shortcode'])
+            async with self.bot.session.get(link) as resp:
+                buf.write(await resp.read())
+        buf.seek(0)
+        return discord.File(buf, filename="obama_speaks.mp4")
 
     @commands.command()
     async def obama(self, ctx, *, text: str):
-        """Makes obama speak the text"""
+        """Makes obama speak.
+        ```{0}obama <text>```"""
         if len(text) - len(ctx.prefix + "obama") > 280:
             return await ctx.send("A maximum character total of 280 is enforced. You sent: `{}` characters".format(len(text)))
         async with ctx.typing():
-            link = await self.create_video(text)
-            url = await self.upload_streamable(link)
-            msg = await ctx.send(url)
-            while True:
-                with async_timeout.timeout(5):
-                    async with self.bot.session.get('https://api.streamable.com/oembed.json?url={}'.format(url)) as resp:
-                        if resp.status >= 400:
-                            raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
-                        js = await resp.json()
-                        if js['height'] is not None:
-                            await msg.edit(content=url+'/')
-                            await msg.edit(content=url)
-                            return
-                await sleep(5)
+            video = await self.create_video(text)
+            await ctx.send(file=video)
+
+
 
 def setup(bot):
     bot.add_cog(Internet(bot))
