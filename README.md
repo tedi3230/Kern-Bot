@@ -18,7 +18,6 @@ python3 -m pip3 install -r requirements.txt
 #make config files
 touch client_secret.txt
 touch database_secret.txt
-touch streamable_secret.txt
 #run bot
 python3 main.py
 ```
@@ -42,11 +41,7 @@ BOT_PREFIX {Bot's Command Prefix}
 ```
 DATABASE_URL {A PostgreSQL DB URL}
 ```
-`streamable_secret.txt`
-```
-STREAM_USER {Streamable.com username}
-STREAM_PASS {Streamable.com password}
-```
+
 **Example**:
 `database_secret.txt`
 ```

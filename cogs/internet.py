@@ -47,19 +47,6 @@ class Internet:
         self.bot = bot
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
-        try:
-            self.streamable_user = environ["STREAM_USER"]
-            self.streamable_password = environ["STREAM_PASS"]
-        except KeyError:
-            file_path = path.join(path.dirname(__file__), '../streamable_secret.txt')
-            stream_file = open(file_path, mode='r')
-            auth = []
-            for line in stream_file:
-                auth.append(line)
-            stream_file.close()
-            self.streamable_user = auth[0].strip('\n')
-            self.streamable_password = auth[1]
-
     async def get_youtube_videos(self, page_url, cutoff_length=80, result_length=5):
         results = OrderedDict()
         vids = []
