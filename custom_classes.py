@@ -62,7 +62,8 @@ class KernBot(commands.Bot):
         await self.wait_until_ready()
         status_messages = [discord.Game(name="for new contests.", type=3),
                            discord.Game(name=f"{len(self.guilds)} servers.", type=3),
-                           discord.Game(name="bot commands", type=2)]
+                           discord.Game(name="bot commands", type=2),
+                           discord.Game(name=f"for {bot.prefix}", type=2)]
         while not self.is_closed():
             message = choice(status_messages)
             await self.change_presence(game=message)
