@@ -109,6 +109,7 @@ class CustomContext(commands.Context):
         new_content = str(content) if content is not None else None
         if new_content and len(new_content) > 2000:
             new_content = new_content[:1960]
+            new_content += "..."
             if content.endswith('```'):
                 new_content += "```"
             new_content += "\n\n*Output Truncated for Discord*"
