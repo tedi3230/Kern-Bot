@@ -82,7 +82,7 @@ async def on_guild_join(guild: discord.Guild):
 @bot.event
 async def on_guild_remove(guild: discord.Guild):
     e = discord.Embed(title="Left {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
-                      colour=discord.Colour.green(),
+                      colour=discord.Colour.red(),
                       timestamp=datetime.utcnow())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
 
