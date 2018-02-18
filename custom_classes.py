@@ -42,7 +42,7 @@ class KernBot(commands.Bot):
         loops.run_until_complete(self.init())
         self.status_task = self.loop.create_task(self.status_changer())
         try:
-            self.loop.add_signal_handler(SIGTERM, self.suicide)
+            self.loop.add_signal_handler(SIGTERM, lambda: asyncio.async(self.suicide))
         except NotImplementedError:
             pass
 
