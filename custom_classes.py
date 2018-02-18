@@ -33,7 +33,7 @@ class KernBot(commands.Bot):
         self.bot_logs_id = 382780308610744331
         self.launch_time = datetime.utcnow()
         self.latest_message_time = None
-        super().add_check(bot_user_check)
+        self.add_check(bot_user_check)
         self.exts = OrderedDict()
         self.statistics = {'market_price':{}, 'coins':[]}
         for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
