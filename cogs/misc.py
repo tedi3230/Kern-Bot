@@ -137,14 +137,6 @@ class Misc:
     async def hash_md5(self, ctx, *, text):
         await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.md5(text.encode()).hexdigest()}```")
 
-    @_hash.command(name="blake2b")
-    async def hash_blake2b(self, ctx, *, text):
-        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.blake2b(text.encode()).hexdigest()}```")
-
-    @_hash.command(name="blake2s")
-    async def hash_blake2s(self, ctx, *, text):
-        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.blake2s(text.encode()).hexdigest()}```")
-
     @commands.command()
     async def tree(self, ctx):
         """Provides a directory tree like view of the server's channels"""
