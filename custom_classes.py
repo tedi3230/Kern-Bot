@@ -47,7 +47,12 @@ class KernBot(commands.Bot):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
                 self.statistics['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
 
-    async def suicide(self):
+    async def suicide(self, message="Shutting Down"):
+        ch = self.get_channel(self.bot_logs_id)
+        em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}",
+                           colour=discord.Colour.red())
+        em.timestamp = datetime.utcnow()
+        await ch.send(embed=em)
         await self.database.pool.close()
         self.session.close()
         await self.logout()
@@ -68,7 +73,7 @@ class KernBot(commands.Bot):
         status_messages = [discord.Game(name="for new contests.", type=3),
                            discord.Game(name=f"{len(self.guilds)} servers.", type=3),
                            discord.Game(name="bot commands", type=2),
-                           discord.Game(name=f"for {self.prefix}", type=2)]
+                           discord.Game(name=f"prefix {self.prefix}", type=2)]
         while not self.is_closed():
             message = choice(status_messages)
             await self.change_presence(game=message)
