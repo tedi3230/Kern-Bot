@@ -108,9 +108,42 @@ class Misc:
         ```{0}kiss <item>```"""
         await ctx.send(":kiss:{}:kiss:".format(item))
 
-    @commands.command(name="hash")
-    async def _hash(self, ctx, *, text):
-        await ctx.neutral(f"Original:```{text}```\nHashed:```{hashlib.sha256(text.encode('utf-8')).hexdigest()}```", "Hash")
+    @commands.group(name="hash")
+    async def _hash(self, ctx):
+        if ctx.invoked_subcommand is None:
+            await ctx.error(f"Hash type {ctx.subcommand_passed} not found")
+
+    @_hash.command(name="sha256")
+    async def hash_sha256(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.sha256(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="sha224")
+    async def hash_sha224(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.sha224(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="sha512")
+    async def hash_sha512(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.sha512(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="sha1")
+    async def hash_sha1(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.sha1(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="sha384")
+    async def hash_sha384(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.sha384(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="md5")
+    async def hash_md5(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.md5(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="blake2b")
+    async def hash_blake2b(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.blake2b(text.encode()).hexdigest()}```")
+
+    @_hash.command(name="blake2s")
+    async def hash_blake2s(self, ctx, *, text):
+        await ctx.neutral(f"**Original:**```{text}```**Hashed:**```{hashlib.blake2s(text.encode()).hexdigest()}```")
 
     @commands.command()
     async def tree(self, ctx):
