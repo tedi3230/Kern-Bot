@@ -50,20 +50,16 @@ class Admin:
     @commands.command(hidden=True, aliases=['restart'])
     async def rebirth(self, ctx):
         """Owner of this bot only command; Restart the bot"""
-        if ctx.channel != self.bot_logs:
-            await ctx.success("", f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
-        await ctx.success("", f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}", channel=self.bot_logs, rqst_by=False)
+        await ctx.success("", f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
         print("\nRestarting...\n")
-        await self.bot.suicide()
+        await self.bot.suicide("Restarting")
         execl(executable, 'python "' + "".join(argv) + '"')
 
     @commands.is_owner()
     @commands.command(hidden=True, aliases=['shutdown', 'die'])
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
-        if ctx.channel != self.bot_logs:
-            await ctx.success("", f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
-        await ctx.success("", f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}", channel=self.bot_logs, rqst_by=False)
+        await ctx.success("", f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
         print("\nShutting Down...\n")
         await self.bot.suicide()
 
