@@ -110,7 +110,7 @@ class Misc:
 
     @commands.command(name="hash")
     async def _hash(self, ctx, *, text):
-        await ctx.send(hashlib.sha256(text.encode("utf-8")).hexdigest())
+        await ctx.neutral(f"Original:```{text}```\nHashed:```{hashlib.sha256(text.encode('utf-8')).hexdigest()}```", "Hash")
 
     @commands.command()
     async def tree(self, ctx):
