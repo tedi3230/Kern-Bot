@@ -2,6 +2,7 @@ from datetime import datetime
 import inspect
 from collections import OrderedDict
 import os
+import hashlib
 
 import psutil
 
@@ -106,6 +107,10 @@ class Misc:
         """Kisses the given item
         ```{0}kiss <item>```"""
         await ctx.send(":kiss:{}:kiss:".format(item))
+
+    @commands.command(name="hash")
+    async def _hash(self, ctx, *, text):
+        await ctx.send(hashlib.sha256(text.encode("utf-8")).hexdigest())
 
     @commands.command()
     async def tree(self, ctx):
