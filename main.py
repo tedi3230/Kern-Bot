@@ -113,6 +113,19 @@ Cur. Com: {sha}
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
 
 @bot.event
+async def on_resumed():
+    ch = bot.get_channel(bot.bot_logs_id)
+    em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
+                       description=f"Down since: {datetime.utcnow().strftime(bot.time_format)}",
+                       colour=discord.Colour.red())
+    await ch.send(embed=em)
+
+@bot.event
+async def on_socket_raw_receive(msg):
+    bot.latest_message_time = datetime.utcnow()
+
+
+@bot.event
 async def on_message(message: discord.Message):
     if bot.database is None:
         return

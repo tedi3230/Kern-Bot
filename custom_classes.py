@@ -31,6 +31,7 @@ class KernBot(commands.Bot):
         self.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
         self.bot_logs_id = 382780308610744331
         self.launch_time = datetime.utcnow()
+        self.latest_message_time = None
         super().add_check(bot_user_check)
         self.exts = OrderedDict()
         self.statistics = {'market_price':{}, 'coins':[]}
