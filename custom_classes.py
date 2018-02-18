@@ -53,8 +53,13 @@ class KernBot(commands.Bot):
         await self.logout()
         self.status_task.cancel()
 
-    async def wait(self, events, *, check=None, timeout=None):
-        to_wait = [self.wait_for(event, check=check) for event in events]
+    async def wait_for_any(self, events, checks, timeout=None):
+        if not isinstance(checks, list):
+            checks = [checks]
+        if len(checks) == 1:
+            checks *= len(events)
+        mapped = zip(events, checks)
+        to_wait = [self.wait_for(event, check=check) for event, check in mapped]
         done, _ = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
         return done.pop().result()
 
