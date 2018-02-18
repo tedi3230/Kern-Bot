@@ -100,7 +100,11 @@ class CustomContext(commands.Context):
         return prefix
 
     async def __embed(self, title, description, colour, rqst_by, timestamp, channel, *args, **kwargs):
-        e = discord.Embed(title=str(title), colour=colour, description=str(description))
+        e = discord.Embed(colour=colour)
+        if title is not None:
+            e.title = str(title)
+        if description is not None:
+            e.description = str(description)
         if rqst_by:
             e.set_footer(text="Requested by: {}".format(self.message.author), icon_url=self.message.author.avatar_url)
         if timestamp:
@@ -109,12 +113,12 @@ class CustomContext(commands.Context):
             return await self.send(embed=e, *args, **kwargs)
         return await channel.send(embed=e, *args, **kwargs)
 
-    async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
+    async def error(self, error, title="Error:", *args, channel: discord.TextChannel = None, **kwargs):
         if isinstance(error, Exception):
             if title == "Error:":
                 title = error.__class__.__name__
             error = str(error)
-        return await self.__embed(title, error, discord.Colour.red(), rqst_by, timestamp, channel, *args, **kwargs)
+        return await self.__embed(title, error, discord.Colour.red(), False, False, channel, *args, **kwargs)
 
     async def success(self, success, title="Success:", *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         return await self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp, channel, *args, **kwargs)

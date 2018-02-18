@@ -77,7 +77,7 @@ class Games:
             try:
                 reaction, _ = await self.bot.wait_for("reaction_add", check=same, timeout=30)
             except asyncio.TimeoutError:
-                await ctx.error("You took too long to add an emoji.", "Timeout Error", rqst_by=False)
+                await ctx.error("You took too long to add an emoji.", "Timeout Error")
                 break
 
             if str(reaction) == "⏹":
@@ -106,9 +106,9 @@ class Games:
     async def trivia_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
         if isinstance(error, ValueError):
-            await ctx.error(error, "Category Not Found", rqst_by=False)
+            await ctx.error(error, "Category Not Found")
         else:
-            await ctx.error(error, rqst_by=False)
+            await ctx.error(error)
 
 def setup(bot: commands.Bot):
     bot.add_cog(Games(bot))
