@@ -119,7 +119,7 @@ class CustomContext(commands.Context):
     async def success(self, success, title="Success:", *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         return await self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp, channel, *args, **kwargs)
 
-    async def neutral(self, text, title, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
+    async def neutral(self, text, title=None, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         return await self.__embed(title, text, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
