@@ -1,7 +1,7 @@
 import random
 import io
 from os import environ, path
-from asyncio import sleep
+from asyncio import sleep, TimeoutError
 from collections import OrderedDict
 from datetime import datetime
 
@@ -167,10 +167,10 @@ class Internet:
         #Now do fake atatck on unsecure port (note, add a RFC 1149 reference)
 
     async def create_video(self, text):
-        with async_timeout.timeout(10):
+        with async_timeout.timeout(20):
             async with self.bot.session.post(url="http://talkobamato.me/synthesize.py", data={"input_text":text}) as resp:
                 if resp.status >= 400:
-                    raise self.bot.ResponseError(f"Streamable upload responded with status {resp.status}")
+                    raise self.bot.ResponseError(f"Obama responded with status {resp.status}")
                 text = await resp.text()
                 url = resp.url
 
@@ -193,6 +193,14 @@ class Internet:
         async with ctx.typing():
             link = await self.create_video(text)
             await ctx.send(link)
+
+    @obama.error
+    async def obama_error_handler(self, ctx, error):
+        error = getattr(error, 'original', error)
+        if isinstance(error, TimeoutError):
+            await ctx.error("Obama server is not responding.", "Request Timed Out")
+        elif isinstance(error, self.bot.ResponseError):
+            await ctx.error(error)
 
 
 
