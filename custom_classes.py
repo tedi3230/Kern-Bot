@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+from signal import SIGTERM
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
@@ -40,7 +41,10 @@ class KernBot(commands.Bot):
         loops = asyncio.get_event_loop()
         loops.run_until_complete(self.init())
         self.status_task = self.loop.create_task(self.status_changer())
-
+        try:
+            self.loop.add_signal_handler(SIGTERM, self.suicide)
+        except NotImplementedError:
+            pass
 
     async def init(self):
         self.session = aiohttp.ClientSession()
