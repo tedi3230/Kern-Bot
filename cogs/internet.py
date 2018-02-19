@@ -146,7 +146,7 @@ class Internet:
             e.set_image(url=dem['img_url'])
             await ctx.send(embed=e)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def hack(self, ctx, *, url: cc.Url):
         """Starts a fake hacking instance on a specified URL.
         ```{0}hack <url>```"""
