@@ -36,8 +36,8 @@ def gen_data():
     secured = [random.choice(["'false'", 'true']) for i in fake_ports]
     table_data = list(zip(fake_ports, protocols, secured))
     table = str(tabulate(table_data, TABLE_HEADERS, tablefmt="rst"))
-    open_data = [data[0:2] for data in table_data if data[2]]
-    open_ports = ", ".join([str(data[0]) for data in open_data])
+    open_data = [data[0:3] for data in table_data if data[2]]
+    open_ports = ", ".join([str(data[0]) for data in open_data if data[2] == "true"])
     return table_data, table, open_ports, open_data
 
 
@@ -158,9 +158,8 @@ class Internet:
         await msg.edit(content=f"{content}\nPort: {th}{hu}{te}{on}{loading}")
         await sleep(10)
 
-        if not table_data:
-            await msg.edit(content=f"Port scan complete. No ports found.")
-            return
+        if not open_ports:
+            return await msg.edit(content=f":x: Port scan complete. No insecure ports found.")
 
         await msg.edit(content=f"Port scan complete. Scan report: ```ml\n{table}```\n{loading}Attempting to bruteforce insecure ports: ({open_ports})")
 
