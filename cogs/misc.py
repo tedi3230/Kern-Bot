@@ -87,9 +87,8 @@ class Misc:
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         ram_usage = self.process.memory_full_info().uss / 1024**2
         invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot"
-        embed = discord.Embed(title=f"Invite Url", url=invite_url,
-                              description="Information about this bot.", color=0x00ff00)
-        embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url, url="https://discord.gg/bEYgRmc")
+        embed = discord.Embed(description=f"[Invite URL]({invite_url})\n[Server Invite](https://discord.gg/bEYgRmc)\nInformation about this bot.", color=0x00ff00)
+        embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url)
         embed.add_field(name="Server Statistics:", value="Guilds: {}\nChannels: {}\nUsers: {}".format(total_servers, total_channels, total_members))
         embed.add_field(name="Resource Usage:", value="CPU: {:.2f} %\nRAM: {:.2f} MiB".format(cpu_usage, ram_usage))
         embed.add_field(name="Uptime:", value=self.get_uptime())
