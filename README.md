@@ -1,3 +1,5 @@
+[![Discord Bots](https://discordbots.org/api/widget/status/380598116488970261.svg)](https://discordbots.org/bot/380598116488970261) [![Discord Bots](https://discordbots.org/api/widget/lib/380598116488970261.svg?noavatar=true)](https://discordbots.org/bot/380598116488970261) [![Discord Bots](https://discordbots.org/api/widget/upvotes/380598116488970261.svg?noavatar=true)](https://discordbots.org/bot/380598116488970261)
+
 # Kern Bot
 
 Kern Bot is a bot by @Modelmat#8218.
