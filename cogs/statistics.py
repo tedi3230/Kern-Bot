@@ -90,7 +90,7 @@ class Statistics:
     @coin.command(name="hour", aliases=["hourly"])
     async def coin_hour(self, ctx, coin: UpperConv, currency: UpperConv = "USD", hours: IntConv = 6):
         """Creates a graph upon day information of a currencies.
-        ```{0}coin day <coin> [currency] [hours]```"""
+        ```{0}coin hour <coin> [currency] [hours]```"""
         async with ctx.typing():
             data = await self.get_data("hour", coin, currency, hours)
             graph, embed = self.gen_graph_embed(data, "Hours", coin, currency, hours)
@@ -99,7 +99,7 @@ class Statistics:
     @coin.command(name="minute")
     async def coin_minute(self, ctx, coin: UpperConv, currency: UpperConv = "USD", minutes: IntConv = 60):
         """Creates a graph upon day information of a currencies.
-        ```{0}coin day <coin> [currency] [minutes]```"""
+        ```{0}coin minute <coin> [currency] [minutes]```"""
         async with ctx.typing():
             data = await self.get_data("minute", coin, currency, minutes)
             graph, embed = self.gen_graph_embed(data, "Minutes", coin, currency, minutes)
