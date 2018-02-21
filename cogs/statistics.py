@@ -46,7 +46,7 @@ class Statistics:
                 time_period: {
                     'high': [[-i, v['high']] for i, v in enumerate(vals)],
                     'low': [[-i, v['low']] for i, v in enumerate(vals)],
-                    'timestamp': datetime.utnow() + get_delta(time_period, limit),
+                    'timestamp': datetime.utcnow() + get_delta(time_period, limit),
                 },
             }
         return self.bot.statistics['market_price'][coin][time_period]
