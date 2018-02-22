@@ -5,6 +5,7 @@ import os
 import hashlib
 from sys import version_info
 from pkg_resources import get_distribution
+import async_timeout
 
 import psutil
 
@@ -13,6 +14,14 @@ from discord.ext import commands
 
 from custom_classes import KernBot
 
+COUNTRY_CODES = {"AU": "Australia", "BR": "Brazil", "CA": "Canada",
+                 "CH": "Switzerland", "DE": "Germany", "DK": "Denmark",
+                 "ES": "Spain", "FI": "Finland", "FR": "France",
+                 "GB": "United Kingdom", "IE": "Ireland",
+                 "IR": "Islamic Republic of Iran", "NL": "Netherlands",
+                 "NZ": "New Zealand", "TR": "Turkey",
+                 "US": "United States of America"}
+
 class Misc:
     """Miscellaneous functions"""
     def __init__(self, bot: KernBot):
@@ -20,6 +29,37 @@ class Misc:
         self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.process = psutil.Process()
         self.bot.remove_command('help')
+
+    @commands.command()
+    async def person(self, ctx):
+        """Generates a random person"""
+        with async_timeout.timeout(10):
+            async with self.bot.session.get("https://randomuser.me/api/?noinfo") as resp:
+                data = (await resp.json())['results'][0]
+        names = data['name']
+        name = "{} {} {}".format(names['title'].capitalize(),
+                                 names['first'].capitalize(),
+                                 names['last'].capitalize())
+        location = data['location']
+        login = data['login']
+
+        em = discord.Embed(title=name, description="**Gender**: " + data['gender'].capitalize() + "\n**Born**: " + data['dob'])
+        address = "**Street**: {}\n**City**: {}\n**State**: {}\n**Postcode**: {}\n**Country**: {}".format(" ".join([w.capitalize() for w in location['street'].split(" ")]),
+                                                                                                          location['city'].capitalize(),
+                                                                                                          location['state'].capitalize(),
+                                                                                                          location['postcode'],
+                                                                                                          COUNTRY_CODES[data['nat']])
+        logins = "**Username**: {}\n**Password**: {}".format(login['username'],
+                                                             login['password'])
+        contact_details = "**Email**: {}\n**Phone**: {}\n**Mobile**: {}".format(data['email'].split("@")[0] + "@gmail.com",
+                                                                                data['phone'],
+                                                                                data['cell'])
+        em.add_field(name="Address:", value=address, inline=False)
+        em.add_field(name="Login Details:", value=logins, inline=False)
+        em.add_field(name="Contact Details", value=contact_details, inline=False)
+        em.set_thumbnail(url=data['picture']['large'])
+
+        await ctx.send(embed=em)
 
     @commands.command()
     async def raw(self, ctx, *, message=None):
