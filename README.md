@@ -36,6 +36,7 @@ APP_ID {Oxford Dictionary API}
 APP_KEY {Oxford Dictionary API}
 BOT_NAME {Bot's Username}
 BOT_PREFIX {Bot's Command Prefix}
+DBL_TOKEN {Discordbot.org Prefix}
 ```
 `database_secret.txt`
 ```
