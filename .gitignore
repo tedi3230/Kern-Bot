@@ -104,3 +104,5 @@ ENV/
 .vscode/
 *secret*
 todo*
+website/
+website/*
