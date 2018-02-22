@@ -206,7 +206,7 @@ class Admin:
                 await ctx.message.add_reaction("👎")
             except discord.Forbidden:
                 pass
-            return await ctx.error(f'```py\n{e}\n```', e.__class__.__name__ + ':')
+            return await ctx.error(f'```\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
         try:
