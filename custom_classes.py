@@ -53,14 +53,16 @@ class KernBot(commands.Bot):
                 self.statistics['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
 
     async def suicide(self, message="Shutting Down"):
+        print(f"\n{message}\n")
         ch = self.get_channel(self.bot_logs_id)
         em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}",
-                           colour=discord.Colour.red())
+                        colour=discord.Colour.red())
         em.timestamp = datetime.utcnow()
         await ch.send(embed=em)
         await self.database.pool.close()
         self.session.close()
-        await self.logout()
+        await self.close()
+        print('suicide')
         self.status_task.cancel()
 
     async def wait_for_any(self, events, checks, timeout=None):
@@ -89,6 +91,14 @@ class KernBot(commands.Bot):
         for e_id in ids:
             emojis.append(str(self.get_emoji(e_id)))
         return emojis
+
+
+    async def update_dbots_server_count(self, dbl_token):
+        url = f"https://discordbots.org/api/bots/{self.user.id}/stats"
+        headers = {"Authorization": dbl_token}
+        payload = {"server_count": len(self.guilds)}
+        with async_timeout.timeout(10):
+            await self.session.post(url, data=payload, headers=headers)
 
     class ResponseError(Exception):
         pass
