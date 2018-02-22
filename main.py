@@ -13,7 +13,7 @@ from discord.ext import commands
 import database as db
 import custom_classes as cc
 
-"update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]"
+# update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
 
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
