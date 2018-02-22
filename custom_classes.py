@@ -62,7 +62,6 @@ class KernBot(commands.Bot):
         await self.database.pool.close()
         self.session.close()
         await self.close()
-        print('suicide')
         self.status_task.cancel()
 
     async def wait_for_any(self, events, checks, timeout=None):
