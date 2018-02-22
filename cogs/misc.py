@@ -43,7 +43,7 @@ class Misc:
         location = data['location']
         login = data['login']
 
-        em = discord.Embed(title=name, description="**Gender**: " + data['gender'].capitalize() + "\n**Born**: " + data['dob'])
+        em = discord.Embed(colour=discord.Colour.dark_purple(), title=name, description="**Gender**: " + data['gender'].capitalize() + "\n**Born**: " + data['dob'])
         address = "**Street**: {}\n**City**: {}\n**State**: {}\n**Postcode**: {}\n**Country**: {}".format(" ".join([w.capitalize() for w in location['street'].split(" ")]),
                                                                                                           location['city'].capitalize(),
                                                                                                           location['state'].capitalize(),
