@@ -44,12 +44,14 @@ try:
     token = environ["AUTH_KEY"]
     name = environ["BOT_NAME"]
     bot_prefix = environ["BOT_PREFIX"]
+    dbl_token = environ["DBL_TOKEN"]
 except KeyError:
     with open("client_secret.txt", encoding="utf-8") as file:
         lines = [l.strip() for l in file]
         token = lines[0]
         name = lines[3]
         bot_prefix = lines[4]
+        dbl_token = lines[5]
 
 bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
@@ -71,6 +73,7 @@ async def load_extensions(bots):
 @bot.event
 async def on_connect():
     bot.database = db.Database(bot)
+    await bot.update_dbots_server_count(dbl_token)
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
@@ -78,6 +81,7 @@ async def on_guild_join(guild: discord.Guild):
                       colour=discord.Colour.green(),
                       timestamp=datetime.utcnow())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.update_dbots_server_count(dbl_token)
 
 @bot.event
 async def on_guild_remove(guild: discord.Guild):
@@ -85,6 +89,7 @@ async def on_guild_remove(guild: discord.Guild):
                       colour=discord.Colour.red(),
                       timestamp=datetime.utcnow())
     await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.update_dbots_server_count(dbl_token)
 
 @bot.event
 async def on_ready():
@@ -220,6 +225,6 @@ async def on_command_error(ctx, error):
 
 loop = asyncio.get_event_loop()
 try:
-    loop.run_until_complete(bot.start(token, reconnect=True))
+    loop.run_until_complete(bot.start(token))
 except KeyboardInterrupt:
     loop.run_until_complete(bot.suicide())
