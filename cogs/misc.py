@@ -3,6 +3,8 @@ import inspect
 from collections import OrderedDict
 import os
 import hashlib
+from sys import version_info
+from pkg_resources import get_distribution
 
 import psutil
 
@@ -87,11 +89,14 @@ class Misc:
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         ram_usage = self.process.memory_full_info().uss / 1024**2
         invite_url = f"https://discordapp.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot"
-        embed = discord.Embed(description=f"[Invite URL]({invite_url})\n[Server Invite](https://discord.gg/nHmAkgg)\n[Bot Website](http://kern-bot.tk/)\nInformation about this bot.", color=0x00ff00)
+        embed = discord.Embed(description=f"[Invite URL]({invite_url})\n[Server Invite](https://discord.gg/nHmAkgg)\n[Bot Website](http://kern-bot.tk/)\n{self.bot.description}", color=0x00ff00)
         embed.set_author(name=str(self.bot.owner), icon_url=self.bot.owner.avatar_url)
-        embed.add_field(name="Server Statistics:", value="Guilds: {}\nChannels: {}\nUsers: {}".format(total_servers, total_channels, total_members))
-        embed.add_field(name="Resource Usage:", value="CPU: {:.2f} %\nRAM: {:.2f} MiB".format(cpu_usage, ram_usage))
-        embed.add_field(name="Uptime:", value=self.get_uptime())
+        embed.add_field(name="#\u20e3 Server Statistics:", value="**Guilds**: {}\n**Channels**: {}\n**Users**: {}".format(total_servers, total_channels, total_members))
+        embed.add_field(name="💻 Resource Usage:", value="CPU: {:.2f} %\nRAM: {:.2f} MiB".format(cpu_usage, ram_usage))
+        embed.add_field(name="⏲ Uptime:", value=self.get_uptime())
+        py_e, disc_e = self.bot.get_emojis(416194389853863939, 416194942520786945)
+        embed.add_field(name="Running On:", value=f"""{py_e}: {".".join([str(v) for v in version_info[:3]])}
+{disc_e}: {get_distribution('discord.py').version} [discord.py]""")
         embed.timestamp = datetime.utcnow()
         await ctx.send(embed=embed)
 
