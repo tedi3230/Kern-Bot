@@ -56,7 +56,7 @@ class KernBot(commands.Bot):
         print(f"\n{message}\n")
         ch = self.get_channel(self.bot_logs_id)
         em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}",
-                        colour=discord.Colour.red())
+                           colour=discord.Colour.red())
         em.timestamp = datetime.utcnow()
         await ch.send(embed=em)
         await self.database.pool.close()
