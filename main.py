@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import environ, system, execl
 import traceback
 import asyncio
@@ -121,16 +121,19 @@ Cur. Com: {var_dict['sha']}
 
 @bot.event
 async def on_resumed():
-    ch = bot.get_channel(bot.bot_logs_id)
-    em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
-                       description=f"Down since: {datetime.utcnow().strftime(bot.time_format)}",
-                       colour=discord.Colour.red())
-    await ch.send(embed=em)
+    if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
+        ch = bot.get_channel(bot.bot_logs_id)
+        em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
+                           description=f"Down since: {datetime.utcnow().strftime(bot.time_format)}",
+                           colour=discord.Colour.red())
+        await ch.send(embed=em)
+    print(bot.latest_message_time)
+    print(bot.latest_message_time == datetime.utcnow())
+    print(datetime.utcnow() + timedelta(seconds=30))
 
 @bot.event
 async def on_socket_raw_receive(msg):
     bot.latest_message_time = datetime.utcnow()
-
 
 @bot.event
 async def on_message(message: discord.Message):
