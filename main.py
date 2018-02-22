@@ -132,7 +132,7 @@ async def on_resumed():
     print(datetime.utcnow() + timedelta(seconds=30))
 
 @bot.event
-async def on_socket_raw_receive(msg):
+async def on_socket_raw_receive(_):
     bot.latest_message_time = datetime.utcnow()
 
 @bot.event
