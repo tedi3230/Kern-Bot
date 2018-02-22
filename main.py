@@ -59,6 +59,7 @@ bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
 with requests.Session() as s:
     with s.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
         sha = "g" + r.json()['sha'][:7]
+    s.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
