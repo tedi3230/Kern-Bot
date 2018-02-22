@@ -56,10 +56,7 @@ except KeyError:
 bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
 
-with requests.Session() as s:
-    with s.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
-        sha = "g" + r.json()['sha'][:7]
-    s.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
+var_dict = {}
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
@@ -75,6 +72,10 @@ async def load_extensions(bots):
 async def on_connect():
     bot.database = db.Database(bot)
     await bot.update_dbots_server_count(dbl_token)
+    with async_timeout.timeout(20):
+        async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
+            var_dict['sha'] = "g" + r.json()['sha'][:7]
+        await bot.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
@@ -110,7 +111,7 @@ Members:  {sum(1 for _ in bot.get_all_members())}
 Channels: {sum(1 for _ in bot.get_all_channels())}
 Python:   {".".join([str(v) for v in version_info[:3]])}
 Discord:  {get_distribution('discord.py').version}
-Cur. Com: {sha}
+Cur. Com: {var_dict['sha']}
 ---------------
 """)
 
