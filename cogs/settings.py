@@ -18,7 +18,6 @@ class Settings:
 
     async def __error(self, ctx, error):
         print(error)
-        pass
 
     @commands.group()
     async def get(self, ctx):
