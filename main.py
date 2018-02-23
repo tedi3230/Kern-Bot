@@ -39,7 +39,6 @@ async def server_prefix(bots, message):
     for prefix in [bots.prefix, *guild_prefixes]:
         prefixes.update(prefix)
         prefixes.update(prefix + " ")
-    print(prefixes)
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
 try:
