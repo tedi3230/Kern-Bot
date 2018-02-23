@@ -36,8 +36,6 @@ async def server_prefix(bots, message):
     else:
         guild_prefixes = bots.server_prefixes[message.guild.id]
 
-    raise Exception("Not implemented yet, cannot use.")
-
     prefixes = [bots.prefix, *guild_prefixes]
     b_prefixes = []
     for prefix in prefixes:
