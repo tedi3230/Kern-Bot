@@ -32,17 +32,15 @@ async def server_prefix(bots, message):
 
     if bots.server_prefixes.get(message.guild.id) is None:
         guild_prefixes = await bots.database.get_prefix(message)
-        bots.server_prefixes[message.guild.id] = guild_prefixes
+        bots.server_prefixes[message.guild.id] = list(set(guild_prefixes))
     else:
         guild_prefixes = bots.server_prefixes[message.guild.id]
-
-    prefixes = [bots.prefix, *guild_prefixes]
-    b_prefixes = []
-    for prefix in prefixes:
-        b_prefixes.append(prefix)
-        b_prefixes.append(prefix + " ")
-
-    return commands.when_mentioned_or(*b_prefixes)(bots, message)
+    prefixes = set()
+    for prefix in [bots.prefix, *guild_prefixes]:
+        prefixes.update(prefix)
+        prefixes.update(prefix + " ")
+    print(prefixes)
+    return commands.when_mentioned_or(*prefixes)(bots, message)
 
 try:
     token = environ["AUTH_KEY"]

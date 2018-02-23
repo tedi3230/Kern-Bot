@@ -94,18 +94,20 @@ class Database:
             channels = await con.fetchrow(sql, ctx.guild.id)
         return channels
 
-    async def set_prefix(self, ctx, prefix: str):
+    async def add_prefix(self, ctx, prefix: str):
+        prefixes = await self.get_prefix(ctx)
+        prefixes.append(prefix)
         sql = """INSERT INTO servers(server_id, prefix) VALUES ($2, $1)
                  ON CONFLICT (server_id) DO UPDATE
                     SET prefix = $1"""
         async with self.pool.acquire() as con:
-            await con.execute(sql, prefix, ctx.guild.id)
+            await con.execute(sql, prefixes, ctx.guild.id)
         return prefix
 
     async def get_prefix(self, ctx):
         async with self.pool.acquire() as con:
-            prefix = await con.fetchval("SELECT prefix FROM servers WHERE server_id = $1", ctx.guild.id) or self.bot.prefix
-        return prefix
+            prefixes = await con.fetchval("SELECT prefix FROM servers WHERE server_id = $1", ctx.guild.id) or []
+        return prefixes
 
     async def remove_prefix(self, ctx):
         async with self.pool.acquire() as con:

@@ -51,21 +51,22 @@ class Settings:
         await ctx.success("​Set channels to {} {}".format(*[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
-    async def set_prefix(self, ctx, *, prefix: str = None):
-        """Set the bot's prefix for this server. Send no prefix to remove."""
-        if prefix is not None:
-            prefix = prefix.strip("'").strip('"')
-            self.bot.server_prefixes[ctx.guild.id] = self.bot.server_prefixes.get(ctx.guild.id, []) + [prefix]
-            await ctx.send("Set prefix to `{}`".format(await self.bot.database.set_prefix(ctx, prefix)))
-        else:
-            await self.bot.database.remove_prefix(ctx)
-            await ctx.send("Custom server prefix removed.")
+    async def set_prefix(self, ctx, *, prefix: str):
+        """Set the bot's prefix for this server"""
+        prefix = prefix.strip("'").strip('"')
+        self.bot.server_prefixes.pop(ctx.guild.id, None)
+        await ctx.send("Adding prefix `{}`".format(await self.bot.database.add_prefix(ctx, prefix)))
+
+
+        # else:
+        #     await self.bot.database.remove_prefix(ctx)
+        #     await ctx.send("Custom server prefix removed.")
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):
         """Get the bot's prefix for this server"""
-        prefix = self.bot.server_prefixes.get(ctx.guild.id, self.bot.prefix)
-        await ctx.send("Prefix for {}: `{}`".format(ctx.guild.name, prefix))
+        prefixes = self.bot.server_prefixes.get(ctx.guild.id, []) + [self.bot.prefix]
+        await ctx.send("Prefixes for {}: ```{}```".format(ctx.guild.name, ", ".join(prefixes)))
 
     @commands.is_owner()
     @get.command(hidden=True)
