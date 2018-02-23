@@ -25,7 +25,7 @@ servers_table = """
                     server_id BIGINT NOT NULL UNIQUE,
                     receive_channel_id BIGINT,
                     vote_channel_id BIGINT,
-                    prefix ANYARRAY,
+                    prefix VARCHAR[],
                     max_rating INTEGER
                 )
                 """
