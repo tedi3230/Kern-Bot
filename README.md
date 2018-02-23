@@ -1,3 +1,5 @@
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 [![Discord Bots](https://discordbots.org/api/widget/status/380598116488970261.svg)](https://discordbots.org/bot/380598116488970261) [![Discord Bots](https://discordbots.org/api/widget/lib/380598116488970261.svg?noavatar=true)](https://discordbots.org/bot/380598116488970261) [![Discord Bots](https://discordbots.org/api/widget/upvotes/380598116488970261.svg?noavatar=true)](https://discordbots.org/bot/380598116488970261)
 
 # Kern Bot
