@@ -15,6 +15,8 @@ import custom_classes as cc
 
 # update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
 
+#Can now only update by git checkout release; git merge master (ADD COMMAND)
+
 async def server_prefix(bots, message):
     """A callable Prefix for our bot.
 
@@ -33,13 +35,18 @@ async def server_prefix(bots, message):
     if bots.server_prefixes.get(message.guild.id) is None:
         guild_prefixes = await bots.database.get_prefix(message)
         bots.server_prefixes[message.guild.id] = list(set(guild_prefixes))
+
     else:
         guild_prefixes = bots.server_prefixes[message.guild.id]
-    prefixes = set()
+
+    prefixes = []
+
     for prefix in [bots.prefix, *guild_prefixes]:
-        prefixes.update(prefix)
-        prefixes.update(prefix + " ")
+        prefixes.append(prefix + " ")
+        prefixes.append(prefix)
+
     return commands.when_mentioned_or(*prefixes)(bots, message)
+
 
 try:
     token = environ["AUTH_KEY"]
