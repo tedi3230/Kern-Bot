@@ -25,11 +25,10 @@ servers_table = """
                     server_id BIGINT NOT NULL UNIQUE,
                     receive_channel_id BIGINT,
                     vote_channel_id BIGINT,
-                    prefix VARCHAR,
+                    prefix ANYARRAY,
                     max_rating INTEGER
                 )
                 """
-
 
 class Database:
     """Accessing database functions"""
@@ -70,7 +69,8 @@ class Database:
 
     async def generate_id(self):
         """Generate the ID needed to index the submissions"""
-        submission_id_list = await self.pool.fetchrow("SELECT submission_id FROM submissions")
+        async with self.pool.acquire() as con:
+            submission_id_list = await con.fetchrow("SELECT submission_id FROM submissions")
         submission_id = "{:06}".format(randint(0, 999999))
         if not submission_id_list:
             return submission_id

@@ -55,7 +55,7 @@ class Settings:
         """Set the bot's prefix for this server. Send no prefix to remove."""
         if prefix is not None:
             prefix = prefix.strip("'").strip('"')
-            self.bot.server_prefixes[ctx.guild.id] = prefix
+            self.bot.server_prefixes[ctx.guild.id] = self.bot.server_prefixes.get(ctx.guild.id, []) + [prefix]
             await ctx.send("Set prefix to `{}`".format(await self.bot.database.set_prefix(ctx, prefix)))
         else:
             await self.bot.database.remove_prefix(ctx)
