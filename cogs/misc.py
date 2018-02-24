@@ -269,7 +269,7 @@ class Misc:
         embed = discord.Embed(color=discord.Colour.green())
         if command is None:
             command = "Help"
-            embed.description = "{0}\nUse `{1}help command` or `{1}help cog` for further detail.".format(self.bot.description, ctx.clean_prefix())
+            embed.description = "{0}\nUse `{1}help command` for further detail.".format(self.bot.description, ctx.clean_prefix())
             for cog, cmds in cogs_dict.items():
                 commands_l = []
                 for cmd in cmds:
@@ -308,7 +308,7 @@ class Misc:
                         embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         else:
-            embed.description = "The parsed cog or command `{}` does not exist.".format(command)
+            embed.description = "The passed command `{}` does not exist.".format(command)
             command = "Error"
 
         embed.timestamp = datetime.utcnow()
