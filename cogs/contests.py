@@ -25,7 +25,6 @@ class Contests:
 
     def __init__(self, bot: KernBot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
     async def __error(self, ctx, error):
         error = getattr(error, 'original', error)
@@ -36,7 +35,7 @@ class Contests:
                 type(error).__qualname__, ctx.command))
             traceback.print_exception(type(error), error, error.__traceback__)
             await ctx.error("An undhandled exception occurred. Don't worry, we know about it now. :thumbsup:")
-            await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=self.bot_logs, rqst_by=False)
+            await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=self.bot.logs, rqst_by=False)
 
     def generate_embed(self, message_author: discord.User, title, description, image_url=None, colour=0x00ff00):
         """Generates a discord embed object off the given parameters

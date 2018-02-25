@@ -87,7 +87,7 @@ async def on_guild_join(guild: discord.Guild):
     e = discord.Embed(title="Joined {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
                       colour=discord.Colour.green(),
                       timestamp=datetime.utcnow())
-    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.get_channel(bot.logs).send(embed=e)
     await bot.update_dbots_server_count(dbl_token)
 
 @bot.event
@@ -95,7 +95,7 @@ async def on_guild_remove(guild: discord.Guild):
     e = discord.Embed(title="Left {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
                       colour=discord.Colour.red(),
                       timestamp=datetime.utcnow())
-    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.get_channel(bot.logs).send(embed=e)
     await bot.update_dbots_server_count(dbl_token)
 
 @bot.event
@@ -120,18 +120,15 @@ Cur. Com: {var_dict['sha']}
 ---------------
 """)
 
-    while bot.get_channel(bot.bot_logs_id) is None:
-        asyncio.sleep(1)
-    await bot.get_channel(bot.bot_logs_id).send(embed=e)
+    await bot.logs.send(embed=e)
 
 @bot.event
 async def on_resumed():
     if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
-        ch = bot.get_channel(bot.bot_logs_id)
         em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
                            description=f"Down since: {datetime.utcnow().strftime('%H:%M:%S')}",
                            colour=discord.Colour.red())
-        await ch.send(embed=em)
+        await bot.logs.send(embed=em)
     print(bot.latest_message_time)
     print(bot.latest_message_time == datetime.utcnow())
     print(datetime.utcnow() + timedelta(seconds=30))
@@ -222,7 +219,7 @@ async def on_command_error(ctx, error):
         await ctx.error(error, "Error while voting: ")
 
     else:
-        await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.get_channel(bot.bot_logs_id))
+        await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.logs)
         print('Ignoring {} in command {}'.format(type(error).__qualname__,
                                                  ctx.command))
         traceback.print_exception(type(error), error, error.__traceback__)

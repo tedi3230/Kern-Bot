@@ -24,7 +24,6 @@ class Admin:
     """Administration commands."""
     def __init__(self, bot: KernBot):
         self.bot = bot
-        self.bot_logs = bot.get_channel(bot.bot_logs_id)
         self._last_result = None
 
     @commands.group(hidden=True)

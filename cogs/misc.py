@@ -26,7 +26,6 @@ class Misc:
     """Miscellaneous functions"""
     def __init__(self, bot: KernBot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.process = psutil.Process()
         self.bot.remove_command('help')
 

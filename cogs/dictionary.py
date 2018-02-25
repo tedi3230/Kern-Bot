@@ -17,7 +17,6 @@ class Dictionary:
 
     def __init__(self, bot: KernBot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
         self.dictionary_base_url = 'https://od-api.oxforddictionaries.com/api/v1/entries/en/{}'
         self.image_base_url = 'https://duckduckgo.com/'
         try:

@@ -45,7 +45,6 @@ class Internet:
     """Web functions (that make requests)"""
     def __init__(self, bot: cc.KernBot):
         self.bot = bot
-        self.bot_logs = self.bot.get_channel(bot.bot_logs_id)
 
     async def get_youtube_videos(self, page_url, cutoff_length=80, result_length=5):
         results = OrderedDict()

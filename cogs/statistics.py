@@ -109,7 +109,6 @@ class Statistics:
     async def coin_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
         if isinstance(error, ValueError):
-            
             await ctx.error('', str(error))
             # There is no data for the symbol {coin}
             # There is no data for the toSymbol {currency}
