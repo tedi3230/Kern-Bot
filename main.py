@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 from os import environ, system, execl
 import traceback
 import asyncio
-from sys import version_info, executable, argv
+from sys import executable, argv
+from platform import python_version
 from pkg_resources import get_distribution
 import async_timeout
 import requests
@@ -61,8 +62,6 @@ except KeyError:
 bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
                  description='Multiple functions, including contests, definitions, and more.')
 
-var_dict = {}
-
 async def load_extensions(bots):
     await asyncio.sleep(2)
     for extension in bots.exts:
@@ -79,7 +78,7 @@ async def on_connect():
     await bot.update_dbots_server_count(dbl_token)
     with async_timeout.timeout(20):
         async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
-            var_dict['sha'] = "g" + (await r.json())['sha'][:7]
+            bot.latest_commit = "g" + (await r.json())['sha'][:7]
         await bot.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
 
 @bot.event
@@ -108,15 +107,16 @@ async def on_ready():
                       colour=discord.Colour.green(),
                       timestamp=datetime.utcnow())
     print(f"""
-Username: {bot.user.name}
-ID:       {bot.user.id}
-Bot:      {bot.user.bot}
-Guilds:   {len(bot.guilds)}
-Members:  {sum(1 for _ in bot.get_all_members())}
-Channels: {sum(1 for _ in bot.get_all_channels())}
-Python:   {".".join([str(v) for v in version_info[:3]])}
-Discord:  {get_distribution('discord.py').version}
-Cur. Com: {var_dict['sha']}
+Username:   {bot.user.name}
+ID:         {bot.user.id}
+Bot:        {bot.user.bot}
+Guilds:     {len(bot.guilds)}
+Members:    {sum(1 for _ in bot.get_all_members())}
+Channels:   {sum(1 for _ in bot.get_all_channels())}
+Python:     {python_version()}
+Discord:    {get_distribution('discord.py').version}
+Cur. Com:   {bot.latest_commit}
+Up to Date: {bot.latest_commit == get_distribution('discord.py').version.split("+")[1]}
 ---------------
 """)
 
