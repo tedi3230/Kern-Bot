@@ -219,6 +219,7 @@ async def on_command_error(ctx, error):
         await ctx.error(error, "Error while voting: ")
 
     else:
+        #add more detailed debug
         await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.logs)
         print('Ignoring {} in command {}'.format(type(error).__qualname__,
                                                  ctx.command))
