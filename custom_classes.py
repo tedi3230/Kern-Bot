@@ -25,40 +25,49 @@ class MessageExceededMaxLength(Warning):
 
 class KernBot(commands.Bot):
     def __init__(self, prefix, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.database = None
         self.prefix = prefix
-        self.server_prefixes = {}
-        self.time_format = '%H:%M:%S UTC on the %d of %B, %Y'
-        self.bot_logs_id = 382780308610744331
-        self.launch_time = datetime.utcnow()
+
+        self.database = None
+        self.session = None
         self.latest_message_time = None
+        self.prefixes_cache = {}
+
+        self.launch_time = datetime.utcnow()
+        self.crypto = {
+            "market_price" : {},
+            "coins": []
+        }
+
+        self.logs = self.get_channel(382780308610744331)
         self.add_check(bot_user_check)
-        self.exts = OrderedDict()
-        self.statistics = {'market_price':{}, 'coins':[]}
-        for e in sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]]):
-            self.exts[e] = True
-        loops = asyncio.get_event_loop()
-        loops.run_until_complete(self.init())
+
+        self.exts = sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]])
+
+        self.loop.create_task(self.init())
         self.status_task = self.loop.create_task(self.status_changer())
+
         try:
             self.loop.add_signal_handler(SIGTERM, lambda: asyncio.ensure_future(self.suicide("SIGTERM Shutdown")))
         except NotImplementedError:
             pass
 
+        super().__init__(*args, **kwargs)
+
     async def init(self):
         self.session = aiohttp.ClientSession()
         with async_timeout.timeout(30):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
-                self.statistics['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
+                self.crypto['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
+            await self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
+        if self.logs is None:
+            self.logs = self.get_channel(382780308610744331)
 
     async def suicide(self, message="Shutting Down"):
         print(f"\n{message}\n")
-        ch = self.get_channel(self.bot_logs_id)
         em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}",
                            colour=discord.Colour.red())
         em.timestamp = datetime.utcnow()
-        await ch.send(embed=em)
+        await self.logs.send(embed=em)
         await self.database.pool.close()
         self.session.close()
         await self.close()
@@ -150,8 +159,8 @@ class CustomContext(commands.Context):
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
         url = str(argument)
-        if not url.startswith('http://'):
-            url = "http://" + url
+        if "://" not in url:
+            url = "https://" + url
         if "." not in url:
             url += (".com")  # A bad assumption
         url = urlparse(url).geturl()
