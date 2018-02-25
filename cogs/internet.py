@@ -1,7 +1,7 @@
 import random
 import io
 from os import environ, path
-from asyncio import sleep, TimeoutError
+from asyncio import sleep, TimeoutError as a_TimeoutError
 from collections import OrderedDict
 from datetime import datetime
 
@@ -196,7 +196,7 @@ class Internet:
     @obama.error
     async def obama_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
-        if isinstance(error, TimeoutError):
+        if isinstance(error, a_TimeoutError):
             await ctx.error("Obama server is not responding.", "Request Timed Out")
         elif isinstance(error, self.bot.ResponseError):
             await ctx.error(error)
