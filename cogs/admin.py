@@ -170,7 +170,7 @@ class Admin:
         await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()
-    @commands.command(hidden=True, name="eval")
+    @commands.command(hidden=True, name="eval", aliases=['exec'])
     async def k_eval(self, ctx, *, body: str):
         """Evaluates code
         ```{0}eval <code>```"""
@@ -199,7 +199,11 @@ class Admin:
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
 
         try:
-            exec(to_compile, env)
+            if ctx.invoked_with = "exec":
+                eval(to_compile, env)
+            else:
+                exec(to_compile, env)
+
         except Exception as e:
             try:
                 await ctx.message.add_reaction("👎")
