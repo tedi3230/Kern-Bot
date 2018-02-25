@@ -87,9 +87,8 @@ class Misc:
         if msg.embeds:
             embed_text += "*Message has {} embed(s).*".format(len(msg.embeds))
         embed = discord.Embed(description=raw + embed_text, timestamp=datetime.utcnow(), colour=discord.Colour.blurple())
-        embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         embed.set_author(name="Message by: {}".format(msg.author), icon_url=msg.author.avatar_url)
-        await ctx.send(embed=embed)
+        await ctx.send(f"Message by: {msg.author}\n{raw} {embed_text}")
 
     @raw.error
     async def raw_error_handler(self, ctx, error):
