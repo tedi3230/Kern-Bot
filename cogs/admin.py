@@ -231,14 +231,14 @@ class Admin:
 
             if ret is None:
                 if value:
-                    await ctx.success(f'```py\n{value}\n```', "Returns:", rqst_by=False)
+                    await ctx.send(f"**Returns:**\n\n{value}")
                     try:
                         await ctx.message.add_reaction("👎")
                     except discord.Forbidden:
                         pass
             else:
                 self._last_result = ret
-                await ctx.success(f'```py\n{value}{ret}\n```', "Returns:", rqst_by=False)
+                await ctx.send(f"**Returns:**\n\n{value}{ret}")
                 try:
                     await ctx.message.add_reaction("👍")
                 except discord.Forbidden:
