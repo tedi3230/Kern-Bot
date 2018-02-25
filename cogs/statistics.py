@@ -33,23 +33,23 @@ class Statistics:
         self.bot = bot
 
     async def get_data(self, time_period, coin, currency, limit):
-        if self.bot.statistics['market_price'].get(coin) is None or \
-           self.bot.statistics['market_price'][coin].get(time_period) is None or \
-           self.bot.statistics['market_price'][coin][time_period]['timestamp'] < datetime.utcnow():
+        if self.bot.crypto['market_price'].get(coin) is None or \
+           self.bot.crypto['market_price'][coin].get(time_period) is None or \
+           self.bot.crypto['market_price'][coin][time_period]['timestamp'] < datetime.utcnow():
             with async_timeout.timeout(10):
                 async with self.bot.session.get(f"https://min-api.cryptocompare.com/data/histo{time_period}?fsym={coin}&tsym={currency}&limit={limit}") as resp:
                     js = await resp.json()
             if js['Response'] != "Success":
                 raise ValueError(js['Message'])
             vals = js['Data']
-            self.bot.statistics['market_price'][coin] = {
+            self.bot.crypto['market_price'][coin] = {
                 time_period: {
                     'high': [[-i, v['high']] for i, v in enumerate(vals)],
                     'low': [[-i, v['low']] for i, v in enumerate(vals)],
                     'timestamp': datetime.utcnow() + get_delta(time_period, limit),
                 },
             }
-        return self.bot.statistics['market_price'][coin][time_period]
+        return self.bot.crypto['market_price'][coin][time_period]
 
     def gen_graph_embed(self, data, unit, coin, currency, limit):
         plt.figure()
@@ -62,7 +62,7 @@ class Statistics:
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
-        coin_data = self.bot.statistics['coins'][coin]
+        coin_data = self.bot.crypto['coins'][coin]
         graph_name = f"{coin}-{currency}-{limit}.png"
         graph = discord.File(buf, filename=graph_name)
         em = discord.Embed()
@@ -109,6 +109,7 @@ class Statistics:
     async def coin_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
         if isinstance(error, ValueError):
+            
             await ctx.error('', str(error))
             # There is no data for the symbol {coin}
             # There is no data for the toSymbol {currency}
