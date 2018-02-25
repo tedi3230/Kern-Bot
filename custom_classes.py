@@ -38,8 +38,10 @@ class KernBot(commands.Bot):
             "coins": []
         }
 
-        self.logs = self.get_channel(382780308610744331)
+        super().__init__(*args, **kwargs)
+
         self.add_check(bot_user_check)
+        self.logs = self.get_channel(382780308610744331)
 
         self.exts = sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]])
 
@@ -51,7 +53,6 @@ class KernBot(commands.Bot):
         except NotImplementedError:
             pass
 
-        super().__init__(*args, **kwargs)
 
     async def init(self):
         self.session = aiohttp.ClientSession()
