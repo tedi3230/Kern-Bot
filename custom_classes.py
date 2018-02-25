@@ -30,6 +30,7 @@ class KernBot(commands.Bot):
         self.database = None
         self.session = None
         self.latest_message_time = None
+        self.latest_commit = None
         self.prefixes_cache = {}
 
         self.launch_time = datetime.utcnow()
