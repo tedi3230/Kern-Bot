@@ -17,7 +17,7 @@ import custom_classes as cc
 
 #Can now only update by git checkout release; git merge master (ADD COMMAND)
 
-async def server_prefix(bots, message):
+async def server_prefix(bots: cc.KernBot, message):
     """A callable Prefix for our bot.
 
     This allow for per server prefixes.
@@ -32,16 +32,13 @@ async def server_prefix(bots, message):
     if not message.guild:
         return bots.prefix
 
-    if bots.server_prefixes.get(message.guild.id) is None:
+    if bots.prefixes_cache.get(message.guild.id) is None:
         guild_prefixes = await bots.database.get_prefix(message)
-        bots.server_prefixes[message.guild.id] = list(set(guild_prefixes))
-
-    else:
-        guild_prefixes = bots.server_prefixes[message.guild.id]
+        bots.prefixes_cache[message.guild.id] = list(set(guild_prefixes))
 
     prefixes = []
 
-    for prefix in [bots.prefix, *guild_prefixes]:
+    for prefix in [bots.prefix, *bots.prefixes_cache[message.guild.id]]:
         prefixes.append(prefix + " ")
         prefixes.append(prefix)
 
@@ -132,7 +129,7 @@ async def on_resumed():
     if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
         ch = bot.get_channel(bot.bot_logs_id)
         em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
-                           description=f"Down since: {datetime.utcnow().strftime(bot.time_format)}",
+                           description=f"Down since: {datetime.utcnow().strftime('%H:%M:%S')}",
                            colour=discord.Colour.red())
         await ch.send(embed=em)
     print(bot.latest_message_time)
