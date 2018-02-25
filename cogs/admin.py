@@ -199,7 +199,7 @@ class Admin:
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
 
         try:
-            if ctx.invoked_with = "exec":
+            if ctx.invoked_with == "exec":
                 eval(to_compile, env)
             else:
                 exec(to_compile, env)
