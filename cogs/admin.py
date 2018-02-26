@@ -105,7 +105,7 @@ class Admin:
                 await ctx.success("`{}/{}`".format(len(deleted), num_messages), "Messages Cleaned", delete_after=10)
             else:
                 await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
-                                Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
+Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
                                 "Invalid Permissions",
                                 delete_after=10)
 
