@@ -65,18 +65,18 @@ class Internet:
         for vid, url in results.items():
             vid = vid.replace("[", "⦋").replace("]", "⦌")
             if vid.isupper():
-                vid = vid[:cutoff_length * 3/4] + "..."
+                vid = vid[:int(cutoff_length * 3/4)] + "..."
             if len(vid) > cutoff_length:
                 vid = vid[:cutoff_length] + "..."
             vids.append(f"[{vid}]({url})")
 
         return vids[:result_length]
 
-    @commands.group("youtube", invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     async def youtube(self, ctx, *, keyword: str):
         """Searches YouTube for a video
         ```{0}youtube <keyword>```"""
-        url = "https://www.youtube.com/results?search_query={}&sp=EgIQAQ%253D%253D".format(keyword)
+        url = f"https://www.youtube.com/results?search_query={keyword}&sp=EgIQAQ%253D%253D"
         vids = await self.get_youtube_videos(url)
 
         if len(keyword) > 40:
