@@ -196,13 +196,14 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
         body = cleanup_code(body)
         stdout = io.StringIO()
 
+
+        if ctx.invoked_with == "exec":
+            body = "return " + body.split("\n")[0]
+
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
 
         try:
-            if ctx.invoked_with == "exec":
-                eval(to_compile, env)
-            else:
-                exec(to_compile, env)
+            exec(to_compile, env)
 
         except Exception as e:
             try:
@@ -231,14 +232,14 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
 
             if ret is None:
                 if value:
-                    await ctx.send(f"**Returns:**\n\n{value}")
+                    await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}```")
                     try:
                         await ctx.message.add_reaction("👎")
                     except discord.Forbidden:
                         pass
             else:
                 self._last_result = ret
-                await ctx.send(f"**Returns:**\n\n{value}{ret}")
+                await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}{ret}```")
                 try:
                     await ctx.message.add_reaction("👍")
                 except discord.Forbidden:
