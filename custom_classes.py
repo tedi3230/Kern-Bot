@@ -119,6 +119,18 @@ class CustomContext(commands.Context):
         prefix = self.prefix.replace(user.mention, '@' + user.name)
         return prefix
 
+    async def add_reaction(self, reaction):
+        try:
+            await self.message.add_reaction(reaction)
+        except discord.Forbidden:
+            pass
+
+    async def del_reaction(self, reaction):
+        try:
+            await self.message.remove_reaction(reaction, self.guild.me)
+        except discord.Forbidden:
+            pass
+
     async def __embed(self, title, description, colour, rqst_by, timestamp, channel, *args, **kwargs):
         e = discord.Embed(colour=colour)
         if title is not None:
