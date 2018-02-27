@@ -203,7 +203,15 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
 
         try:
-            exec(to_compile, env)
+            future = self.bot.loop.run_in_executor(None, exec, to_compile, env)
+            await self.bot.loop.wait_for(future, 30)
+
+        except asyncio.TimeoutError as e:
+            try:
+                await ctx.message.add_reaction("👎")
+            except discord.Forbidden:
+                pass
+            return await ctx.error("Function timed out.", e.__class__.__name__ + ':')
 
         except Exception as e:
             try:
