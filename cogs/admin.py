@@ -201,57 +201,45 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             body = "return " + body.split("\n")[0]
 
         to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+        loading_emoji = self.bot.get_emoji(395834326450831370)
 
         try:
-            future = self.bot.loop.run_in_executor(None, exec, to_compile, env)
-            await self.bot.loop.wait_for(future, 30)
+            await ctx.add_reaction(loading_emoji)
+            exec(to_compile, env)
+            await ctx.del_reaction(loading_emoji)
 
         except asyncio.TimeoutError as e:
-            try:
-                await ctx.message.add_reaction("👎")
-            except discord.Forbidden:
-                pass
+            await ctx.add_reaction("👎")
+            await ctx.del_reaction(loading_emoji)
             return await ctx.error("Function timed out.", e.__class__.__name__ + ':')
 
         except Exception as e:
-            try:
-                await ctx.message.add_reaction("👎")
-            except discord.Forbidden:
-                pass
+            await ctx.add_reaction("👎")
+            await ctx.del_reaction(loading_emoji)
             return await ctx.error(f'```\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
         try:
             with redirect_stdout(stdout):
+                await ctx.add_reaction(loading_emoji)
                 ret = await func()
+                await ctx.del_reaction(loading_emoji)
+
         except Exception as e:
             value = stdout.getvalue()
             await ctx.error(f'```py\n{e}\n```', e.__class__.__name__ + ":")
-            try:
-                return await ctx.message.add_reaction("👎")
-            except discord.Forbidden:
-                return
+            await ctx.add_reaction("👎")
+
         else:
             value = stdout.getvalue()
-            try:
-                await ctx.message.add_reaction("👍")
-            except discord.Forbidden:
-                pass
+            await ctx.add_reaction("👍")
 
             if ret is None:
                 if value:
                     await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}```")
-                    try:
-                        await ctx.message.add_reaction("👎")
-                    except discord.Forbidden:
-                        pass
             else:
                 self._last_result = ret
                 await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}{ret}```")
-                try:
-                    await ctx.message.add_reaction("👍")
-                except discord.Forbidden:
-                    pass
 
 def setup(bot):
     bot.add_cog(Admin(bot))
