@@ -158,6 +158,9 @@ class CustomContext(commands.Context):
     async def neutral(self, text, title=None, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         return await self.__embed(title, text, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
 
+    async def warning(self, warning, title=None, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
+        return await self.__embed(title, warning, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
+
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
         new_content = str(content) if content is not None else None
         if new_content and len(new_content) > 2000:
