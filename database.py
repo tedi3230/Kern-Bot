@@ -31,6 +31,15 @@ servers_table = """
                 )
                 """
 
+class DudPool:
+    _closed = True
+
+    async def close(self):
+        return
+
+    async def acquire(self):
+        return
+
 class Database:
     """Accessing database functions"""
 
@@ -41,9 +50,9 @@ class Database:
         except KeyError:
             file_path = os.path.join(os.path.dirname(
                 __file__), 'database_secret.txt')
-            database_file = open(file_path, 'r')
-            self.dsn = database_file.read()
-            database_file.close()
+            with open(file_path, "r") as database_file:
+                lines = [l.strip() for l in database_file]
+                self.dsn = lines[0]
 
         self.pool = None
         self.prefix_conn = None
@@ -68,7 +77,9 @@ class Database:
                                    description="Many function will not work, however prefix will still",
                                    colour=discord.Colour.orange())
                 await self.bot.logs.send(embed=em)
-                print(e)
+                print(e.__class__.__name__, str(e))
+                self.pool = DudPool()
+                return
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
