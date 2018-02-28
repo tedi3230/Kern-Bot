@@ -61,11 +61,7 @@ class Games:
             e.timestamp = datetime.utcnow()
             answers = result['incorrect_answers'] + [result['correct_answer']]
             shuffle(answers)
-            if "True" in answers:
-                answers.sort(reverse=True)
-            else:
-                answers = OrderedDict([(i, j) for i, j in enumerate(answers)])
-            for index, question in enumerate(answers.values()):
+            for index, question in enumerate(answers):
                 e.description += "\n{} {}".format(EMOJIS[index + 1], html.unescape(question))
             msg = await ctx.send(embed=e)
             for index in range(len(answers)):
