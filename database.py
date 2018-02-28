@@ -2,6 +2,7 @@ import os
 from random import randint
 import ssl
 import json
+from socket import gaierror
 
 import asyncio
 
@@ -33,7 +34,7 @@ servers_table = """
 class Database:
     """Accessing database functions"""
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         try:
             self.dsn = os.environ["DATABASE_URL"]
@@ -58,7 +59,16 @@ class Database:
         ssl_object.check_hostname = False
         ssl_object.verify_mode = ssl.CERT_NONE
         async with self.lock:
-            self.pool = await asyncpg.create_pool(self.dsn, ssl=ssl_object)
+            try:
+                self.pool = await asyncpg.create_pool(self.dsn, ssl=ssl_object)
+            except (asyncpg.exceptions.InvalidCatalogNameError,
+                    asyncpg.exceptions.InvalidPasswordError,
+                    ValueError, TimeoutError, gaierror) as e:
+                em = discord.Embed(title="Database failed to Connect",
+                                   description="Many function will not work, however prefix will still",
+                                   colour=discord.Colour.orange())
+                await self.bot.logs.send(embed=em)
+                print(e)
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
