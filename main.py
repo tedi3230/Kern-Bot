@@ -11,7 +11,6 @@ import requests
 import discord
 from discord.ext import commands
 
-import database as db
 import custom_classes as cc
 
 # update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
@@ -74,7 +73,6 @@ async def load_extensions(bots):
 
 @bot.event
 async def on_connect():
-    bot.database = db.Database(bot)
     await bot.update_dbots_server_count(dbl_token)
     with async_timeout.timeout(20):
         async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:

@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 from signal import SIGTERM
+import sys
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
@@ -15,6 +16,8 @@ import aiohttp
 import discord
 from discord.ext import commands
 
+import database as db
+
 async def bot_user_check(ctx):
     return not ctx.author.bot
 
@@ -27,7 +30,6 @@ class KernBot(commands.Bot):
     def __init__(self, prefix, *args, **kwargs):
         self.prefix = prefix
 
-        self.database = None
         self.session = None
         self.latest_message_time = None
         self.latest_commit = None
@@ -54,6 +56,7 @@ class KernBot(commands.Bot):
         except NotImplementedError:
             pass
 
+        self.database = db.Database(self)
 
     async def init(self):
         self.session = aiohttp.ClientSession()
@@ -74,6 +77,7 @@ class KernBot(commands.Bot):
         self.session.close()
         await self.close()
         self.status_task.cancel()
+        sys.exit(0)
 
     async def wait_for_any(self, events, checks, timeout=None):
         if not isinstance(checks, list):
