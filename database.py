@@ -32,6 +32,7 @@ servers_table = """
                 """
 
 class DudPool:
+    _closed = True
     async def close(self):
         return
 
