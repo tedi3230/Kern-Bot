@@ -158,7 +158,7 @@ async def on_message(message: discord.Message):
                         failed_to_run[msg.strip(
                             ctx.prefix)] = "Command not found."
 
-            if failed_to_run:
+            if failed_to_run and len(failed_to_run) != len(message.content.split(" && ")):
                 errors = ""
                 for fail, reason in failed_to_run.items():
                     errors += f"{fail}: {reason}\n"
