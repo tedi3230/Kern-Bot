@@ -217,7 +217,6 @@ class Misc:
         """Echoes the text sent
         ```{0}echo <text>```"""
         await ctx.send(text)
-        print(text)
 
     @commands.command()
     async def source(self, ctx, *, command: str = None):
