@@ -204,18 +204,14 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
         loading_emoji = self.bot.get_emoji(395834326450831370)
 
         try:
-            await ctx.add_reaction(loading_emoji)
             exec(to_compile, env)
-            await ctx.del_reaction(loading_emoji)
 
         except asyncio.TimeoutError as e:
             await ctx.add_reaction("👎")
-            await ctx.del_reaction(loading_emoji)
             return await ctx.error("Function timed out.", e.__class__.__name__ + ':')
 
         except Exception as e:
             await ctx.add_reaction("👎")
-            await ctx.del_reaction(loading_emoji)
             return await ctx.error(f'```\n{e}\n```', e.__class__.__name__ + ':')
 
         func = env['func']
@@ -223,7 +219,6 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             with redirect_stdout(stdout):
                 await ctx.add_reaction(loading_emoji)
                 ret = await func()
-                await ctx.del_reaction(loading_emoji)
 
         except Exception as e:
             value = stdout.getvalue()
