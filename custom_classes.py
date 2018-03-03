@@ -169,7 +169,7 @@ class CustomContext(commands.Context):
         for cnt in contents[:-1]:
             await super().send(cnt, delete_after=delete_after, tts=tts, nonce=nonce)
 
-        return await super().send(contents[:-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        return await super().send(contents[-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
