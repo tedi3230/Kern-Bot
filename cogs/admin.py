@@ -229,10 +229,12 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             value = stdout.getvalue()
             await ctx.error(f'```py\n{e}\n```', e.__class__.__name__ + ":")
             await ctx.add_reaction("👎")
+            await ctx.del_reaction(loading_emoji)
 
         else:
             value = stdout.getvalue()
             await ctx.add_reaction("👍")
+            await ctx.del_reaction(loading_emoji)
 
             if ret is None:
                 if value:
