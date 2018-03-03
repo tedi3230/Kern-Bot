@@ -84,13 +84,14 @@ class Admin:
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True)
-    async def clean(self, ctx, num_messages=200, old: bool = False):
-        """Removes all messages for num_messages by this bot
-        ```{0}delete clean [num_messages: 200] [old: False]```"""
+    async def clean(self, ctx, num_messages=200, other: bool = False):
+        """Removes all messages for num_messages by this bot.
+        Other specifies clearing everyone else's messages
+        ```{0}delete clean [num_messages: 200] [other: False]```"""
         def is_me(m):
             return m.author == ctx.guild.me
 
-        if old:
+        if not other:
             total_deleted = 0
             if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
@@ -106,8 +107,7 @@ class Admin:
             else:
                 await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
 Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
-                                "Invalid Permissions",
-                                delete_after=10)
+                                "Invalid Permissions", delete_after=10)
 
     @commands.check(message_purge_perm_check)
     @delete.command(hidden=True, name="id")
