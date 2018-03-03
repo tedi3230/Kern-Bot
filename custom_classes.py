@@ -165,11 +165,12 @@ class CustomContext(commands.Context):
         return await self.__embed(title, warning, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
-        contents = list(chunks(content, 1900)) if content is not None else None
-        for cnt in contents[:-1]:
-            await super().send(cnt, delete_after=delete_after, tts=tts, nonce=nonce)
-
-        return await super().send(contents[-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        if content is not None:
+            contents = list(chunks(content, 1900)) if content else []
+            for cnt in contents[:-1]:
+                await super().send(cnt, delete_after=delete_after, tts=tts, nonce=nonce)
+            return await super().send(contents[-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        return await super().send(content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
