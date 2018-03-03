@@ -6,7 +6,6 @@ from os.path import isfile, join
 from datetime import datetime
 from collections import OrderedDict
 import asyncio
-import warnings
 from concurrent.futures import FIRST_COMPLETED
 from random import choice
 import async_timeout
@@ -18,12 +17,12 @@ from discord.ext import commands
 
 import database as db
 
+def chunks(s, n):
+    for start in range(0, len(s), n):
+        yield s[start:start+n]
+
 async def bot_user_check(ctx):
     return not ctx.author.bot
-
-
-class MessageExceededMaxLength(Warning):
-    pass
 
 
 class KernBot(commands.Bot):
@@ -166,16 +165,11 @@ class CustomContext(commands.Context):
         return await self.__embed(title, warning, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
-        new_content = str(content) if content is not None else None
-        if new_content and len(new_content) > 2000:
-            new_content = new_content[:1960]
-            new_content += "..."
-            if content.endswith('```'):
-                new_content += "```"
-            new_content += "\n\n*Output Truncated for Discord*"
-            warnings.warn("Message exceeded max length allowed by discord. Cutting message off and sending.",
-                          MessageExceededMaxLength)
-        return await super().send(new_content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        contents = list(chunks(content, 1900)) if content is not None else None
+        for cnt in contents[:-1]:
+            await super().send(cnt, delete_after=delete_after, tts=tts, nonce=nonce)
+
+        return await super().send(contents[:-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
