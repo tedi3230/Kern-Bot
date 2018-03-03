@@ -100,7 +100,9 @@ async def on_ready():
     await load_extensions(bot)
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
-    await bot.user.edit(username=name)
+    if bot.user.name != name:
+        print(f"\nName changed from '{bot.user.name}' to '{name}'")
+        await bot.user.edit(username=name)
     e = discord.Embed(title=f"Bot Online @ {datetime.utcnow().strftime('%H:%M:%S UTC')}",
                       colour=discord.Colour.green(),
                       timestamp=datetime.utcnow())
