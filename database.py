@@ -76,8 +76,8 @@ class Database:
                     print('enter')
                     await asyncio.sleep(1)
                 await self.bot.logs.send(embed=em)
-                await self.bot.suicide("Database not connected")
-                return
+                return await self.bot.suicide("Database not connected")
+
         async with self.pool.acquire() as con:
             if not await con.fetch("SELECT relname FROM pg_class WHERE relname = 'servers'"):
                 await con.execute(servers_table)
