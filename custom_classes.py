@@ -30,6 +30,7 @@ class KernBot(commands.Bot):
         self.prefix = prefix
 
         self.session = None
+        self.owner = None
         self.latest_message_time = None
         self.latest_commit = None
         self.prefixes_cache = {}
