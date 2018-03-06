@@ -18,6 +18,19 @@ def get_delta(time_period, limit):
         return timedelta(minutes=limit // 4)
     return timedelta(minute=10)
 
+class CoinError(Exception):
+    def __init__(self, message, coin, currency, limit):
+        self.message = message
+        self.coin = coin
+        self.currency = currency
+        self.limit = limit
+
+    def __str__(self):
+        return self.message
+
+    def __repr__(self):
+        return "CoinError({0.message}, {0.coin}, {0.currency}, {0.limit})".format(self)
+
 class UpperConv(commands.Converter):
     async def convert(self, ctx, argument):
         return argument.upper()
@@ -34,19 +47,22 @@ class Statistics:
 
     async def get_data(self, time_period, coin, currency, limit):
         if self.bot.crypto['market_price'].get(coin) is None or \
-           self.bot.crypto['market_price'][coin].get(time_period) is None or \
-           self.bot.crypto['market_price'][coin][time_period]['timestamp'] < datetime.utcnow():
+           self.bot.crypto['market_price'].get(currency) is None or \
+           self.bot.crypto['market_price'][coin][currency].get(time_period) is None or \
+           self.bot.crypto['market_price'][coin][currency][time_period]['timestamp'] < datetime.utcnow():
             with async_timeout.timeout(10):
                 async with self.bot.session.get(f"https://min-api.cryptocompare.com/data/histo{time_period}?fsym={coin}&tsym={currency}&limit={limit}") as resp:
                     js = await resp.json()
             if js['Response'] != "Success":
-                raise ValueError(js['Message'])
+                raise CoinError(js['Message'], coin, currency, limit)
             vals = js['Data']
             self.bot.crypto['market_price'][coin] = {
-                time_period: {
-                    'high': [[-i, v['high']] for i, v in enumerate(vals)],
-                    'low': [[-i, v['low']] for i, v in enumerate(vals)],
-                    'timestamp': datetime.utcnow() + get_delta(time_period, limit),
+                currency: {
+                    time_period: {
+                        'high': [[-i, v['high']] for i, v in enumerate(vals)],
+                        'low': [[-i, v['low']] for i, v in enumerate(vals)],
+                        'timestamp': datetime.utcnow() + get_delta(time_period, limit),
+                    },
                 },
             }
         return self.bot.crypto['market_price'][coin][time_period]
@@ -108,11 +124,16 @@ class Statistics:
     @coin.error
     async def coin_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
-        if isinstance(error, ValueError):
-            await ctx.error('', str(error))
-            # There is no data for the symbol {coin}
-            # There is no data for the toSymbol {currency}
-            # limit param is not an integer
+        if isinstance(error, CoinError):
+            if "toSymbol" in str(error):
+                await ctx.error(f"Currency {error.currency} does not exist.", "")
+            elif "symbol" in str(error):
+                await ctx.error(f"Coin {error.coin} does not exist.", "")
+            elif "limit param" in str(error):
+                await ctx.error(f"Limit {error.limit} is not a number.", "")
+            else:
+                await ctx.error(f"Un unknown error has occurred.", "")
+                await self.bot.logs.send(repr(error))
         else:
             raise error(str(error))
 
