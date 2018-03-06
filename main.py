@@ -58,7 +58,7 @@ except KeyError:
         bot_prefix = lines[4]
         dbl_token = lines[5]
 
-bot = cc.KernBot(bot_prefix, command_prefix=server_prefix,
+bot = cc.KernBot(bot_prefix, command_prefix=server_prefix, case_insensitive=True,
                  description='Multiple functions, including contests, definitions, and more.')
 
 async def load_extensions(bots):
@@ -119,6 +119,9 @@ Up to Date: {bot.latest_commit == get_distribution('discord.py').version.split("
 ---------------
 """)
 
+    while bot.logs is None:
+        await asyncio.sleep(1)
+        bot.logs = bot.get_channel(382780308610744331)
     await bot.logs.send(embed=e)
 
 @bot.event
