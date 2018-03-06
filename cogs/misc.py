@@ -218,7 +218,17 @@ class Misc:
         ```{0}echo <text>```"""
         await ctx.send(text)
 
-    @commands.command()
+    @commands.command(aliases=['creation_date', 'snowflake_date'])
+    async def snowflake(self, ctx, snowflake: int):
+        """Converts snowflake id into creation date.
+        Bot requires no knowledge of user/emoji/guild.
+        Provides date in D/M/Y format
+        ```{0}snowflake <id>```"""
+        timestamp = int(f"{snowflake:b}"[:-22], 2) + 1420070400000
+        date = datetime.utcfromtimestamp(float(timestamp)/1000)
+        await ctx.send(date.strftime("%d/%m/%Y %H:%M:%S"))
+
+    @commands.command(hidden=True)
     async def source(self, ctx, *, command: str = None):
         """Displays my full source code or for a specific command.
         To display the source code of a subcommand you can separate it by
@@ -226,6 +236,14 @@ class Misc:
         or by spaces.
         ```{0}source <command>```
         """
+
+        if "discord" in ctx.guild.name:
+            pass
+        elif ctx.guild.owner.id == self.bot.owner.id:
+            pass
+        else:
+            return
+
         source_url = 'https://github.com/Modelmat/Kern-Bot'
         if command is None:
             return await ctx.send(source_url)
@@ -305,8 +323,7 @@ class Misc:
                         embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         else:
-            embed.description = "The passed command `{}` does not exist.".format(command)
-            command = "Error"
+            return await ctx.error(f"The passed command `{command}` does not exist.", "")
 
         embed.timestamp = datetime.utcnow()
         embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
