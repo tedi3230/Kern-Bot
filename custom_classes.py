@@ -48,13 +48,7 @@ class KernBot(commands.Bot):
 
         self.exts = sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]])
 
-        try:
-            self.loop.create_task(self.init())
-        except:
-            pass
-
-        if self.logs is None:
-            self.logs = self.get_channel(382780308610744331)
+        self.loop.create_task(self.init())
 
         self.status_task = self.loop.create_task(self.status_changer())
 
@@ -70,8 +64,8 @@ class KernBot(commands.Bot):
         with async_timeout.timeout(10):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
                 self.crypto['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
-            # async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
-            #     pass
+            async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
+                pass
 
     async def suicide(self, message="Shutting Down"):
         print(f"\n{message}\n")
@@ -97,13 +91,13 @@ class KernBot(commands.Bot):
 
     async def status_changer(self):
         await self.wait_until_ready()
-        status_messages = [discord.Game(name="for new contests.", type=3),
-                           discord.Game(name=f"{len(self.guilds)} servers.", type=3),
-                           discord.Game(name="bot commands", type=2),
-                           discord.Game(name=f"prefix {self.prefix}", type=2)]
+        status_messages = [discord.Activity(name="for new contests.", type=discord.ActivityType.watching),
+                           discord.Activity(name=f"{len(self.guilds)} servers.", type=discord.ActivityType.watching),
+                           discord.Activity(name="bot commands", type=discord.ActivityType.listening),
+                           discord.Activity(name=f"prefix {self.prefix}", type=discord.ActivityType.listening)]
         while not self.is_closed():
             message = choice(status_messages)
-            await self.change_presence(game=message)
+            await self.change_presence(activity=message)
             await asyncio.sleep(60)
 
     def get_emojis(self, *ids):
