@@ -77,7 +77,6 @@ async def on_connect():
     with async_timeout.timeout(20):
         async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
             bot.latest_commit = "g" + (await r.json())['sha'][:7]
-        await bot.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):
