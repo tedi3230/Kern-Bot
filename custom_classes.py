@@ -48,7 +48,14 @@ class KernBot(commands.Bot):
 
         self.exts = sorted([extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]])
 
-        self.loop.create_task(self.init())
+        try:
+            self.loop.create_task(self.init())
+        except:
+            pass
+
+        if self.logs is None:
+            self.logs = self.get_channel(382780308610744331)
+
         self.status_task = self.loop.create_task(self.status_changer())
 
         try:
@@ -60,12 +67,11 @@ class KernBot(commands.Bot):
 
     async def init(self):
         self.session = aiohttp.ClientSession()
-        with async_timeout.timeout(30):
+        with async_timeout.timeout(10):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
                 self.crypto['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
-            await self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
-        if self.logs is None:
-            self.logs = self.get_channel(382780308610744331)
+            # async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
+            #     pass
 
     async def suicide(self, message="Shutting Down"):
         print(f"\n{message}\n")
