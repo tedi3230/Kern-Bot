@@ -26,7 +26,8 @@ servers_table = """
                     server_id BIGINT NOT NULL UNIQUE,
                     receive_channel_id BIGINT,
                     vote_channel_id BIGINT,
-                    prefix VARCHAR[],
+                    prefixes VARCHAR[],
+                    default_prefix_enabled BOOL,
                     max_rating INTEGER
                 )
                 """
@@ -49,8 +50,6 @@ class Database:
                 self.dsn = lines[0]
 
         self.pool = None
-        self.prefix_conn = None
-        self.prefix_stmt = None
         if __name__ in '__main__':
             asyncio.get_event_loop().run_until_complete(self.init())
         else:
@@ -114,23 +113,21 @@ class Database:
         return channels
 
     async def add_prefix(self, ctx, prefix: str):
-        prefixes = await self.get_prefix(ctx)
-        prefixes.append(prefix)
-        sql = """INSERT INTO servers(server_id, prefix) VALUES ($2, $1)
-                 ON CONFLICT (server_id) DO UPDATE
-                    SET prefix = $1"""
+        sql = """UPDATE servers SET prefixes = array_append(prefixes, $1)
+                    WHERE server_id = $2"""
         async with self.pool.acquire() as con:
-            await con.execute(sql, prefixes, ctx.guild.id)
+            await con.execute(sql, prefix, ctx.guild.id)
         return prefix
 
     async def get_prefix(self, ctx):
         async with self.pool.acquire() as con:
-            prefixes = await con.fetchval("SELECT prefix FROM servers WHERE server_id = $1", ctx.guild.id) or []
+            prefixes = await con.fetchval("SELECT prefixes FROM servers WHERE server_id = $1", ctx.guild.id) or []
         return prefixes
 
-    async def remove_prefix(self, ctx):
+    async def remove_prefix(self, ctx, prefix):
         async with self.pool.acquire() as con:
-            await con.execute("UPDATE servers SET prefix = $1 WHERE server_id = $2", self.bot.prefixes_cache.get(ctx.guild.id, []), ctx.guild.id)
+            await con.execute("UPDATE servers SET prefixes = array_remove(prefixes, $1) WHERE server_id = $2",
+                              prefix, ctx.guild.id)
 
     async def add_contest_submission(self, ctx, embed: discord.Embed):
         sub_id = int(await self.generate_id())
