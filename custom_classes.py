@@ -42,6 +42,7 @@ class KernBot(commands.Bot):
         }
 
         super().__init__(*args, **kwargs)
+        self.loop.set_debug(True)
 
         self.add_check(bot_user_check)
         self.logs = self.get_channel(382780308610744331)
