@@ -33,7 +33,7 @@ async def server_prefix(bots: cc.KernBot, message):
         return bots.prefix
 
     if bots.prefixes_cache.get(message.guild.id) is None:
-        guild_prefixes = await bots.database.get_prefix(message)
+        guild_prefixes = await bots.database.get_prefixes(message)
         bots.prefixes_cache[message.guild.id] = list(set(guild_prefixes))
 
     prefixes = []

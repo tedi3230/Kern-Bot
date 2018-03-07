@@ -119,7 +119,7 @@ class Database:
             await con.execute(sql, prefix, ctx.guild.id)
         return prefix
 
-    async def get_prefix(self, ctx):
+    async def get_prefixes(self, ctx):
         async with self.pool.acquire() as con:
             prefixes = await con.fetchval("SELECT prefixes FROM servers WHERE server_id = $1", ctx.guild.id) or []
         return prefixes

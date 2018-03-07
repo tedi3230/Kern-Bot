@@ -68,8 +68,8 @@ class Settings:
         await self.bot.database.remove_prefix(ctx, prefix)
         await ctx.success(f"Prefix {prefix} sucessfully removed.")
 
-    @get.command(name="prefix")
-    async def get_prefix(self, ctx):
+    @get.command(name="prefixes")
+    async def get_prefixes(self, ctx):
         """Get the bot's prefix for this server"""
         prefixes = self.bot.prefixes_cache.get(ctx.guild.id, []) + [self.bot.prefix]
         await ctx.send("Prefixes for {}: ```{}```".format(ctx.guild.name, ", ".join(prefixes)))
