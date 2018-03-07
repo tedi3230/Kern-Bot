@@ -65,7 +65,7 @@ class Settings:
         except ValueError:
             return await ctx.error(f"Prefix `{prefix}` is not in the list.", "")
 
-        await self.bot.database.remove_prefix(ctx)
+        await self.bot.database.remove_prefix(ctx, prefix)
         await ctx.success(f"Prefix {prefix} sucessfully removed.")
 
     @get.command(name="prefix")
