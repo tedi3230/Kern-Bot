@@ -57,10 +57,16 @@ class Settings:
         self.bot.prefixes_cache.pop(ctx.guild.id, None)
         await ctx.send("Adding prefix `{}`".format(await self.bot.database.add_prefix(ctx, prefix)))
 
+    @_set.command()
+    async def remove_prefix(self, ctx, *, prefix: str):
+        """Remove the bot's prefix"""
+        try:
+            self.bot.prefixes_cache.get(ctx.guild.id, []).remove(prefix)
+        except ValueError:
+            return await ctx.error(f"Prefix `{prefix}` is not in the list.", "")
 
-        # else:
-        #     await self.bot.database.remove_prefix(ctx)
-        #     await ctx.send("Custom server prefix removed.")
+        await self.bot.database.remove_prefix(ctx)
+        await ctx.success(f"Prefix {prefix} sucessfully removed.")
 
     @get.command(name="prefix")
     async def get_prefix(self, ctx):

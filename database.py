@@ -130,7 +130,7 @@ class Database:
 
     async def remove_prefix(self, ctx):
         async with self.pool.acquire() as con:
-            await con.execute("UPDATE servers SET prefix = NULL WHERE server_id = $1", ctx.guild.id)
+            await con.execute("UPDATE servers SET prefix = $1 WHERE server_id = $2", self.bot.prefixes_cache.get(ctx.guild.id, []), ctx.guild.id)
 
     async def add_contest_submission(self, ctx, embed: discord.Embed):
         sub_id = int(await self.generate_id())
