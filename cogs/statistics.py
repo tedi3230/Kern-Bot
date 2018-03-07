@@ -47,7 +47,7 @@ class Statistics:
 
     async def get_data(self, time_period, coin, currency, limit):
         if self.bot.crypto['market_price'].get(coin) is None or \
-           self.bot.crypto['market_price'].get(currency) is None or \
+           self.bot.crypto['market_price'][coin].get(currency) is None or \
            self.bot.crypto['market_price'][coin][currency].get(time_period) is None or \
            self.bot.crypto['market_price'][coin][currency][time_period]['timestamp'] < datetime.utcnow():
             with async_timeout.timeout(10):
@@ -121,21 +121,23 @@ class Statistics:
             graph, embed = self.gen_graph_embed(data, "Minutes", coin, currency, minutes)
             await ctx.send(file=graph, embed=embed)
 
-    @coin.error
+    @coin_day.error
+    @coin_minute.error
+    @coin_hour.error
     async def coin_error_handler(self, ctx, error):
         error = getattr(error, 'original', error)
         if isinstance(error, CoinError):
             if "toSymbol" in str(error):
-                await ctx.error(f"Currency {error.currency} does not exist.", "")
+                await ctx.error(f"Currency `{error.currency}` does not exist.", "")
             elif "symbol" in str(error):
-                await ctx.error(f"Coin {error.coin} does not exist.", "")
+                await ctx.error(f"Coin `{error.coin}` does not exist.", "")
             elif "limit param" in str(error):
-                await ctx.error(f"Limit {error.limit} is not a number.", "")
+                await ctx.error(f"Limit `{error.limit}` is not a number.", "")
             else:
                 await ctx.error(f"Un unknown error has occurred.", "")
                 await self.bot.logs.send(repr(error))
-        else:
-            raise error(str(error))
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.error(str(error), "Missing Argument")
 
 
 def setup(bot):
