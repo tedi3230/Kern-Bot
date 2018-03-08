@@ -1,5 +1,6 @@
 #pylint: disable-msg=C0413
 import io
+from inspect import Parameter
 from datetime import datetime, timedelta
 import async_timeout
 import matplotlib
@@ -89,10 +90,17 @@ class Statistics:
     @commands.group(aliases=["crypto"])
     async def coin(self, ctx):
         """Provides information on cryptocurrencies
+        This root command is not working.
         ```{0}coin <coin>```"""
         #self.statistics [coin]
-        print(ctx.invoked_subcommand)
-        print(ctx.subcommand_passed)
+        if ctx.invoked_subcommand is None and ctx.subcommand_passed is None:
+            raise commands.MissingRequiredArgument(param=Parameter(name="currency", kind=Parameter.POSITIONAL_ONLY))
+
+        elif ctx.invoked_subcommand is None and ctx.subcommand_passed:
+            #do stuff with subcommand_passed
+            return await ctx.error("Not implemented yet", "")
+
+    @coin.command(name="list", )
 
     @coin.command(name="day", aliases=["daily"])
     async def coin_day(self, ctx, coin: UpperConv, currency: UpperConv = "USD", days: IntConv = 30):
