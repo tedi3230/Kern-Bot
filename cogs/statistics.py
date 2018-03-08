@@ -100,7 +100,8 @@ class Statistics:
             #do stuff with subcommand_passed
             return await ctx.error("Not implemented yet", "")
 
-    @coin.command(name="list", )
+    #@coin.command(name="list")
+
 
     @coin.command(name="day", aliases=["daily"])
     async def coin_day(self, ctx, coin: UpperConv, currency: UpperConv = "USD", days: IntConv = 30):
