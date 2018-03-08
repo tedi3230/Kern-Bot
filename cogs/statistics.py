@@ -98,9 +98,15 @@ class Statistics:
 
         elif ctx.invoked_subcommand is None and ctx.subcommand_passed:
             #do stuff with subcommand_passed
-            return await ctx.error("Not implemented yet", "")
+            return await ctx.error(f"Not implemented yet. Try `{ctx.prefix}coin day`.", "")
 
-    #@coin.command(name="list")
+    @coin.command(name="list")
+    async def coin_list(self, ctx):
+        """Provides a list of possible coin names.
+        ```{0}coin list```"""
+        await ctx.neutral("""All coins names are in shorthand format.
+For a full list of coins, the orange text underneath the coin name [here](https://www.cryptocompare.com/coins/list/USD/1) is the key.
+Full name support is incoming.""", rqst_by=False, timestamp=False)
 
 
     @coin.command(name="day", aliases=["daily"])
