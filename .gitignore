@@ -106,3 +106,5 @@ ENV/
 todo*
 website/
 website/*
+images_gifs/
+images_gifs/*
