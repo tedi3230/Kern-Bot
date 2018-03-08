@@ -196,15 +196,16 @@ async def on_command_error(ctx, error):
         if hasattr(bot.get_cog(ctx.command.cog_name), '_' + ctx.command.cog_name + '__error'):
             return
 
-    ignored = (commands.UserInputError, commands.NotOwner,
-               commands.CheckFailure, commands.CommandNotFound, discord.Forbidden)
+    ignored = (commands.NotOwner, commands.CheckFailure,
+               commands.CommandNotFound, discord.Forbidden)
 
     error = getattr(error, 'original', error)
     if isinstance(error, ignored):
         return
 
     elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.error(ctx.error, "Missing Required Argument(s)")
+        do_send = False
+        await ctx.error(error, "Missing Required Argument(s)")
 
     elif isinstance(error, asyncio.TimeoutError):
         await ctx.error("A web request timed out. This is on our end, not yours.", "Timeout Error")
