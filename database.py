@@ -27,7 +27,7 @@ servers_table = """
                     receive_channel_id BIGINT,
                     vote_channel_id BIGINT,
                     prefixes VARCHAR[],
-                    default_prefix_enabled BOOL,
+                    default_prefix_enabled BOOL DEFAULT FALSE,
                     max_rating INTEGER
                 )
                 """
@@ -118,6 +118,9 @@ class Database:
         async with self.pool.acquire() as con:
             await con.execute(sql, prefix, ctx.guild.id)
         return prefix
+
+    #async def enable_default_prefix(self, ctx):
+
 
     async def get_prefixes(self, ctx):
         async with self.pool.acquire() as con:
