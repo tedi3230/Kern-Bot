@@ -105,7 +105,7 @@ class Statistics:
         """Provides a list of possible coin names.
         ```{0}coin list```"""
         await ctx.neutral("""All coins names are in shorthand format.
-For a full list of coins, the orange text underneath the coin name [here](https://www.cryptocompare.com/coins/list/USD/1) is the key.
+For a full list of coins, the orange text underneath the coin names [here](https://www.cryptocompare.com/coins/list/USD/1) is the key.
 Full name support is incoming.""", rqst_by=False, timestamp=False)
 
 
