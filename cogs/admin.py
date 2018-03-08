@@ -170,6 +170,17 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
         await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()
+    @commands.command(hidden=True)
+    async def announce(self, ctx, *, message):
+        """Announces a message to everyone"""
+        for guild in self.bot.guilds:
+            for channel in guild.text_channels:
+                if channel.permissions_for(guild.me).send_messages:
+                    await channel.send(message)
+                    break
+        await ctx.send("Success.")
+
+    @commands.is_owner()
     @commands.command(hidden=True, name="eval", aliases=['exec'])
     async def k_eval(self, ctx, *, body: str):
         """Evaluates code
