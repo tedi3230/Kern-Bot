@@ -16,9 +16,6 @@ class Settings:
     def __init__(self, bot: KernBot):
         self.bot = bot
 
-    async def __error(self, ctx, error):
-        print(error)
-
     @commands.group()
     async def get(self, ctx):
         """Commands related to determining the value of settings."""
