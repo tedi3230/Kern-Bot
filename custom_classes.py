@@ -65,8 +65,7 @@ class KernBot(commands.Bot):
         with async_timeout.timeout(10):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
                 self.crypto['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
-            async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
-                pass
+
 
     async def suicide(self, message="Shutting Down"):
         print(f"\n{message}\n")
@@ -120,8 +119,8 @@ class KernBot(commands.Bot):
 
     async def pull_remotes(self):
         with async_timeout.timeout(20):
-            async with self.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
-                self.latest_commit = "g" + (await r.json())['sha'][:7]
+            async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
+                pass
 
 
     class ResponseError(Exception):
