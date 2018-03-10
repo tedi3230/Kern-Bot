@@ -16,6 +16,7 @@ class Owner:
     """Owner only commands"""
     def __init__(self, bot: KernBot):
         self.bot = bot
+        self.hidden = True
         self._last_result = None
 
     @commands.is_owner()
