@@ -15,8 +15,6 @@ import custom_classes as cc
 
 # update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
 
-#Can now only update by git checkout release; git merge master (ADD COMMAND)
-
 async def server_prefix(bots: cc.KernBot, message):
     """A callable Prefix for our bot.
 
@@ -174,64 +172,19 @@ async def on_message(message: discord.Message):
             ctx = await bot.get_context(message, cls=cc.CustomContext)
             await bot.invoke(ctx)
 
-
 @commands.is_owner()
 @bot.command(name="reload", hidden=True)
 async def reload_cog(ctx, cog_name: str):
     """Reload the cog `cog_name`"""
-    bot.unload_extension("cogs." + cog_name)
-    print("Cog unloaded.", end=' | ')
-    bot.load_extension("cogs." + cog_name)
-    print("Cog loaded.")
-    await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
-
-
-@bot.event
-async def on_command_error(ctx, error):
-    # This prevents any commands with local handlers being handled here in on_command_error.
-    do_send = True
-    if hasattr(ctx.command, 'on_error'):
-        return
-    #This prevents any commands with cog handlers
-    if hasattr(ctx.cog, f'_{ctx.cog.__class__.__name__}__error'):
-        return
-
-    ignored = (commands.NotOwner, commands.CheckFailure,
-               commands.CommandNotFound, discord.Forbidden)
-
-    error = getattr(error, 'original', error)
-    if isinstance(error, ignored):
-        return
-
-    elif isinstance(error, commands.MissingRequiredArgument):
-        do_send = False
-        await ctx.error(error, "Missing Required Argument(s)")
-
-    elif isinstance(error, asyncio.TimeoutError):
-        await ctx.error("A web request timed out. This is on our end, not yours.", "Timeout Error")
-
-    elif isinstance(error, ModuleNotFoundError):
-        await ctx.error(str(error).split("'")[1].capitalize(), "Cog not found:")
-        do_send = False
-        print("Cog failed to unload.")
-
-    elif isinstance(error, bot.ResponseError):
-        await ctx.error(error, "Response Code > 400:")
-
-    elif isinstance(error, ValueError) and ctx.command in ['vote']:
-        await ctx.error(error, "Error while voting: ")
-
+    try:
+        bot.unload_extension("cogs." + cog_name)
+        print("Cog unloaded.", end=' | ')
+        bot.load_extension("cogs." + cog_name)
+        print("Cog loaded.")
+    except ModuleNotFoundError:
+        await ctx.error(f"Cog {cog_name} not found.", "")
     else:
-        #add more detailed debug
-        await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=bot.logs)
-        print('Ignoring {} in command {}'.format(type(error).__qualname__,
-                                                 ctx.command))
-        traceback.print_exception(type(error), error, error.__traceback__)
-        do_send = False
-
-    if do_send:
-        print('Ignoring {} in command {}'.format(type(error).__qualname__,
-                                                 ctx.command))
+        await ctx.send("Cog `{}` sucessfully reloaded.".format(cog_name))
 
 
 loop = asyncio.get_event_loop()
