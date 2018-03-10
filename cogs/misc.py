@@ -265,14 +265,14 @@ class Misc:
         final_url = f'<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>'
         await ctx.send(final_url)
 
-    def make_commands(self):
+    def make_commands(self, ctx):
         cogs_dict = OrderedDict()
         for cog in self.bot.cogs:
             if getattr(cog, "hidden", False):
                 continue
-            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
+            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden and cmd.can_run(ctx)]
         for cmd in self.bot.commands:
-            if cmd.cog_name is None and not cmd.hidden:
+            if cmd.cog_name is None and not cmd.hidden and cmd.can_run(ctx):
                 cogs_dict['No Category'] = cogs_dict.get('No Category', []) + [[cmd.name] + cmd.aliases]
         cogs_dict = OrderedDict([(key, val) for key, val in cogs_dict.items() if val])
         return cogs_dict
@@ -281,7 +281,7 @@ class Misc:
     async def _help(self, ctx, *, command: str = None):
         """Shows this message.
         ```{0}help [command]```"""
-        cogs_dict = self.make_commands()
+        cogs_dict = self.make_commands(ctx)
         embed = discord.Embed(color=discord.Colour.green())
         if command is None:
             command = "Help"
