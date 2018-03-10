@@ -12,7 +12,7 @@ import psutil
 import discord
 from discord.ext import commands
 
-from custom_classes import KernBot
+from custom_classes import KernBot, DisError
 
 COUNTRY_CODES = {"AU": "Australia", "BR": "Brazil", "CA": "Canada",
                  "CH": "Switzerland", "DE": "Germany", "DK": "Denmark",
@@ -90,8 +90,7 @@ class Misc:
         await ctx.send(f"Message by: {msg.author}\n{raw} {embed_text}")
 
     @raw.error
-    async def raw_error_handler(self, ctx, error):
-        error = getattr(error, 'original', error)
+    async def raw_error_handler(self, ctx, error: DisError):
         if isinstance(error, discord.NotFound):
             return await ctx.error("Incorrect message id provided", "Message not found")
         elif isinstance(error, ValueError):

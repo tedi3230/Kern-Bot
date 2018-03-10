@@ -8,7 +8,7 @@ import async_timeout
 
 import discord
 from discord.ext import commands
-from custom_classes import KernBot
+from custom_classes import KernBot, DisError
 
 def rgb(r, g, b):
     return discord.Colour.from_rgb(r, g, b)
@@ -99,8 +99,7 @@ class Games:
             await ctx.success(des, "Results")
 
     @trivia.error
-    async def trivia_error_handler(self, ctx, error):
-        error = getattr(error, 'original', error)
+    async def trivia_error_handler(self, ctx, error: DisError):
         if isinstance(error, ValueError):
             await ctx.error(error, "Category Not Found")
         else:

@@ -26,8 +26,7 @@ class Contests:
     def __init__(self, bot: KernBot):
         self.bot = bot
 
-    async def __error(self, ctx, error):
-        error = getattr(error, 'original', error)
+    async def __error(self, ctx, error: DisError):
         if isinstance(error, (TypeError, ValueError, AlreadySubmitted)):
             await ctx.error(error)
         else:
