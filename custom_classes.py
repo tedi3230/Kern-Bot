@@ -92,14 +92,16 @@ class KernBot(commands.Bot):
 
     async def status_changer(self):
         await self.wait_until_ready()
-        status_messages = [discord.Activity(name="for new contests.", type=discord.ActivityType.watching),
-                           discord.Activity(name="{len(0.guilds)} servers.", type=discord.ActivityType.watching),
-                           discord.Activity(name="bot commands", type=discord.ActivityType.listening),
-                           discord.Activity(name="prefix {0.prefix}", type=discord.ActivityType.listening)]
+        activities = {
+            "for new contests."       : discord.ActivityType.watching,
+            "{len(0.guilds)} servers.": discord.ActivityType.watching,
+            "bot commands"            : discord.ActivityType.listening,
+            "prefix {0.prefix}"       : discord.ActivityType.listening,
+        }
         while not self.is_closed():
-            message = choice(status_messages)
-            message.name = message.name.format(self)
-            await self.change_presence(activity=message)
+            message, activity_type = choice(list(activities.items()))
+            activity = discord.Activity(name=message.format(self), type=activity_type)
+            await self.change_presence(activity=activity)
             await asyncio.sleep(60)
 
     def get_emojis(self, *ids):
