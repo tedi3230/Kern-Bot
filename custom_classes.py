@@ -192,3 +192,7 @@ class Url(commands.Converter):
         url = urlparse(url).geturl()
 
         return url
+
+class DisError(commands.Converter):
+    async def convert(self, ctx, argument):
+        return getattr(argument, "original", argument)
