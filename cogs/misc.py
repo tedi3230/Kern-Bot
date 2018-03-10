@@ -268,6 +268,8 @@ class Misc:
     def make_commands(self):
         cogs_dict = OrderedDict()
         for cog in self.bot.cogs:
+            if getattr(cog, "hidden", False):
+                continue
             cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden]
         for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden:
