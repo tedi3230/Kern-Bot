@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import discord
 from discord.ext import commands
 
+from custom_classes import KernBot, DisError, CoinError, UpperConv, IntConv
+
 def get_delta(time_period, limit):
     if time_period == "day":
         return timedelta(days=limit // 4)
@@ -18,28 +20,6 @@ def get_delta(time_period, limit):
     elif time_period == "minute":
         return timedelta(minutes=limit // 4)
     return timedelta(minute=10)
-
-class CoinError(Exception):
-    def __init__(self, message, coin, currency, limit):
-        self.message = message
-        self.coin = coin
-        self.currency = currency
-        self.limit = limit
-
-    def __str__(self):
-        return self.message
-
-    def __repr__(self):
-        return "CoinError({0.message}, {0.coin}, {0.currency}, {0.limit})".format(self)
-
-class UpperConv(commands.Converter):
-    async def convert(self, ctx, argument):
-        return argument.upper()
-
-
-class IntConv(commands.Converter):
-    async def convert(self, ctx, argument):
-        return int(argument)
 
 
 class Statistics:
@@ -139,8 +119,7 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
     @coin_day.error
     @coin_minute.error
     @coin_hour.error
-    async def coin_error_handler(self, ctx, error):
-        error = getattr(error, 'original', error)
+    async def coin_error_handler(self, ctx, error: DisError):
         if isinstance(error, CoinError):
             if "toSymbol" in str(error):
                 await ctx.error(f"Currency `{error.currency}` does not exist.", "")
