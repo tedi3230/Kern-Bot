@@ -191,10 +191,9 @@ async def on_command_error(ctx, error):
     do_send = True
     if hasattr(ctx.command, 'on_error'):
         return
-    #This prevents any
-    if ctx.command is not None:
-        if hasattr(bot.get_cog(ctx.command.cog_name), '_' + ctx.command.cog_name + '__error'):
-            return
+    #This prevents any commands with cog handlers
+    if hasattr(ctx.cog, f'_{ctx.cog.__class__.__name__}__error'):
+        return
 
     ignored = (commands.NotOwner, commands.CheckFailure,
                commands.CommandNotFound, discord.Forbidden)
