@@ -26,7 +26,7 @@ class Admin:
         self.bot = bot
 
     @commands.check(message_purge_perm_check)
-    @commands.group(hidden=True, invoke_without_command=True)
+    @commands.group(invoke_without_command=True)
     async def delete(self, ctx):
         """Deletes the last message sent by this bot"""
         async for message in ctx.channel.history(limit=100):
@@ -41,7 +41,7 @@ class Admin:
         await ctx.error("No messages were found.")
 
     @commands.check(message_purge_perm_check)
-    @delete.command(hidden=True)
+    @delete.command()
     async def clean(self, ctx, num_messages=200, other: bool = False):
         """Removes all messages for num_messages by this bot.
         Other specifies clearing everyone else's messages
@@ -68,7 +68,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
                                 "Invalid Permissions", delete_after=10)
 
     @commands.check(message_purge_perm_check)
-    @delete.command(hidden=True, name="id")
+    @delete.command(name="id")
     async def delete_by_id(self, ctx, *message_ids: int):
         """Deletes message from list of ids/id
         ```{0}delete id <message_id> [message_id]...```"""
@@ -97,7 +97,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             roles = ", ".join([role.name.strip('@') for role in member.roles])
             await ctx.success("```ini\n[{roles}]```", f"Roles for `{member.display_name}`:")
 
-    @commands.group(hidden=True, aliases=["permissions"])
+    @commands.group(aliases=["permissions"])
     async def perms(self, ctx):
         """Permissions command group top (does nothing)"""
         pass
