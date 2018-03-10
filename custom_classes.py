@@ -196,3 +196,25 @@ class Url(commands.Converter):
 class DisError(commands.Converter):
     async def convert(self, ctx, argument):
         return getattr(argument, "original", argument)
+
+class CoinError(Exception):
+    def __init__(self, message, coin, currency, limit):
+        self.message = message
+        self.coin = coin
+        self.currency = currency
+        self.limit = limit
+
+    def __str__(self):
+        return self.message
+
+    def __repr__(self):
+        return "CoinError({0.message}, {0.coin}, {0.currency}, {0.limit})".format(self)
+
+class UpperConv(commands.Converter):
+    async def convert(self, ctx, argument):
+        return argument.upper()
+
+
+class IntConv(commands.Converter):
+    async def convert(self, ctx, argument):
+        return int(argument)
