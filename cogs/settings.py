@@ -71,11 +71,6 @@ class Settings:
         prefixes = self.bot.prefixes_cache.get(ctx.guild.id, []) + [self.bot.prefix]
         await ctx.send("Prefixes for {}: ```{}```".format(ctx.guild.name, ", ".join(prefixes)))
 
-    @commands.is_owner()
-    @get.command(hidden=True)
-    async def permissions(self, ctx):
-        await ctx.send()
-
     @_set.command(name="max_rating")
     async def set_max_rating(self, ctx, max_rating: int):
         await self.bot.database.set_max_rating(ctx, max_rating)
