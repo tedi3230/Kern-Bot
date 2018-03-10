@@ -74,9 +74,7 @@ async def load_extensions(bots):
 @bot.event
 async def on_connect():
     await bot.update_dbots_server_count(dbl_token)
-    with async_timeout.timeout(20):
-        async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
-            bot.latest_commit = "g" + (await r.json())['sha'][:7]
+    await bot.pull_remotes()
 
 @bot.event
 async def on_guild_join(guild: discord.Guild):

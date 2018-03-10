@@ -118,6 +118,12 @@ class KernBot(commands.Bot):
         with async_timeout.timeout(10):
             await self.session.post(url, data=payload, headers=headers)
 
+    async def pull_remotes(self):
+        with async_timeout.timeout(20):
+            async with self.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
+                self.latest_commit = "g" + (await r.json())['sha'][:7]
+
+
     class ResponseError(Exception):
         pass
 
