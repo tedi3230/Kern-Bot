@@ -216,15 +216,21 @@ class Misc:
         ```{0}echo <text>```"""
         await ctx.send(text)
 
-    @commands.command(aliases=['creation_date', 'snowflake_date'])
+    @commands.command()
     async def snowflake(self, ctx, snowflake: int):
         """Converts snowflake id into creation date.
-        Bot requires no knowledge of user/emoji/guild.
+        Bot requires no knowledge of user/emoji/guild/channel.
         Provides date in D/M/Y format
         ```{0}snowflake <id>```"""
-        timestamp = int(f"{snowflake:b}"[:-22], 2) + 1420070400000
-        date = datetime.utcfromtimestamp(float(timestamp)/1000)
-        await ctx.send(date.strftime("%d/%m/%Y %H:%M:%S"))
+        try:
+            timestamp = int(f"{snowflake:b}"[:-22], 2) + 1420070400000
+            date = datetime.utcfromtimestamp(float(timestamp)/1000)
+        except OverflowError:
+            await ctx.error("Snowflake integer **way** too large", "")
+        except ValueError:
+            await ctx.error("Snowflake integer **way** too small", "")
+        else:
+            await ctx.send(date.strftime("%d/%m/%Y %H:%M:%S"))
 
     @commands.command(hidden=True)
     async def source(self, ctx, *, command: str = None):
