@@ -33,9 +33,9 @@ class Admin:
             if message.author == self.bot.user:
                 await message.delete()
                 await ctx.success("Message deleted.")
-                await asyncio.sleep(5)
 
                 if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
+                    await asyncio.sleep(5)
                     await ctx.message.delete()
                 return
         await ctx.error("No messages were found.")
