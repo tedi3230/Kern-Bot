@@ -43,8 +43,6 @@ class Errors:
                                            error, error.__traceback__))),
                             title=f"{ctx.command}: {type(error).__qualname__}",
                             channel=self.bot.logs)
-            print('Ignoring {} in command {}'.format(type(error).__qualname__,
-                                                     ctx.command))
 
 def setup(bot: commands.Bot):
     bot.add_cog(Errors(bot))
