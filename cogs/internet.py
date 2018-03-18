@@ -193,7 +193,8 @@ class Internet:
             await ctx.send(link)
 
     @obama.error
-    async def obama_error_handler(self, ctx, error: cc.DisError):
+    async def obama_error_handler(self, ctx, error):
+        error = getattr(error, "original", error)
         if isinstance(error, a_TimeoutError):
             await ctx.error("Obama server is not responding.", "Request Timed Out")
         elif isinstance(error, self.bot.ResponseError):

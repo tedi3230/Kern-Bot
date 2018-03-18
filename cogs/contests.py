@@ -4,7 +4,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from custom_classes import KernBot, DisError
+from custom_classes import KernBot
 
 
 class AlreadySubmitted(Exception):
@@ -26,7 +26,8 @@ class Contests:
     def __init__(self, bot: KernBot):
         self.bot = bot
 
-    async def __error(self, ctx, error: DisError):
+    async def __error(self, ctx, error):
+        error = getattr(error, "original", error)
         if isinstance(error, (TypeError, ValueError, AlreadySubmitted)):
             await ctx.error(error)
         else:
@@ -120,7 +121,8 @@ class Contests:
         await ctx.success(f"Successfully voted on submission {submission_id}")
 
     @vote.error
-    async def vote_error_handler(self, ctx, error: DisError):
+    async def vote_error_handler(self, ctx, error):
+        error = getattr(error, "original", error)
         await ctx.error(error, "Error while voting: ")
         await ctx.error(error, "Error while voting:", channel=self.bot.logs)
 

@@ -4,15 +4,16 @@ import traceback
 import discord
 from discord.ext import commands
 
-from custom_classes import KernBot, DisError
+from custom_classes import KernBot
 
 
 class Errors:
     def __init__(self, bot: KernBot):
         self.bot = bot
 
-    async def on_command_error(self, ctx, error: DisError):
+    async def on_command_error(self, ctx, error):
         # This prevents any commands already handled locally being run here.
+        error = getattr(error, "original", error)
         if hasattr(ctx.command, 'on_error') or \
            hasattr(ctx.cog, f'_{ctx.cog.__class__.__name__}__error'):
             return
