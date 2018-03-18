@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import discord
 from discord.ext import commands
 
-from custom_classes import KernBot, DisError, CoinError, UpperConv, IntConv
+from custom_classes import KernBot, CoinError, UpperConv, IntConv
 
 def get_delta(time_period, limit):
     if time_period == "day":
@@ -46,7 +46,7 @@ class Statistics:
                     },
                 },
             }
-        return self.bot.crypto['market_price'][coin][time_period]
+        return self.bot.crypto['market_price'][coin][currency][time_period]
 
     def gen_graph_embed(self, data, unit, coin, currency, limit):
         plt.figure()
@@ -95,6 +95,7 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
         ```{0}coin day <coin> [currency] [days]```"""
         async with ctx.typing():
             data = await self.get_data("day", coin, currency, days)
+            print('done')
             graph, embed = self.gen_graph_embed(data, "Days", coin, currency, days)
             await ctx.send(file=graph, embed=embed)
 
@@ -119,7 +120,8 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
     @coin_day.error
     @coin_minute.error
     @coin_hour.error
-    async def coin_error_handler(self, ctx, error: DisError):
+    async def coin_error_handler(self, ctx, error):
+        error = getattr(error, "original", error)
         if isinstance(error, CoinError):
             if "toSymbol" in str(error):
                 await ctx.error(f"Currency `{error.currency}` does not exist.", "")
@@ -132,6 +134,20 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
                 await self.bot.logs.send(repr(error))
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.error(str(error), "Missing Argument")
+
+        else:
+            await ctx.error(error)
+
+    @commands.command(hidden=True)
+    async def weather(self, ctx, *, location):
+        loc = self.bot.weather[location.lower()]
+        em = discord.Embed(title=loc['description'])
+        #await ctx.send()
+
+    @weather.error
+    async def weather_error_handler(self, ctx, error):
+        error = getattr(error, "original", error)
+        #if isinstance()
 
 
 def setup(bot):
