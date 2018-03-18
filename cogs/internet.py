@@ -197,7 +197,7 @@ class Internet:
         error = getattr(error, "original", error)
         if isinstance(error, a_TimeoutError):
             await ctx.error("Obama server is not responding.", "Request Timed Out")
-        elif isinstance(error, self.bot.ResponseError):
+        else: #includes bot response error
             await ctx.error(error)
 
 

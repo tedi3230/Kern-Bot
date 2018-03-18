@@ -93,9 +93,11 @@ class Misc:
     async def raw_error_handler(self, ctx, error):
         error = getattr(error, "original", error)
         if isinstance(error, discord.NotFound):
-            return await ctx.error("Incorrect message id provided", "Message not found")
+            await ctx.error("Incorrect message id provided", "Message not found")
         elif isinstance(error, ValueError):
-            return await ctx.error("Message ID not an integer", "Incorrect argument type")
+            await ctx.error("Message ID not an integer", "Incorrect argument type")
+        else:
+            await ctx.error(error)
 
     @commands.command()
     async def ping(self, ctx):
