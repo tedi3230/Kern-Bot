@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+from io import BytesIO
 from signal import SIGTERM
 import sys
 from os import listdir
@@ -8,18 +9,43 @@ from collections import OrderedDict
 import asyncio
 from concurrent.futures import FIRST_COMPLETED
 from random import choice
+from xml.etree.ElementTree import fromstring
 import async_timeout
 
 import aiohttp
+import aioftp
 
 import discord
 from discord.ext import commands
+import xmljson
 
 import database as db
+
+LINKS = ["anon/gen/fwo/IDN11060.xml", # NSW/ACT
+         "anon/gen/fwo/IDD10207.xml", # NT
+         "anon/gen/fwo/IDQ11295.xml", # QLD
+         "anon/gen/fwo/IDS10044.xml", # SA
+         "anon/gen/fwo/IDT16710.xml", # TAS
+         "anon/gen/fwo/IDW14199.xml", # WA
+         "anon/gen/fwo/IDV10753.xml", # VIC
+        ]
+XML_PARSER = xmljson.GData(dict_type=dict)
 
 def chunks(s, n):
     for start in range(0, len(s), n):
         yield s[start:start+n]
+
+def replace_backticks(content, do_it):
+    if not do_it:
+        return content
+    if content.endswith("```") and (len(content.split("```")) - 1) % 2 == 1:
+        content = "```" + content
+    elif (len(content.split("```")) - 1) % 2 == 1:
+        content += "```"
+    elif len(content.split("```")) == 1:
+        content += "```"
+        content = "```" + content
+    return content
 
 async def bot_user_check(ctx):
     return not ctx.author.bot
@@ -40,9 +66,9 @@ class KernBot(commands.Bot):
             "market_price" : {},
             "coins": []
         }
+        self.weather = {}
 
         super().__init__(*args, **kwargs)
-        self.loop.set_debug(True)
 
         self.add_check(bot_user_check)
         self.logs = self.get_channel(382780308610744331)
@@ -60,12 +86,35 @@ class KernBot(commands.Bot):
 
         self.database = db.Database(self)
 
+        self.loop.set_debug(True)
+
     async def init(self):
         self.session = aiohttp.ClientSession()
-        with async_timeout.timeout(10):
+        with async_timeout.timeout(30):
             async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
                 self.crypto['coins'] = {k.upper():v for k, v in (await resp.json())['Data'].items()}
 
+        await asyncio.wait([self.get_forecast(link) for link in LINKS])
+
+    async def get_forecast(self, link):
+        xml = BytesIO()
+        with async_timeout.timeout(10):
+            async with aioftp.ClientSession("ftp.bom.gov.au", 21) as client:
+                async with client.download_stream(link) as stream:
+                    async for block in stream.iter_by_block():
+                        xml.write(block)
+
+        data = XML_PARSER.data(fromstring(xml.getvalue()))
+        forecast = data["product"]["forecast"]["area"]
+        for loc in forecast:
+            if loc["type"] == "location":
+                self.weather[loc["description"].lower()] = loc #week
+
+        self.weather['EXPIRY'] = datetime.strptime(
+            data['product']['amoc']['expiry-time']['$t'],
+            '%Y-%m-%dT%H:%M:%SZ')
+
+        return data
 
     async def suicide(self, message="Shutting Down"):
         print(f"\n{message}\n")
@@ -174,13 +223,16 @@ class CustomContext(commands.Context):
     async def warning(self, warning, title=None, *args, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, **kwargs):
         return await self.__embed(title, warning, discord.Colour.blurple(), rqst_by, timestamp, channel, *args, **kwargs)
 
-    async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
-        if content is not None:
-            contents = list(chunks(content, 1900)) if content else []
+    async def send(self, content: str = None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
+        if content:
+            contents = list(chunks(str(content), 1900))
+            do_it = bool("```" in contents[-1])
             for cnt in contents[:-1]:
+                cnt = replace_backticks(cnt, do_it)
                 await super().send(cnt, delete_after=delete_after, tts=tts, nonce=nonce)
+            contents[-1] = replace_backticks(contents[-1], do_it)
             return await super().send(contents[-1], tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
-        return await super().send(content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
+        return await super().send(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce)
 
 class Url(commands.Converter):
     async def convert(self, ctx, argument):
@@ -192,10 +244,6 @@ class Url(commands.Converter):
         url = urlparse(url).geturl()
 
         return url
-
-class DisError(commands.Converter):
-    async def convert(self, ctx, argument):
-        return getattr(argument, "original", argument)
 
 class CoinError(Exception):
     def __init__(self, message, coin, currency, limit):
