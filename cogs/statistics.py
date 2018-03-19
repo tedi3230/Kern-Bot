@@ -2,15 +2,42 @@
 import io
 from inspect import Parameter
 from datetime import datetime, timedelta
+
 import async_timeout
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from fuzzyfinder.main import fuzzyfinder
 
 import discord
 from discord.ext import commands
 
 from custom_classes import KernBot, CoinError, UpperConv, IntConv
+
+ICON_CODES = {
+    1:  "☀",
+    2:  "🌙",
+    3:  "🌤",
+    4:  "☁",
+    6:  "🌁",
+    8:  "🌧",
+    9:  "💨",
+    10:  "🌫",
+    11:  "🌦",
+    13: "🌧",
+    14: "🌬",
+    15: "❄",
+    16: "🌨",
+    17: "⛈",
+    18: "🌧",
+    19: "🌀",
+}
+ELEMENT_CODES = {
+    "precipitation_range"          : "Precipitation: ",
+    "air_temperature_minimum"      : "Min: ",
+    "air_temperature_maximum"      : "Max: ",
+}
+
 
 def get_delta(time_period, limit):
     if time_period == "day":
@@ -139,15 +166,46 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
             await ctx.error(error)
 
     @commands.command(hidden=True)
-    async def weather(self, ctx, *, location):
-        loc = self.bot.weather[location.lower()]
-        em = discord.Embed(title=loc['description'])
-        #await ctx.send()
+    async def auforecast(self, ctx, *, location):
+        # add weekdays, then RADAR images, and current temp etc.
+        try:
+            loc = self.bot.weather[location.lower()]
+        except KeyError:
+            em = discord.Embed(title="Unknown Location",
+                               description=f":cityscape: `{location}` not found.")
+            locations = list(fuzzyfinder(location.lower(), self.bot.weather.keys()))
+            if locations:
+                em.add_field(name="Did you mean?",
+                             value=locations[0])
+            return await ctx.send(embed=em)
 
-    @weather.error
-    async def weather_error_handler(self, ctx, error):
-        error = getattr(error, "original", error)
-        #if isinstance()
+        place = loc['description']
+        em = discord.Embed(title=place)
+        em.set_footer(text="Source: Bureau of Meteorology")
+        em.timestamp = datetime.strptime(loc["forecast-period"][0]["start-time-utc"], '%Y-%m-%dT%H:%M:%SZ')
+        em.set_image(url="http://www.bom.gov.au/radar/IDR713.gif?20180318121051")
+
+        for day in loc['forecast-period']:
+            print(day)
+            if isinstance(day["element"], dict):
+                day["element"] = [day["element"]]
+            name = datetime.strptime(day["end-time-utc"],
+                                     "%Y-%m-%dT%H:%M:%SZ").strftime("%A")
+            emoji_name = ICON_CODES[day["element"][0]["$t"]]
+            print(day["element"][0]["$t"])
+            print(day["text"][0]["$t"])
+            value = day["text"][0]["$t"] + "\n**Chance of Rain:** " + day["text"][1]["$t"] + "\n"
+            for el in day["element"]:
+                if el["type"] == "forecast_icon_code":
+                    continue
+                value += f"**{ELEMENT_CODES[el['type']]}**{el['$t']}\n"
+
+            em.add_field(name=emoji_name + name, value=value)
+
+
+        await ctx.send(embed=em)
+        #for item in loc['forecast-period']:
+        #    print(item, end="\n\n\n")
 
 
 def setup(bot):
