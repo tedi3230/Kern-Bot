@@ -150,7 +150,7 @@ class Misc:
     async def kiss(self, ctx, *, item: str):
         """Kisses the given item
         ```{0}kiss <item>```"""
-        await ctx.send(":kiss:{}:kiss:".format(item))
+        await ctx.send("💋{}💋".format(item))
 
     @commands.group(name="hash")
     async def _hash(self, ctx):
@@ -278,7 +278,7 @@ class Misc:
         for cog in self.bot.cogs:
             if getattr(cog, "hidden", False):
                 continue
-            cogs_dict[cog] = cogs_dict.get(cog, []) + [[cmd.name] + cmd.aliases for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden and cmd.can_run(ctx)]
+            cogs_dict[cog] = cogs_dict.get(cog, []) + [cmd.name for cmd in self.bot.get_cog_commands(cog) if not cmd.hidden and cmd.can_run(ctx)]
         for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden and cmd.can_run(ctx):
                 cogs_dict['No Category'] = cogs_dict.get('No Category', []) + [[cmd.name] + cmd.aliases]
@@ -297,10 +297,7 @@ class Misc:
             for cog, cmds in cogs_dict.items():
                 commands_l = []
                 for cmd in cmds:
-                    if len(cmd) > 1:
-                        commands_l += ["{} [{}]".format(cmd[0], ", ".join(cmd[1:]))]
-                    else:
-                        commands_l += [cmd[0]]
+                    commands_l.append(f"{cmd}")
                 embed.add_field(name=cog.capitalize(), value=", ".join(commands_l), inline=False)
 
         elif command.lower() in [cog.lower() for cog in cogs_dict.keys()]:
@@ -316,14 +313,15 @@ class Misc:
                     embed.add_field(name=cmd.qualified_name, value=c_help, inline=False)
 
         elif self.bot.get_command(command) in self.bot.commands:
-            cmd_group = self.bot.get_command(command)
-            if cmd_group.help is None:
-                cmd_group_help = "No description"
+            command = self.bot.get_command(command)
+            if command.help is None:
+                command_help = "No description"
             else:
-                cmd_group_help = cmd_group.help.format(ctx.clean_prefix())
-            embed.description = cmd_group_help
-            if isinstance(cmd_group, commands.Group):
-                for cmd in cmd_group.commands:
+                command_help = command.help.format(ctx.clean_prefix())
+            embed.description = command_help
+            embed.add_field(name="Aliases", value=", ".join(command.aliases))
+            if isinstance(command, commands.Group):
+                for cmd in command.commands:
                     if not cmd.hidden:
                         if cmd.help is None:
                             c_help = "No description"
@@ -335,7 +333,7 @@ class Misc:
             return await ctx.error(f"The passed command `{command}` does not exist.", "")
 
         embed.timestamp = datetime.utcnow()
-        embed.set_author(name=command.capitalize(), url="https://discord.gg/bEYgRmc")
+        embed.set_author(name=command.name.capitalize(), url="https://discord.gg/bEYgRmc")
         embed.set_footer(text="Requested by: {}".format(ctx.message.author), icon_url=ctx.message.author.avatar_url)
         await ctx.send(embed=embed)
 
