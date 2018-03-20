@@ -63,7 +63,7 @@ class Admin:
                 deleted = await ctx.channel.purge(limit=num_messages, check=is_me)
                 await ctx.success("`{}/{}`".format(len(deleted), num_messages), "Messages Cleaned", delete_after=10)
             else:
-                await ctx.error(""":octagonal_sign: This bot does not have the required permissions to delete messages.
+                await ctx.error("""🛑 This bot does not have the required permissions to delete messages.
 Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
                                 "Invalid Permissions", delete_after=10)
 

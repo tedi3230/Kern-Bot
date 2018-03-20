@@ -36,7 +36,7 @@ class Errors:
 
         else:
             #add more detailed debug
-            await ctx.error(f"**This error is now known about :thumbsup:**\n```{error}```",
+            await ctx.error(f"**This error is now known about 👍**\n```{error}```",
                             type(error).__qualname__)
             await ctx.error("```py\n{}```".format("".join(
                 traceback.format_exception(type(error),

@@ -34,7 +34,7 @@ class Contests:
             print('Ignoring {} in command {}'.format(
                 type(error).__qualname__, ctx.command))
             traceback.print_exception(type(error), error, error.__traceback__)
-            await ctx.error("An undhandled exception occurred. Don't worry, we know about it now. :thumbsup:")
+            await ctx.error("An undhandled exception occurred. Don't worry, we know about it now. 👍")
             await ctx.error("```{}: {}```".format(type(error).__qualname__, error), title=f"Ignoring exception in command *{ctx.command}*:", channel=self.bot.logs, rqst_by=False)
 
     def generate_embed(self, message_author: discord.User, title, description, image_url=None, colour=0x00ff00):
