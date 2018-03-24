@@ -14,6 +14,7 @@ from custom_classes import KernBot
 
 class Owner:
     """Owner only commands"""
+
     def __init__(self, bot: KernBot):
         self.bot = bot
         self.hidden = True
@@ -24,7 +25,8 @@ class Owner:
     async def update_lib(self, ctx):
         await self.bot.pull_remotes()
         await ctx.send("""Instigate Pull Request. To update;
-```pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]```""")
+```pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]```"""
+                       )
 
     @commands.is_owner()
     @commands.group(hidden=True)
@@ -48,7 +50,10 @@ class Owner:
     @commands.command(hidden=True, aliases=['restart'])
     async def rebirth(self, ctx):
         """Owner of this bot only command; Restart the bot"""
-        await ctx.success("", f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
+        await ctx.success(
+            "",
+            f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}",
+            rqst_by=False)
         await self.bot.suicide("Restarting")
         execl(executable, 'python "' + "".join(argv) + '"')
 
@@ -56,7 +61,10 @@ class Owner:
     @commands.command(hidden=True, aliases=['shutdown', 'die'])
     async def suicide(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
-        await ctx.success("", f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
+        await ctx.success(
+            "",
+            f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}",
+            rqst_by=False)
         await self.bot.suicide()
 
     @commands.is_owner()
@@ -70,7 +78,8 @@ class Owner:
     @commands.command(hidden=True)
     async def servers(self, ctx):
         """Sends the servers this bot is in"""
-        await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
+        await ctx.send("My servers:```ini\n[{}]```".format(
+            ", ".join([guild.name for guild in self.bot.guilds])))
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -88,6 +97,7 @@ class Owner:
     async def k_eval(self, ctx, *, body: str):
         """Evaluates code
         ```{0}eval <code>```"""
+
         def cleanup_code(content):
             if content.startswith('```') and content.endswith('```'):
                 return '\n'.join(content.split('\n')[1:-1])
@@ -110,7 +120,6 @@ class Owner:
         body = cleanup_code(body)
         stdout = io.StringIO()
 
-
         if ctx.invoked_with == "exec":
             body = "return " + body.split("\n")[0]
 
@@ -122,11 +131,13 @@ class Owner:
 
         except asyncio.TimeoutError as e:
             await ctx.add_reaction("👎")
-            return await ctx.error("Function timed out.", e.__class__.__name__ + ':')
+            return await ctx.error("Function timed out.",
+                                   e.__class__.__name__ + ':')
 
         except Exception as e:
             await ctx.add_reaction("👎")
-            return await ctx.error(f'```\n{e}\n```', e.__class__.__name__ + ':')
+            return await ctx.error(f'```\n{e}\n```',
+                                   e.__class__.__name__ + ':')
 
         func = env['func']
         try:
@@ -147,10 +158,20 @@ class Owner:
 
             if ret is None:
                 if value:
-                    await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}```")
+                    await ctx.send(
+                        f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}```"
+                    )
             else:
                 self._last_result = ret
-                await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}{ret}```")
+                await ctx.send(
+                    f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}{ret}```"
+                )
+
+            try:
+                await ctx.message.delete()
+            except discord.HTTPException:
+                pass
+
 
 def setup(bot):
     bot.add_cog(Owner(bot))
