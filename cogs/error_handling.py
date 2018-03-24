@@ -28,6 +28,9 @@ class Errors:
             await ctx.error(f"Argument `{error.param}` is missing!",
                             "Missing Required Argument(s)")
 
+        elif isinstance(error, commands.BadArgument):
+            await ctx.error(str(error), "Bad Argument")
+
         elif isinstance(error, asyncio.TimeoutError):
             await ctx.error("The internet is gone?!?!?!?", "Timeout Error")
 
@@ -35,14 +38,17 @@ class Errors:
             await ctx.error(error, "Response Code > 400:")
 
         else:
-            #add more detailed debug
-            await ctx.error(f"**This error is now known about 👍**\n```{error}```",
-                            type(error).__qualname__)
-            await ctx.error("```py\n{}```".format("".join(
-                traceback.format_exception(type(error),
-                                           error, error.__traceback__))),
-                            title=f"{ctx.command}: {type(error).__qualname__}",
-                            channel=self.bot.logs)
+            # add more detailed debug
+            await ctx.error(
+                f"**This error is now known about 👍**\n```{error}```",
+                type(error).__qualname__)
+            await ctx.error(
+                "```py\n{}```".format("".join(
+                    traceback.format_exception(
+                        type(error), error, error.__traceback__))),
+                title=f"{ctx.command}: {type(error).__qualname__}",
+                channel=self.bot.logs)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(Errors(bot))
