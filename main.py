@@ -1,20 +1,18 @@
 from datetime import datetime, timedelta
-from os import environ, system, execl
+from os import environ
 import traceback
 import asyncio
-from sys import executable, argv
 from platform import python_version
 from pkg_resources import get_distribution
 import async_timeout
-import requests
 
 import discord
 from discord.ext import commands
 
 import custom_classes as cc
 
-# update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
 
+# update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
 async def server_prefix(bots: cc.KernBot, message):
     """A callable Prefix for our bot.
 
@@ -56,8 +54,13 @@ except KeyError:
         bot_prefix = lines[4]
         dbl_token = lines[5]
 
-bot = cc.KernBot(bot_prefix, command_prefix=server_prefix, case_insensitive=True,
-                 description='Multiple functions, including contests, definitions, and more.')
+bot = cc.KernBot(
+    bot_prefix,
+    command_prefix=server_prefix,
+    case_insensitive=True,
+    description='Multiple functions, including contests, definitions, and more.'
+)
+
 
 async def load_extensions(bots):
     await asyncio.sleep(2)
@@ -69,29 +72,41 @@ async def load_extensions(bots):
             traceback.print_exc()
             await bot.suicide()
 
+
 @bot.event
 async def on_connect():
     await bot.update_dbots_server_count(dbl_token)
     with async_timeout.timeout(20):
-        async with bot.session.get("https://api.github.com/repos/Modelmat/discord.py/commits/rewrite") as r:
+        async with bot.session.get(
+                "https://api.github.com/repos/Modelmat/discord.py/commits/rewrite"
+        ) as r:
             bot.latest_commit = "g" + (await r.json())['sha'][:7]
     await bot.pull_remotes()
 
+
 @bot.event
 async def on_guild_join(guild: discord.Guild):
-    e = discord.Embed(title="Joined {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
-                      colour=discord.Colour.green(),
-                      timestamp=datetime.utcnow())
+    e = discord.Embed(
+        title="Joined {} @ {}".format(
+            guild.name,
+            datetime.utcnow().strftime('%H:%M:%S UTC')),
+        colour=discord.Colour.green(),
+        timestamp=datetime.utcnow())
     await bot.get_channel(bot.logs).send(embed=e)
     await bot.update_dbots_server_count(dbl_token)
 
+
 @bot.event
 async def on_guild_remove(guild: discord.Guild):
-    e = discord.Embed(title="Left {} @ {}".format(guild.name, datetime.utcnow().strftime('%H:%M:%S UTC')),
-                      colour=discord.Colour.red(),
-                      timestamp=datetime.utcnow())
+    e = discord.Embed(
+        title="Left {} @ {}".format(
+            guild.name,
+            datetime.utcnow().strftime('%H:%M:%S UTC')),
+        colour=discord.Colour.red(),
+        timestamp=datetime.utcnow())
     await bot.get_channel(bot.logs).send(embed=e)
     await bot.update_dbots_server_count(dbl_token)
+
 
 @bot.event
 async def on_ready():
@@ -101,9 +116,10 @@ async def on_ready():
     if bot.user.name != name:
         print(f"\nName changed from '{bot.user.name}' to '{name}'")
         await bot.user.edit(username=name)
-    e = discord.Embed(title=f"Bot Online @ {datetime.utcnow().strftime('%H:%M:%S UTC')}",
-                      colour=discord.Colour.green(),
-                      timestamp=datetime.utcnow())
+    e = discord.Embed(
+        title=f"Bot Online @ {datetime.utcnow().strftime('%H:%M:%S UTC')}",
+        colour=discord.Colour.green(),
+        timestamp=datetime.utcnow())
     print(f"""
 Username:   {bot.user.name}
 ID:         {bot.user.id}
@@ -123,20 +139,24 @@ Up to Date: {bot.latest_commit == get_distribution('discord.py').version.split("
         bot.logs = bot.get_channel(382780308610744331)
     await bot.logs.send(embed=e)
 
+
 @bot.event
 async def on_resumed():
     if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
-        em = discord.Embed(title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
-                           description=f"Down since: {datetime.utcnow().strftime('%H:%M:%S')}",
-                           colour=discord.Colour.red())
+        em = discord.Embed(
+            title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
+            description=f"Down since: {datetime.utcnow().strftime('%H:%M:%S')}",
+            colour=discord.Colour.red())
         await bot.logs.send(embed=em)
     print(bot.latest_message_time)
     print(bot.latest_message_time == datetime.utcnow())
     print(datetime.utcnow() + timedelta(seconds=30))
 
+
 @bot.event
 async def on_socket_raw_receive(_):
     bot.latest_message_time = datetime.utcnow()
+
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -155,13 +175,16 @@ async def on_message(message: discord.Message):
                         await bot.invoke(ctx)
                         cmds_run_before.append(msg.strip(ctx.prefix))
                     else:
-                        failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
+                        failed_to_run[msg.strip(
+                            ctx.prefix
+                        )] = "This command has been at least once before."
                 else:
                     if ctx.prefix is not None:
                         failed_to_run[msg.strip(
                             ctx.prefix)] = "Command not found."
 
-            if failed_to_run and len(failed_to_run) != len(message.content.split(" && ")):
+            if failed_to_run and len(failed_to_run) != len(
+                    message.content.split(" && ")):
                 errors = ""
                 for fail, reason in failed_to_run.items():
                     errors += f"{fail}: {reason}\n"
@@ -171,6 +194,7 @@ async def on_message(message: discord.Message):
             # is a command returned
             ctx = await bot.get_context(message, cls=cc.CustomContext)
             await bot.invoke(ctx)
+
 
 @commands.is_owner()
 @bot.command(name="reload", hidden=True)
