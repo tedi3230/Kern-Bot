@@ -42,12 +42,18 @@ class Errors:
             await ctx.error(
                 f"**This error is now known about 👍**\n```{error}```",
                 type(error).__qualname__)
-            await ctx.error(
-                "```py\n{}```".format("".join(
-                    traceback.format_exception(
-                        type(error), error, error.__traceback__))),
-                title=f"{ctx.command}: {type(error).__qualname__}",
-                channel=self.bot.logs)
+
+            await self.bot.logs.send("""
+**Command:** {}
+**Error:** {}
+**Member: ** {}
+**Guild: ** {}
+```py\n{}```
+            """.format(ctx.command,
+                       type(error).__qualname__, ctx.author, ctx.guild,
+                       "".join(
+                           traceback.format_exception(
+                               type(error), error, error.__traceback__))))
 
 
 def setup(bot: commands.Bot):
