@@ -109,7 +109,7 @@ class Games:
                     correct_qs += 1
                     des += f"\n✅ {correct}"
                 else:
-                    des += f"\n❌ Correct Answer: {correct}"
+                    des += f"\n❌{correct} 👨:{yours}"
             des += "\n\nFor a total score of {}/{}".format(
                 correct_qs, len(corrects))
 
