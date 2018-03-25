@@ -36,7 +36,9 @@ async def server_prefix(bots: cc.KernBot, message):
 
     for prefix in [bots.prefix, *bots.prefixes_cache[message.guild.id]]:
         prefixes.append(prefix + " ")
+        prefixes.append(prefix.upper() + "")
         prefixes.append(prefix)
+        prefixes.append(prefix.upper())
 
     return commands.when_mentioned_or(*prefixes)(bots, message)
 
