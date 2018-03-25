@@ -107,6 +107,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             await ctx.success("```ini\n[{roles}]```",
                               f"Roles for `{member.display_name}`:")
 
+    @commands.guild_only()
     @commands.group(aliases=["permissions"])
     async def perms(self, ctx):
         """Permissions command group top (does nothing)"""
@@ -127,8 +128,13 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
     async def perms_role(self, ctx, *, role: discord.Role):
         """Shows the permissions for a role
         ```{0}perms role <role>```"""
-        pos = ", ".join([name for name, has in role.permissions if has])
-        neg = ", ".join([name for name, has in role.permissions if not has])
+        d_pos = [
+            name for name, has in ctx.guild.default_role.permissions if has
+        ]
+        pos = ", ".join(
+            [name for name, has in role.permissions if name in d_pos or has])
+        neg = ", ".join(
+            [name for name, has in role.permissions if name not in pos])
         await ctx.send(
             f"Permissions for role `{role}`: ```ini\n[{pos}]``````css\n[{neg}]```"
         )
