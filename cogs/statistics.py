@@ -15,15 +15,15 @@ from discord.ext import commands
 from custom_classes import KernBot, CoinError, UpperConv, IntConv
 
 ICON_CODES = {
-    1:  "☀",
-    2:  "🌙",
-    3:  "🌤",
-    4:  "☁",
-    6:  "🌁",
-    8:  "🌧",
-    9:  "💨",
-    10:  "🌫",
-    11:  "🌦",
+    1: "☀",
+    2: "🌙",
+    3: "🌤",
+    4: "☁",
+    6: "🌁",
+    8: "🌧",
+    9: "💨",
+    10: "🌫",
+    11: "🌦",
     13: "🌧",
     14: "🌬",
     15: "❄",
@@ -33,9 +33,9 @@ ICON_CODES = {
     19: "🌀",
 }
 ELEMENT_CODES = {
-    "precipitation_range"          : "Precipitation: ",
-    "air_temperature_minimum"      : "Min: ",
-    "air_temperature_maximum"      : "Max: ",
+    "precipitation_range": "Precipitation: ",
+    "air_temperature_minimum": "Min: ",
+    "air_temperature_maximum": "Max: ",
 }
 
 
@@ -59,7 +59,9 @@ class Statistics:
            self.bot.crypto['market_price'][coin][currency].get(time_period) is None or \
            self.bot.crypto['market_price'][coin][currency][time_period]['timestamp'] < datetime.utcnow():
             with async_timeout.timeout(10):
-                async with self.bot.session.get(f"https://min-api.cryptocompare.com/data/histo{time_period}?fsym={coin}&tsym={currency}&limit={limit}") as resp:
+                async with self.bot.session.get(
+                        f"https://min-api.cryptocompare.com/data/histo{time_period}?fsym={coin}&tsym={currency}&limit={limit}"
+                ) as resp:
                     js = await resp.json()
             if js['Response'] != "Success":
                 raise CoinError(js['Message'], coin, currency, limit)
@@ -69,7 +71,8 @@ class Statistics:
                     time_period: {
                         'high': [[-i, v['high']] for i, v in enumerate(vals)],
                         'low': [[-i, v['low']] for i, v in enumerate(vals)],
-                        'timestamp': datetime.utcnow() + get_delta(time_period, limit),
+                        'timestamp':
+                        datetime.utcnow() + get_delta(time_period, limit),
                     },
                 },
             }
@@ -90,7 +93,9 @@ class Statistics:
         graph_name = f"{coin}-{currency}-{limit}.png"
         graph = discord.File(buf, filename=graph_name)
         em = discord.Embed()
-        em.set_author(name=coin_data['CoinName'], icon_url="https://www.cryptocompare.com" + coin_data['ImageUrl'])
+        em.set_author(
+            name=coin_data['CoinName'],
+            icon_url="https://www.cryptocompare.com" + coin_data['ImageUrl'])
         em.set_image(url=f"attachment://{graph_name}")
         return graph, em
 
@@ -101,47 +106,67 @@ class Statistics:
         ```{0}coin <coin>```"""
         #self.statistics [coin]
         if ctx.invoked_subcommand is None and ctx.subcommand_passed is None:
-            raise commands.MissingRequiredArgument(param=Parameter(name="currency", kind=Parameter.POSITIONAL_ONLY))
+            raise commands.MissingRequiredArgument(
+                param=Parameter(
+                    name="currency", kind=Parameter.POSITIONAL_ONLY))
 
         elif ctx.invoked_subcommand is None and ctx.subcommand_passed:
             #do stuff with subcommand_passed
-            return await ctx.error(f"Not implemented yet. Try `{ctx.prefix}coin day`.", "")
+            return await ctx.error(
+                f"Not implemented yet. Try `{ctx.prefix}coin day`.", "")
 
     @coin.command(name="list")
     async def coin_list(self, ctx):
         """Provides a list of possible coin names.
         ```{0}coin list```"""
-        await ctx.neutral("""All coins names are in shorthand format.
+        await ctx.neutral(
+            """All coins names are in shorthand format.
 For a full list of coins, the orange text underneath the coin names [here](https://www.cryptocompare.com/coins/list/USD/1) is the key.
-Full name support is incoming.""", rqst_by=False, timestamp=False)
-
+Full name support is incoming.""",
+            rqst_by=False,
+            timestamp=False)
 
     @coin.command(name="day", aliases=["daily"])
-    async def coin_day(self, ctx, coin: UpperConv, currency: UpperConv = "USD", days: IntConv = 30):
+    async def coin_day(self,
+                       ctx,
+                       coin: UpperConv,
+                       currency: UpperConv = "USD",
+                       days: IntConv = 30):
         """Creates a graph upon day information of a currencies.
         ```{0}coin day <coin> [currency] [days]```"""
         async with ctx.typing():
             data = await self.get_data("day", coin, currency, days)
             print('done')
-            graph, embed = self.gen_graph_embed(data, "Days", coin, currency, days)
+            graph, embed = self.gen_graph_embed(data, "Days", coin, currency,
+                                                days)
             await ctx.send(file=graph, embed=embed)
 
     @coin.command(name="hour", aliases=["hourly"])
-    async def coin_hour(self, ctx, coin: UpperConv, currency: UpperConv = "USD", hours: IntConv = 6):
+    async def coin_hour(self,
+                        ctx,
+                        coin: UpperConv,
+                        currency: UpperConv = "USD",
+                        hours: IntConv = 6):
         """Creates a graph upon day information of a currencies.
         ```{0}coin hour <coin> [currency] [hours]```"""
         async with ctx.typing():
             data = await self.get_data("hour", coin, currency, hours)
-            graph, embed = self.gen_graph_embed(data, "Hours", coin, currency, hours)
+            graph, embed = self.gen_graph_embed(data, "Hours", coin, currency,
+                                                hours)
             await ctx.send(file=graph, embed=embed)
 
     @coin.command(name="minute")
-    async def coin_minute(self, ctx, coin: UpperConv, currency: UpperConv = "USD", minutes: IntConv = 60):
+    async def coin_minute(self,
+                          ctx,
+                          coin: UpperConv,
+                          currency: UpperConv = "USD",
+                          minutes: IntConv = 60):
         """Creates a graph upon day information of a currencies.
         ```{0}coin minute <coin> [currency] [minutes]```"""
         async with ctx.typing():
             data = await self.get_data("minute", coin, currency, minutes)
-            graph, embed = self.gen_graph_embed(data, "Minutes", coin, currency, minutes)
+            graph, embed = self.gen_graph_embed(data, "Minutes", coin,
+                                                currency, minutes)
             await ctx.send(file=graph, embed=embed)
 
     @coin_day.error
@@ -151,7 +176,8 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
         error = getattr(error, "original", error)
         if isinstance(error, CoinError):
             if "toSymbol" in str(error):
-                await ctx.error(f"Currency `{error.currency}` does not exist.", "")
+                await ctx.error(f"Currency `{error.currency}` does not exist.",
+                                "")
             elif "symbol" in str(error):
                 await ctx.error(f"Coin `{error.coin}` does not exist.", "")
             elif "limit param" in str(error):
@@ -166,24 +192,31 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
             await ctx.error(error)
 
     @commands.command(hidden=True)
+    async def auweather(self, ctx, *, location):
+        await ctx.send(await self.bot.get_weather())
+
+    @commands.command(hidden=True)
     async def auforecast(self, ctx, *, location):
         # add weekdays, then RADAR images, and current temp etc.
         try:
             loc = self.bot.weather[location.lower()]
         except KeyError:
-            em = discord.Embed(title="Unknown Location",
-                               description=f":cityscape: `{location}` not found.")
-            locations = list(fuzzyfinder(location.lower(), self.bot.weather.keys()))
+            em = discord.Embed(
+                title="Unknown Location",
+                description=f"🏙 `{location}` not found.")
+            locations = list(
+                fuzzyfinder(location.lower(), self.bot.weather.keys()))
             if locations:
-                em.add_field(name="Did you mean?",
-                             value=locations[0])
+                em.add_field(name="Did you mean?", value=locations[0])
             return await ctx.send(embed=em)
 
         place = loc['description']
         em = discord.Embed(title=place)
         em.set_footer(text="Source: Bureau of Meteorology")
-        em.timestamp = datetime.strptime(loc["forecast-period"][0]["start-time-utc"], '%Y-%m-%dT%H:%M:%SZ')
-        em.set_image(url="http://www.bom.gov.au/radar/IDR713.gif?20180318121051")
+        em.timestamp = datetime.strptime(
+            loc["forecast-period"][0]["start-time-utc"], '%Y-%m-%dT%H:%M:%SZ')
+        em.set_image(
+            url="http://www.bom.gov.au/radar/IDR713.gif?20180318121051")
 
         for day in loc['forecast-period']:
             print(day)
@@ -201,7 +234,6 @@ Full name support is incoming.""", rqst_by=False, timestamp=False)
                 value += f"**{ELEMENT_CODES[el['type']]}**{el['$t']}\n"
 
             em.add_field(name=emoji_name + name, value=value)
-
 
         await ctx.send(embed=em)
         #for item in loc['forecast-period']:
