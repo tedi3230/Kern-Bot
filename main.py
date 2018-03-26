@@ -142,6 +142,11 @@ Up to Date: {bot.latest_commit == get_distribution('discord.py').version.split("
     await bot.logs.send(embed=e)
 
 
+@bot.check
+async def bot_user_check(ctx):
+    return not ctx.author.bot
+
+
 @bot.event
 async def on_resumed():
     if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
