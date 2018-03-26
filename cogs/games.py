@@ -89,6 +89,7 @@ class Games:
             except asyncio.TimeoutError:
                 await ctx.error("You took too long to add an emoji.",
                                 "Timeout Error")
+                await msg.delete()
                 break
 
             if str(reaction) == "⏹":
