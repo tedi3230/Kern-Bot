@@ -5,7 +5,6 @@
 # Kern Bot
 
 Kern Bot is a bot by @Modelmat#8218.
-[TODO](https://github.com/Modelmat/Kern-Bot/projects/1)
 
 It has multiple features include YouTube® search, Trivia, Contests (semi-working), dictionaries, and other Miscellaneous functions.
 
