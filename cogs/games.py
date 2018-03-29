@@ -94,27 +94,25 @@ class Games:
 
             if str(reaction) == "⏹":
                 await msg.delete()
-                corrects = {}
-                break
+                return
 
             corrects[answers[int(str(reaction)[0]) - 1]] = html.unescape(
                 result['correct_answer'])
 
             await msg.delete()
 
-        if corrects:
-            des = "You answered:"
-            correct_qs = 0
-            for yours, correct in corrects.items():
-                if yours is correct:
-                    correct_qs += 1
-                    des += f"\n✅ {correct}"
-                else:
-                    des += f"\n❌{yours} ➡ {correct}"
-            des += "\n\nFor a total score of {}/{}".format(
-                correct_qs, len(corrects))
+        des = "You answered:"
+        correct_qs = 0
+        for yours, correct in corrects.items():
+            if yours is correct:
+                correct_qs += 1
+                des += f"\n✅ {correct}"
+            else:
+                des += f"\n❌{yours} ➡ {correct}"
+        des += "\n\nFor a total score of {}/{}".format(correct_qs,
+                                                       len(corrects))
 
-            await ctx.success(des, "Results")
+        await ctx.success(des, "Results")
 
     @commands.cooldown(1, 30, commands.BucketType.channel)
     @commands.command()
