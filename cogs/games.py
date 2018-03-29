@@ -139,7 +139,7 @@ class Games:
             await ctx.command.reset_cooldown(ctx)
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.error(
-                f"🛑 This command can't be used for another {error.retry_after}",
+                f"🛑 This command can't be used for another {round(error.retry_after)}",
                 "Command on Cooldown")
         else:
             await ctx.error(error)
