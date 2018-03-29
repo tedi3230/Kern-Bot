@@ -1,11 +1,8 @@
 import random
-import io
-from os import environ, path
 from asyncio import sleep, TimeoutError as a_TimeoutError
 from collections import OrderedDict
 from datetime import datetime
 
-import aiohttp
 import async_timeout
 from bs4 import BeautifulSoup
 from tabulate import tabulate
@@ -151,7 +148,7 @@ class Internet:
                 name=dem['title'],
                 url=dem['product_url'],
                 icon_url=
-                "http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png?3483196325227810892"
+                "http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png?3483196325227810892",
             )
             e.set_footer(
                 text="Data from Despair, Inc • Requested by: {}".format(
@@ -225,7 +222,7 @@ class Internet:
         if isinstance(error, a_TimeoutError):
             await ctx.error("Obama server is not responding.",
                             "Request Timed Out")
-        else:  #includes bot response error
+        else:  # includes bot response error
             await ctx.error(error)
 
 

@@ -3,16 +3,21 @@ from discord.ext import commands
 
 from custom_classes import KernBot
 
+
 async def manage_server_check(ctx):
     if commands.is_owner():
         return True
     elif commands.has_permissions(manage_server=True):
         return True
-    await ctx.error("You do not have valid permissions to do this. (Manage Server Permission).", "Permissions Error")
+    await ctx.error(
+        "You do not have valid permissions to do this. (Manage Server Permission).",
+        "Permissions Error")
     return False
+
 
 class Settings:
     """Sets and gets the settings for the bot"""
+
     def __init__(self, bot: KernBot):
         self.bot = bot
 
@@ -32,7 +37,8 @@ class Settings:
         """Get the channels used for the contests"""
         channels = await self.bot.database.get_contest_channels(ctx)
         if None not in channels:
-            await ctx.send("​Channels for {}: <#{}> and <#{}>.".format(ctx.guild.name, *channels))
+            await ctx.send("​Channels for {}: <#{}> and <#{}>.".format(
+                ctx.guild.name, *channels))
         else:
             await ctx.error("Channels are not set up", "Configuration Error:")
 
@@ -42,17 +48,24 @@ class Settings:
         if len(channels) == 1:
             channels *= 2
         elif len(channels) > 2:
-            raise TypeError("set channels takes 2 positional arguments but {} were given".format(len(channels)))
-        receive_channel_id, output_channel_id = [channel.id for channel in channels]
-        await self.bot.database.set_contest_channels(ctx, receive_channel_id, output_channel_id)
-        await ctx.success("​Set channels to {} {}".format(*[channel.mention for channel in channels]))
+            raise TypeError(
+                "set channels takes 2 positional arguments but {} were given".
+                format(len(channels)))
+        receive_channel_id, output_channel_id = [
+            channel.id for channel in channels
+        ]
+        await self.bot.database.set_contest_channels(ctx, receive_channel_id,
+                                                     output_channel_id)
+        await ctx.success("​Set channels to {} {}".format(
+            *[channel.mention for channel in channels]))
 
     @_set.command(name="prefix")
     async def set_prefix(self, ctx, *, prefix: str):
         """Set the bot's prefix for this server"""
         prefix = prefix.strip("'").strip('"')
         self.bot.prefixes_cache.pop(ctx.guild.id, None)
-        await ctx.send("Adding prefix `{}`".format(await self.bot.database.add_prefix(ctx, prefix)))
+        await ctx.send("Adding prefix `{}`".format(
+            await self.bot.database.add_prefix(ctx, prefix)))
 
     @_set.command()
     async def remove_prefix(self, ctx, *, prefix: str):
@@ -60,7 +73,8 @@ class Settings:
         try:
             self.bot.prefixes_cache.get(ctx.guild.id, []).remove(prefix)
         except ValueError:
-            return await ctx.error(f"Prefix `{prefix}` is not in the list.", "")
+            return await ctx.error(f"Prefix `{prefix}` is not in the list.",
+                                   "")
 
         await self.bot.database.remove_prefix(ctx, prefix)
         await ctx.success(f"Prefix {prefix} sucessfully removed.")
@@ -68,8 +82,10 @@ class Settings:
     @get.command(name="prefixes")
     async def get_prefixes(self, ctx):
         """Get the bot's prefix for this server"""
-        prefixes = self.bot.prefixes_cache.get(ctx.guild.id, []) + [self.bot.prefix]
-        await ctx.send("Prefixes for {}: ```{}```".format(ctx.guild.name, ", ".join(prefixes)))
+        prefixes = self.bot.prefixes_cache.get(ctx.guild.id,
+                                               []) + [self.bot.prefix]
+        await ctx.send("Prefixes for {}: ```{}```".format(
+            ctx.guild.name, ", ".join(prefixes)))
 
     @_set.command(name="max_rating")
     async def set_max_rating(self, ctx, max_rating: int):
