@@ -244,7 +244,7 @@ class Misc:
     @commands.command()
     async def tree(self, ctx):
         """Provides a directory tree like view of the server's channels"""
-        tree_string = ctx.guild.name + "\n"
+        tree_string = f"For user {ctx.author}\n{ctx.guild}\n"
         for cat_tup in ctx.guild.by_category():
             if cat_tup[0] is not None:
                 tree_string += f"|-- {cat_tup[0].name.upper()}\n"
@@ -257,7 +257,8 @@ class Misc:
                 elif isinstance(channel, discord.VoiceChannel):
                     prefix += "🔊"
                 tree_string += "|  |--{}\n".format(
-                    f"{prefix} {channel.name.lower()}")
+                    f"{prefix} {channel.name.lower()} ({channel.permissions_for(ctx.author).value})"
+                )
 
         await ctx.send(f"```fix\n{tree_string}```")
 
