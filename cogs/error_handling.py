@@ -37,6 +37,11 @@ class Errors:
         elif isinstance(error, self.bot.ResponseError):
             await ctx.error(error, "Response Code > 400:")
 
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.error(
+                f"🛑 This command can't be used for another {round(error.retry_after)}",
+                "Command on Cooldown")
+
         else:
             # add more detailed debug
             await ctx.error(
