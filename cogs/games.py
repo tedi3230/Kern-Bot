@@ -93,6 +93,7 @@ class Games:
                 break
 
             if str(reaction) == "⏹":
+                await ctx.command.reset_cooldown(ctx)
                 await msg.delete()
                 return
 
@@ -113,6 +114,7 @@ class Games:
                                                        len(corrects))
 
         await ctx.success(des, "Results")
+        await ctx.command.reset_cooldown(ctx)
 
     @commands.cooldown(1, 30, commands.BucketType.channel)
     @commands.command()
@@ -134,12 +136,14 @@ class Games:
         error = getattr(error, "original", error)
         if isinstance(error, ValueError):
             await ctx.error(error, "Category Not Found")
+            await ctx.command.reset_cooldown(ctx)
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.error(
                 f"🛑 This command can't be used for another {error.retry_after}",
                 "Command on Cooldown")
         else:
             await ctx.error(error)
+            await ctx.command.reset_cooldown(ctx)
 
 
 def setup(bot: commands.Bot):
