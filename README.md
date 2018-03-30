@@ -10,8 +10,6 @@ It has multiple features include YouTube® search, Trivia, Contests (semi-workin
 
 To add this bot to your server, use [this](https://discordapp.com/oauth2/authorize?client_id=380598116488970261&scope=bot) link.
 
-
-
 To run this by yourself (you MUST provide a reference to this bot somewhere.)
 ```bash
 #Clone this bot
