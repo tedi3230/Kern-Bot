@@ -94,7 +94,7 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentatiom
+# mkdocs documentation
 /site
 
 # mypy
@@ -102,4 +102,5 @@ ENV/
 
 *secret*
 .vscode/
-.idea/
+workspace.xml
+.idea/shelf

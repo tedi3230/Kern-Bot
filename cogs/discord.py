@@ -5,8 +5,7 @@ from typing import Dict
 import discord
 from discord.ext import commands
 
-from custom_classes import CreateDocumentation
-
+from fuzzywuzzy import process
 
 class Discord:
     """Commands related to discord.py library"""
@@ -14,12 +13,6 @@ class Discord:
 
     def __init__(self, bot):
         self.bot = bot
-        self.documentation = {}
-        bot.loop.create_task(self.__ainit__())
-
-    async def __ainit__(self):
-        self.documentation = await CreateDocumentation().generate_documentation()
-        print('Got Docs')
 
     async def __local_check(self, ctx):
         return "discord" in ctx.guild.name or await ctx.bot.is_owner(ctx.author)
@@ -69,11 +62,20 @@ class Discord:
         e.g `discord.User` is User, and `commands.Bot` is Bot
         Note this is not paginated and is currently very spammy"""
         try:
-            obj = self.documentation[obj.lower()]
+            objs = [o[0] for o in process.extract(obj.lower(), self.bot.documentation.keys()) if o[1] > 75]
+            obj = self.bot.documentation[obj]
         except KeyError:
-            return await ctx.error(f"Object `{obj}` does not exist", "No Documentation Found")
-        em = discord.Embed(title=f"*{obj['type']}* {obj['name']}{obj['arguments']}", description=obj["description"],
-                           url=obj["url"])
+            op = ""
+            if objs:
+                op = "\n**Did you mean:**\n\n- {}".format("\n- ".join(
+                     [f"[{o}]({self.bot.documentation[o]['url']}])" for o in objs]
+                ))
+            return await ctx.error(f"Object `{obj}` does not exist{op}", "No Documentation Found")
+        em = discord.Embed()
+        em.description = f"""
+**[*{obj['type']}* {obj['name']}{obj['arguments'].replace('*', '∗')}]({obj["url"]})**
+{obj["description"]}
+        """
         msg = await ctx.send(embed=em)
         # implement pagination
 

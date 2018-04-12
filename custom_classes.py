@@ -62,18 +62,18 @@ def replace_backticks(content, do_it):
 
 
 class KernBot(commands.Bot):
-    def __init__(self, prefix, debug=False, *args, **kwargs):
-        self.prefix = prefix
+    def __init__(self, debug=False, *args, **kwargs):
 
         self.session = None
         self.owner = None
         self.latest_message_time = None
         self.latest_commit = None
+        self.documentation = {}
         self.prefixes_cache = {}
+        self.weather = {}
 
         self.launch_time = datetime.utcnow()
         self.crypto = {"market_price": {}, "coins": []}
-        self.weather = {}
 
         super().__init__(*args, **kwargs)
 
@@ -103,6 +103,7 @@ class KernBot(commands.Bot):
 
         await asyncio.wait([self.get_forecast("anon/gen/fwo/" + link) for link in FORECAST_XML])
         # await asyncio.wait([self.get_weather("anon/gen/fwo/" + link) for link in WEATHER_XML])
+        self.documentation = await CreateDocumentation().generate_documentation()
 
     async def download_xml(self, link):
         xml = BytesIO()
@@ -193,6 +194,9 @@ class KernBot(commands.Bot):
 
 
 class CustomContext(commands.Context):
+    async def paginator(self, num_entries, max_fields=5, base_embed=discord.Embed()):
+        return await Paginator.init(self, num_entries, max_fields, base_embed)
+
     def clean_prefix(self):
         user = self.bot.user
         prefix = self.prefix.replace(user.mention, '@' + user.name)
@@ -303,15 +307,19 @@ class CreateDocumentation:
     def fake(*args):
         return []
 
+    @staticmethod
+    def get_name(el):
+        return el.dt["id"].replace("discord.", "").replace("ext.commands.", "")
+
     def get_code_text(self, type, element):
-        return {el.dt.code.text: self.parse_ps(el) for el in element.dd.findAll("dl", {"class": type})}
+        return {el.dt.code.text.lower(): self.parse_ps(el) for el in element.dd.findAll("dl", {"class": type})}
 
     def parse_class(self, el, url):
         if len(el.dt.text.split("(")) == 1:
             sp = "()"
         else:
             sp = "(" + el.dt.text.split("(")[1].strip("¶")
-        name = el.dt["id"].replace("discord.", "").replace("ext.commands.", "")
+        name = self.get_name(el)
         self.documentation[name.lower()] = {
             "name": name,
             "arguments": sp,
@@ -325,14 +333,10 @@ class CreateDocumentation:
         }
 
     def parse_data(self, el, url):
-        if len(el.dt.text.split("(")) == 1:
-            sp = "()"
-        else:
-            sp = "(" + el.dt.text.split("(")[1].strip("¶")
-        name = el.dt["id"].replace("discord.", "").replace("ext.commands.", "")
+        name = self.get_name(el)
         self.documentation[name.lower()] = {
             "name": name,
-            "arguments": sp,
+            "arguments": "",
             "type": "data",
             "url": str(url) + el.dt.a["href"],
             "description": self.parse_ps(el),
@@ -343,7 +347,7 @@ class CreateDocumentation:
             sp = "()"
         else:
             sp = "(" + el.dt.text.split("(")[1].strip("¶")
-        name = el.dt["id"].replace("discord.", "").replace("ext.commands.", "")
+        name = self.get_name(el)
         self.documentation[name.lower()] = {
             "name": name,
             "arguments": sp,
@@ -358,7 +362,7 @@ class CreateDocumentation:
             sp = "()"
         else:
             sp = "(" + el.dt.text.split("(")[1].strip("¶")
-        name = el.dt["id"].replace("discord.", "").replace("ext.commands.", "")
+        name = self.get_name(el)
         self.documentation[name.lower()] = {
             "name": name,
             "arguments": sp,
@@ -395,8 +399,30 @@ class CreateDocumentation:
         return self.documentation
 
 class Paginator:
-    def __init__(self, num_entries, max_fields=5, base_embed=discord.Embed()):
-        self.base_embed = base_embed
+    @classmethod
+    async def init(cls, ctx: CustomContext, data: dict, max_fields: int=5, base_embed: discord.Embed()=None):
+        """data = {section_name: {title: value}}"""
+        self = Paginator()
+        self.message = None
+        self.ctx = ctx
+        self.embeds = {1: base_embed}
         self.max_fields = 5
-        self.num_entries = num_entries
-        self.num_pages = ceil(num_entries / max_fields)
+        self.num_entries = data
+        self.num_pages = ceil(sum([len(i) for i in data.values()]) / max_fields)
+
+        await self.start_paginating(base_embed)
+
+        return self
+
+    async def start_paginating(self, base_embed):
+        if base_embed:
+            self.message = await self.ctx.send(embed=base_embed)
+        else:
+            #generate all embeds
+            pass
+
+    async def next_page(self):
+        pass
+
+    async def go_to_page(self, number):
+        await self.message.edit(embed=self.embeds[number])
