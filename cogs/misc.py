@@ -43,6 +43,19 @@ class Misc:
         self.bot.remove_command('help')
 
     @commands.command()
+    async def please(self, ctx, action, item="you"):
+        """You can now make this bot do things!"""
+        if len(action) < 3:
+            return await ctx.error(f"{action} is not long enough.", "Invalid Input")
+        elif action[-2] in "aeiou" and action[-1] not in "aeiou" and action[-3] not in "aeiou":
+            action = action[:-1]
+        elif action[-2:] == "ie":
+            action = action[-2:] + "y"
+        elif action[-1] == "e":
+            action = action[:-1]
+        await ctx.send(f"I am {action}ing {item}")
+
+    @commands.command()
     async def codestats(self, ctx):
         """Provides information about the bot's code"""
         line_count = 0
@@ -56,7 +69,6 @@ class Misc:
 **Cogs**: {cog_count}
 **Commands**: {len(ctx.bot.commands)}""",
                           "Code Statistics", timestamp=False)
-
 
     @commands.command()
     async def emoji(self, ctx, *, emoji):
@@ -264,7 +276,7 @@ class Misc:
         for cmd in self.bot.commands:
             if cmd.cog_name is None and not cmd.hidden and cmd.can_run(ctx):
                 cogs_dict['No Category'] = cogs_dict.get(
-                    'No Category', []) + [[cmd.name] + cmd.aliases]
+                    'No Category', []) + [cmd.name]
         cogs_dict = OrderedDict(
             [(key, val) for key, val in cogs_dict.items() if val])
         return cogs_dict
