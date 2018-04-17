@@ -6,7 +6,7 @@ import async_timeout
 import discord
 from discord.ext import commands
 
-from custom_classes import KernBot
+import custom_classes as cc
 
 
 def rgb(r, g, b):
@@ -20,7 +20,8 @@ EMOJIS = {1: '1\u20e3', 2: '2\u20e3', 3: '3\u20e3', 4: '4\u20e3'}
 
 class Games:
     """Games"""
-    def __init__(self, bot: KernBot):
+
+    def __init__(self, bot: cc.KernBot):
         self.bot = bot
 
     async def add_reactions(self, message, number):
@@ -40,7 +41,7 @@ class Games:
 
         with async_timeout.timeout(10):
             async with self.bot.session.get(url) as resp:
-                raw_results =  (await resp.json())['results']
+                raw_results = (await resp.json())['results']
 
         for r in raw_results:
             d = {}
@@ -57,8 +58,8 @@ class Games:
         return results
 
     @commands.cooldown(1, 30, commands.BucketType.channel)
-    @commands.group(invoke_without_command=True)
-    async def trivia(self, ctx: commands.Context, *, category: str = None):
+    @cc.group(invoke_without_command=True)
+    async def trivia(self, ctx: cc.KernContext, *, category: str = None):
         """Provides a trivia functionality. 5 questions. Can pass a category"""
         results = await self.get_trivia_results(category)
         corrects = []
@@ -95,7 +96,7 @@ class Games:
             if str(reaction) == "⏹":
                 return ctx.command.reset_cooldown(ctx)
 
-            your_answer = answers[int(str(reaction)[0]) -1]
+            your_answer = answers[int(str(reaction)[0]) - 1]
             corrects.append((your_answer, result['correct_answer']))
 
         if not corrects:
@@ -105,7 +106,7 @@ class Games:
         correct_qs = 0
         for answer in corrects:
             if answer[0] == answer[1]:
-                correct_qs +=1
+                correct_qs += 1
                 des += f"\n✅ {answer[0]}"
             else:
                 des += f"\n❌{answer[0]} ➡ {answer[1]}"
@@ -129,19 +130,7 @@ class Games:
         if isinstance(error, ValueError):
             await ctx.error(error, "Category Not Found")
             ctx.command.reset_cooldown(ctx)
-        elif isinstance(error, commands.CommandOnCooldown):
-            await ctx.error(f"🛑 This command can't be used for another {round(error.retry_after)}",
-                            "Command on Cooldown")
-        elif isinstance(error, commands.DisabledCommand):
-            if self.bot.is_owner(ctx.author):
-                await ctx.reinvoke()
-            else:
-                await ctx.error(f"The trivia command has been disabled because of some internal issues.\nNo worries, it will be fixed soon",
-                                "Command Disabled")
-        else:
-            await ctx.error(error)
-            ctx.command.reset_cooldown(ctx)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: cc.KernBot):
     bot.add_cog(Games(bot))

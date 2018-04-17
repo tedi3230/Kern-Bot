@@ -1,5 +1,5 @@
 import random
-from asyncio import sleep, TimeoutError as a_TimeoutError
+import asyncio
 from collections import OrderedDict
 from datetime import datetime
 from random import sample
@@ -62,7 +62,7 @@ class Internet:
 
         return vids[:result_length]
 
-    @commands.group(invoke_without_command=True)
+    @cc.group(invoke_without_command=True)
     async def youtube(self, ctx, *, keyword: str):
         """Searches YouTube for a video"""
         url = f"https://www.youtube.com/results?search_query={keyword}&sp=EgIQAQ%253D%253D"
@@ -92,7 +92,7 @@ class Internet:
         """Get a playlist's 1st 5 videos"""
         pass
 
-    @commands.command()
+    @cc.command()
     async def demotivate(self, ctx, *, search_term=""):
         """Provides an embed with a demotivating quote & poster.
         Without a search_term specified a random result is returned."""
@@ -122,7 +122,7 @@ class Internet:
             await ctx.send(embed=e)
 
     @commands.cooldown(1, 10, commands.BucketType.user)
-    @commands.command(hidden=True)
+    @cc.command(hidden=True)
     async def hack(self, ctx, *, url: cc.Url):
         """Starts a fake hacking instance on a specified URL."""
         loading, th, hu, te, on = self.bot.get_emojis(395834326450831370, 396890900783038499, 396890900158218242,
@@ -132,7 +132,7 @@ class Internet:
         msg = await ctx.send(f"Looking for open ports in <{url}>")
         content = msg.content
         await msg.edit(content=f"{content}\nPort: {th}{hu}{te}{on}{loading}")
-        await sleep(10)
+        await asyncio.sleep(10)
 
         if not open_ports:
             return await msg.edit(content=f":x: Port scan complete. No insecure ports found.")
@@ -154,7 +154,7 @@ class Internet:
 
         key = url.query['speech_key']
         link = f"http://talkobamato.me/synth/output/{key}/obama.mp4"
-        await sleep(text//5)
+        await asyncio.sleep(text//5)
         with async_timeout.timeout(10):
             async with self.bot.session.get(link) as resp:
                 if resp.status >= 400:
@@ -162,7 +162,7 @@ class Internet:
         return link
 
     @commands.cooldown(1, 10, commands.BucketType.user)
-    @commands.command()
+    @cc.command()
     async def obama(self, ctx, *, text: str):
         """Makes obama speak."""
         if len(text) - len(ctx.prefix + "obama") > 280:
@@ -175,16 +175,14 @@ class Internet:
     @obama.error
     async def obama_error_handler(self, ctx, error):
         error = getattr(error, "original", error)
-        if isinstance(error, a_TimeoutError):
+        if isinstance(error, asyncio.TimeoutError):
             await ctx.error("http://talkobamato.me/ is not responding.", "Request Timed Out")
         elif isinstance(error, discord.HTTPException):
             await ctx.error(error.text, error.response.reason, footer="Don't worry. We just propogate this error from the server.")
             ctx.bot.obama_is_up = (datetime.utcnow(), False)
-        else:
-            await ctx.error(error)
 
     @commands.cooldown(1, 5, commands.BucketType.channel)
-    @commands.command(aliases=["translate_mixup", "googletrans"])
+    @cc.command(aliases=["translate_mixup", "googletrans"])
     async def translate(self, ctx, *, text):
         """Translates text to 10 random languages then back to English."""
         async with ctx.typing():
