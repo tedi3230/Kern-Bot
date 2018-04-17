@@ -1,18 +1,17 @@
 import random
 from asyncio import sleep, TimeoutError as a_TimeoutError
 from collections import OrderedDict
-from datetime import datetime, timedelta
+from datetime import datetime
 from random import sample
 
-import async_timeout
-from bs4 import BeautifulSoup
-from tabulate import tabulate
 import aiogoogletrans
-
-from fuzzywuzzy import process
-
+import async_timeout
 import discord
+from bs4 import BeautifulSoup
 from discord.ext import commands
+from fuzzywuzzy import process
+from tabulate import tabulate
+
 import custom_classes as cc
 
 PROTOCOLS = ['ssh', 'smb', 'smtp', 'ftp', 'imap', 'http', 'https', 'pop', 'htcpcp', 'telnet', 'tcp', 'ipoac']
@@ -28,14 +27,6 @@ def gen_data():
     open_data = [data[0:3] for data in table_data if data[2]]
     open_ports = ", ".join([str(data[0]) for data in open_data if data[2] == "true"])
     return table_data, table, open_ports, open_data
-
-async def is_obama_up(ctx):
-    if ctx.bot.obama_is_up[0] + timedelta(minutes=10) > datetime.utcnow():
-        with async_timeout.timeout(5):
-            async with ctx.bot.session.post(
-                    url="http://talkobamato.me/synthesize.py", data={"input_text": "Is talkobamato.me up?"}) as resp:
-                ctx.bot.obama_is_up = (datetime.utcnow(), resp.status < 400)
-    return ctx.bot.obama_is_up[1]
 
 
 class Internet:
@@ -101,38 +92,19 @@ class Internet:
         """Get a playlist's 1st 5 videos"""
         pass
 
-    async def get_demotivators(self):
-        demotivators = {}
-        url = "https://despair.com/collections/posters"
-        with async_timeout.timeout(10):
-            async with self.bot.session.get(url) as resp:
-                soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
-
-        for div_el in soup.find_all('div', {'class': 'column'}):
-            a_el = div_el.a
-            if a_el and a_el.div:
-                title = a_el['title']
-                img_url = "http:" + a_el.div.img['data-src']
-                product_url = "http://despair.com" + a_el['href']
-                quote = a_el.find('span', {'class': 'price'}).p.string
-                demotivators[title.lower()] = {
-                    'title': title,
-                    'img_url': img_url,
-                    'quote': quote,
-                    'product_url': product_url
-                }
-
-        return demotivators
-
     @commands.command()
-    async def demotivate(self, ctx, *, search_term):
-        """Provides an embed with a demotivating quote & poster"""
+    async def demotivate(self, ctx, *, search_term=""):
+        """Provides an embed with a demotivating quote & poster.
+        Without a search_term specified a random result is returned."""
         async with ctx.typing():
             search_term = search_term.lower()
-            demotivators = await self.get_demotivators()
-            dem = demotivators.get(search_term)
+            demotivators = self.bot.demotivators
+            if search_term:
+                dem = demotivators.get(search_term)
+            else:
+                dem = sample(list(demotivators.values()), 1)[0]
             if dem is None:
-                fuzzy = process.extractOne(search_term, demotivators.keys())
+                fuzzy = process.extractOne(search_term, demotivators.keys()) or (0, 0)
                 if fuzzy[1] < 75:
                     return await ctx.error("No demotivator found.")
                 dem = demotivators.get(fuzzy[0])
@@ -140,7 +112,7 @@ class Internet:
             e.set_author(
                 name=dem['title'],
                 url=dem['product_url'],
-                icon_url="http://cdn.shopify.com/s/files/1/0535/6917/t/29/assets/favicon.png",
+                icon_url="https://i.imgur.com/SAQRxIc.png",
             )
             e.set_footer(
                 text="Data from Despair, Inc",
@@ -182,13 +154,13 @@ class Internet:
 
         key = url.query['speech_key']
         link = f"http://talkobamato.me/synth/output/{key}/obama.mp4"
+        await sleep(text//5)
         with async_timeout.timeout(10):
             async with self.bot.session.get(link) as resp:
                 if resp.status >= 400:
                     raise discord.HTTPException(resp, f"{resp.url} returned error code {resp.status}")
         return link
 
-    @commands.check(is_obama_up)
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.command()
     async def obama(self, ctx, *, text: str):
@@ -208,8 +180,6 @@ class Internet:
         elif isinstance(error, discord.HTTPException):
             await ctx.error(error.text, error.response.reason, footer="Don't worry. We just propogate this error from the server.")
             ctx.bot.obama_is_up = (datetime.utcnow(), False)
-        elif isinstance(error, commands.CheckFailure):
-            await ctx.error("http://talkobamato.me/ is currently down.", "Command Disabled")
         else:
             await ctx.error(error)
 
@@ -239,7 +209,7 @@ class Internet:
 ```{}```
 **End result**: 
 {}""".format(ctx.author, "\n".join([aiogoogletrans.LANGUAGES[l] for l in langs]), result.text))
-        ctx.command.reset_cooldown()
+        ctx.command.reset_cooldown(ctx)
 
 
 def setup(bot):
