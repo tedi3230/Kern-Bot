@@ -1,12 +1,17 @@
+from datetime import datetime
+
 import discord
 from discord.ext import commands
 
-from datetime import datetime
-
+from custom_classes import Ast
 from .paginator import Paginator
 
 
 class KernGroup(commands.Group):
+    def __init__(self, **attrs):
+        self.handled_errors = []
+        super().__init__(**attrs)
+
     async def can_run(self, ctx):
         if not self.enabled:
             return False
@@ -20,12 +25,24 @@ class KernGroup(commands.Group):
 
         return decorator
 
+    def error(self, coro):
+        self.handled_errors = Ast(coro).errors
+        return super().error(coro)
+
 
 class KernCommand(commands.Command):
+    def __init__(self, name, callback, **kwargs):
+        self.handled_errors = []
+        super().__init__(name, callback, **kwargs)
+
     async def can_run(self, ctx):
         if not self.enabled:
             return False
         return await super().can_run(ctx)
+
+    def error(self, coro):
+        self.handled_errors = Ast(coro).errors
+        return super().error(coro)
 
 
 def command(name=None, cls=KernCommand, **attrs):
@@ -67,8 +84,8 @@ class KernContext(commands.Context):
             e.set_footer(icon_url=self.message.author.avatar_url)
         if footer:
             e.set_footer(text=footer)
-        if timestamp:
-            e.timestamp = datetime.utcnow()
+        if isinstance(timestamp, datetime):
+            e.timestamp = timestamp
         if channel is None:
             return await self.send(embed=e, **kwargs)
         return await channel.send(embed=e, **kwargs)
@@ -80,13 +97,13 @@ class KernContext(commands.Context):
             error = str(error)
         return await self.__embed(title, error, discord.Colour.red(), False, False, channel, footer, **kwargs)
 
-    async def success(self, success, title="Success:", channel: discord.TextChannel = None, rqst_by=True, timestamp=True, footer=None, **kwargs):
+    async def success(self, success, title="Success:", channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
         return await self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp, channel, footer, **kwargs)
 
-    async def neutral(self, text, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, footer=None, **kwargs):
+    async def neutral(self, text, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
         return await self.__embed(title, text, 0x36393E, rqst_by, timestamp, channel, footer, **kwargs)
 
-    async def warning(self, warning, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=True, footer=None, **kwargs):
+    async def warning(self, warning, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
         return await self.__embed(title, warning, discord.Colour.orange(), rqst_by, timestamp, channel, footer, **kwargs)
 
     async def upload(self, content):
@@ -95,6 +112,7 @@ class KernContext(commands.Context):
         return link
 
     async def send(self, content: str = None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None):
+        content = str(content) if content is not None else None
         if content and len(content) > 1990:
             content = "**Output too long**:" + await self.upload(content)
 

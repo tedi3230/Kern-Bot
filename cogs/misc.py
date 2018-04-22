@@ -33,6 +33,12 @@ COUNTRY_CODES = {
     "US": "United States of America"
 }
 
+INDEXES = {
+    "1": "ˢᵗ",
+    "2": "ⁿᵈ",
+    "3": "ʳᵈ",
+}
+
 
 class Misc:
     """Miscellaneous functions"""
@@ -42,8 +48,30 @@ class Misc:
         self.process = psutil.Process()
         self.bot.remove_command('help')
 
+    @cc.command(aliases=["whowerefirst"])
+    async def whowasfirst(self, ctx, number: int=1):
+        """Provides the first x number of members in this guild
+        Requires a maximum of ten members"""
+        if number > 10 or number == 0:
+            return await ctx.error(f"{number} is too big. Try less than 11.", "Bad Argument")
+        mems = sorted(ctx.guild.members, key=lambda x: x.joined_at)[:number]
+        oup = ""
+        for i, mem in enumerate(mems):
+            oup += f"{mem.mention} was {i+1}{INDEXES.get(str(i + 1), 'ᵗʰ')}\n"
+        await ctx.neutral(oup, "First Member(s)", timestamp=ctx.guild.created_at, footer="Guild created at")
+
     @cc.command()
-    async def please(self, ctx, action, item="you"):
+    async def whatwas(self, ctx, member: discord.Member=None):
+        """Provides the index of a member in joining this guild"""
+        if not member:
+            member = ctx.author
+        mems = sorted(ctx.guild.members, key=lambda x: x.joined_at)
+        index = mems.index(member) + 1
+        end = INDEXES.get(str(index)[-1], "ᵗʰ")
+        await ctx.neutral(f"{member.mention} was {index}{end}")
+
+    @cc.command()
+    async def please(self, ctx, action: commands.clean_content, item: commands.clean_content, *, person: commands.clean_content="you"):
         """You can now make this bot do things!"""
         if len(action) < 3:
             return await ctx.error(f"{action} is not long enough.", "Invalid Input")
@@ -53,7 +81,7 @@ class Misc:
             action = action[-2:] + "y"
         elif action[-1] == "e":
             action = action[:-1]
-        await ctx.send(f"I am {action}ing {item}")
+        await ctx.send(f"I am {action}ing {item} {person}")
 
     @cc.command()
     async def codestats(self, ctx):
