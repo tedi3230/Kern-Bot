@@ -13,32 +13,31 @@ import custom_classes as cc
 
 
 # update: pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]
-def server_prefix(bot_prefixes: list):
-    async def prefix(bots: cc.KernBot, message: discord.Message):
+def server_prefix(default_prefixes: list):
+    async def get_prefix(bots: cc.KernBot, message: discord.Message):
         if not message.guild:
-            return commands.when_mentioned_or(*bot_prefixes)(bots, message)
+            return commands.when_mentioned_or(*default_prefixes)(bots, message)
 
         if bots.prefixes_cache.get(message.guild.id) is None:
             guild_prefixes = await bots.database.get_prefixes(message)
             bots.prefixes_cache[message.guild.id] = list(set(guild_prefixes))
 
-        prefixes = []
+        guild_prefixes = []
+        for prefix in sorted([*default_prefixes, *bots.prefixes_cache[message.guild.id]], key=lambda x: len(x)):
+            guild_prefixes.append(prefix + " ")
+            guild_prefixes.append(prefix.upper() + "")
+            guild_prefixes.append(prefix)
+            guild_prefixes.append(prefix.upper())
 
-        for prefix in sorted([*bot_prefixes, *bots.prefixes_cache[message.guild.id]], key=len):
-            prefixes.append(prefix + " ")
-            prefixes.append(prefix.upper() + "")
-            prefixes.append(prefix)
-            prefixes.append(prefix.upper())
+        return commands.when_mentioned_or(*guild_prefixes)(bots, message)
 
-        return commands.when_mentioned_or(*prefixes)(bots, message)
-
-    return prefix
+    return get_prefix
 
 
 try:
     token = environ["AUTH_KEY"]
     name = environ["BOT_NAME"]
-    bot_prefixes = environ["BOT_PREFIX"].split(", ")
+    prefixes = environ["BOT_PREFIX"].split(", ")
     dbl_token = environ["DBL_TOKEN"]
     testing = False
 except KeyError:
@@ -47,13 +46,21 @@ except KeyError:
         lines = [l.strip() for l in file]
         token = lines[0]
         name = lines[3]
-        bot_prefixes = lines[4].split(", ")
+        prefixes = lines[4].split(", ")
         dbl_token = lines[5]
 
+description = f"""Kern is a discord bot by Modelmat#8218.
+
+Its original concept was for a contests bot, but this has expanded to incorporate many other functions as the owner sees fit.
+
+It is in active development and as such any errors found can be reported to the owner in the support server which is linked below.
+
+"""
+
 bot = cc.KernBot(
-    command_prefix=server_prefix(bot_prefixes),
+    command_prefix=server_prefix(prefixes),
     case_insensitive=True,
-    description="Multiple functions, including contests, definitions, and more.",
+    description=description,
     activity=discord.Game(name="Start-up 101"),
     testing=testing)
 
@@ -91,6 +98,7 @@ async def on_guild_remove(guild: discord.Guild):
 
 @bot.event
 async def on_ready():
+    bot.invite_url = discord.utils.oauth_url(bot.user.id, permissions=discord.Permissions(270336))
     await bot.change_presence(status=discord.Status.online)
     bot.owner = (await bot.application_info()).owner
     if bot.user.name != name:
