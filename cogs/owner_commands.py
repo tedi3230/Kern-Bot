@@ -140,16 +140,10 @@ class Owner:
             await ctx.del_reaction(loading_emoji)
             if ret is None:
                 if value:
-                    await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}```")
+                    await ctx.send(f"**Input:**\n```py\n{body}\n```\n**Returns:**\n```py\n{value}\n```")
             else:
                 self._last_result = ret
-                await ctx.send(f"**Input:**\n```py\n{body}```\n**Returns:**```py\n{value}{ret}```")
-
-            try:
-                await ctx.message.delete()
-            except discord.HTTPException:
-                pass
-
+                await ctx.send(f"**Input:**\n```py\n{body}\n```\n**Returns:**\n```py\n{value}{ret}\n```")
 
 def setup(bot):
     bot.add_cog(Owner(bot))
