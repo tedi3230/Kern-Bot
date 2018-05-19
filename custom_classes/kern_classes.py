@@ -12,6 +12,10 @@ class KernGroup(commands.Group):
         self.handled_errors = []
         super().__init__(**attrs)
 
+    @property
+    def long_doc(self):
+        return f"{self.help or ''}\n```{self.signature}```"
+
     async def can_run(self, ctx):
         if not self.enabled:
             return False
@@ -35,6 +39,10 @@ class KernCommand(commands.Command):
         self.handled_errors = []
         super().__init__(name, callback, **kwargs)
 
+    @property
+    def long_doc(self):
+        return f"{self.help or ''}\n```{self.signature}```"
+
     async def can_run(self, ctx):
         if not self.enabled:
             return False
@@ -54,8 +62,8 @@ def group(name=None, **attrs):
 
 
 class KernContext(commands.Context):
-    async def paginator(self, num_entries, max_fields=5, base_embed=discord.Embed()):
-        return await Paginator.init(self, num_entries, max_fields, base_embed)
+    async def paginate(self, *args, **kwargs):
+        return Paginator(self, *args, **kwargs)
 
     def clean_prefix(self):
         user = self.bot.user
@@ -97,14 +105,14 @@ class KernContext(commands.Context):
             error = str(error)
         return await self.__embed(title, error, discord.Colour.red(), False, False, channel, footer, **kwargs)
 
-    async def success(self, success, title="Success:", channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
-        return await self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp, channel, footer, **kwargs)
+    async def success(self, success, title="Success:", channel: discord.TextChannel = None, rqst_by=True, timestamp=None, footer=None, **kwargs):
+        return await self.__embed(title, success, discord.Colour.green(), rqst_by, timestamp or datetime.utcnow(), channel, footer, **kwargs)
 
-    async def neutral(self, text, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
-        return await self.__embed(title, text, 0x36393E, rqst_by, timestamp, channel, footer, **kwargs)
+    async def neutral(self, text, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=None, footer=None, **kwargs):
+        return await self.__embed(title, text, 0x36393E, rqst_by, timestamp or datetime.utcnow(), channel, footer, **kwargs)
 
-    async def warning(self, warning, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=datetime.utcnow(), footer=None, **kwargs):
-        return await self.__embed(title, warning, discord.Colour.orange(), rqst_by, timestamp, channel, footer, **kwargs)
+    async def warning(self, warning, title=None, channel: discord.TextChannel = None, rqst_by=True, timestamp=None, footer=None, **kwargs):
+        return await self.__embed(title, warning, discord.Colour.orange(), rqst_by, timestamp or datetime.utcnow(), channel, footer, **kwargs)
 
     async def upload(self, content):
         json = {"files": {"output.md": {"content": content}}}
