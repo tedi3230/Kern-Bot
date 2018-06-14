@@ -20,23 +20,32 @@ class Errors:
         self.bot = bot
 
     async def on_command_error(self, ctx: cc.KernContext, error):
-        # This prevents any errors already handled locally being run here.
         error = getattr(error, "original", error)
 
-        ignored = [commands.NotOwner, commands.CheckFailure, commands.CommandNotFound, discord.Forbidden]
-        ignored += [eval(e) for e in getattr(ctx.command, "handled_errors", []) + getattr(ctx.cog, "handled_errors", [])]
+        ignored = (commands.NotOwner, commands.CommandNotFound, discord.Forbidden)
 
         if isinstance(error, tuple(ignored)):
             return
 
+        # This ignores any errors that are being handled at command or cog level
+        command_ignored = ctx.command.handled_errors + ctx.cog.handled_errors
+
+        if isinstance(error, tuple(command_ignored)):
+            return
+
+        elif isinstance(error, commands.CheckFailure):
+            if await self.bot.is_owner(ctx.author):
+                await ctx.reinvoke()
+
         elif isinstance(error, commands.DisabledCommand):
-            if self.bot.is_owner(ctx.author):
+            if await self.bot.is_owner(ctx.author):
                 await ctx.reinvoke()
             else:
                 await ctx.error(f"`{ctx.command}` is disabled.", "Command Disabled")
 
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.error(f"Argument `{error.param}` is missing!", "Missing Required Argument(s)")
+            await ctx.error(f"Argument `{str(error.param).split(':')[0]}` is missing!",
+                            "Missing Required Argument(s)")
 
         elif isinstance(error, commands.BadArgument):
             await ctx.error(str(error), "Bad Argument")
@@ -45,7 +54,7 @@ class Errors:
             await ctx.error("The internet is gone?!?!?!?", "Timeout Error")
 
         elif isinstance(error, commands.CommandOnCooldown):
-            if self.bot.is_owner(ctx.author):
+            if await self.bot.is_owner(ctx.author):
                 await ctx.reinvoke()
             else:
                 await ctx.error(f"🛑 This command can't be used for another {round(error.retry_after)} seconds",

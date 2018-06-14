@@ -14,6 +14,7 @@ import aiohttp
 import async_timeout
 from bs4 import BeautifulSoup
 import xmljson
+from collections import defaultdict
 
 import discord
 from discord.ext import commands
@@ -21,6 +22,7 @@ from discord.ext import commands
 from . import database as db
 from .documentation import CreateDocumentation
 from .data_classes import *
+import custom_classes as cc
 
 XML_PARSER = xmljson.GData(dict_type=dict)
 
@@ -37,9 +39,9 @@ class KernBot(commands.Bot):
         self.invite_url = None
         self.documentation = {}
         self.prefixes_cache = {}
+        self.contest_channels = defaultdict(list)
         self.weather = {}
         self.demotivators = {}
-        self.tasks = []
         self.trivia_categories = {}
 
         self.launch_time = datetime.utcnow()
@@ -52,13 +54,12 @@ class KernBot(commands.Bot):
         self.exts = sorted(
             [extension for extension in [f.replace('.py', '') for f in listdir("cogs") if isfile(join("cogs", f))]])
 
-        self.add_task(self.init())
-        self.add_task(self.status_changer())
-        self.add_task(self.get_demotivators())
-        self.add_task(self.get_trivia_categories())
+        self.loop.create_task(cc.run_tasks(self.init(),
+                                           self.get_demotivators(),
+                                           self.get_trivia_categories()))
 
         try:
-            self.loop.add_signal_handler(SIGTERM, lambda: asyncio.ensure_future(self.suicide("SIGTERM Shutdown")))
+            self.loop.add_signal_handler(SIGTERM, lambda: asyncio.ensure_future(self.close("SIGTERM Shutdown")))
         except NotImplementedError:
             pass
 
@@ -67,6 +68,25 @@ class KernBot(commands.Bot):
         self.loop.set_debug(debug)
 
         self.load_extensions()
+
+    async def init(self):
+        self.session = aiohttp.ClientSession()
+
+        await self.wait_until_ready()
+        activity = discord.Activity(name="for prefix k; in {0} servers".format(len(self.guilds)),
+                                    type=discord.ActivityType.watching)
+        await self.change_presence(activity=activity)
+
+        try:
+            with async_timeout.timeout(30):
+                async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
+                    self.crypto['coins'] = {k.upper(): v for k, v in (await resp.json())['Data'].items()}
+        except asyncio.TimeoutError:
+            pass
+
+        await asyncio.wait([self.get_forecast("anon/gen/fwo/" + link) for link in FORECAST_XML])
+        # await asyncio.wait([self.get_weather("anon/gen/fwo/" + link) for link in WEATHER_XML])
+        self.documentation = await CreateDocumentation().generate_documentation()
 
     def load_extensions(self):
         for extension in self.exts:
@@ -77,33 +97,34 @@ class KernBot(commands.Bot):
                 traceback.print_exc()
                 quit()
 
-    def add_task(self, function):
-        self.tasks.append(self.loop.create_task(function))
+    def add_cog(self, cog):
+        error_coro = getattr(cog, f"_{cog.__class__.__name__}__error", None)
+        if error_coro:
+            cog.handled_errors = cc.Ast(error_coro).errors
+        else:
+            cog.handled_errors = []
 
-    async def init(self):
-        self.session = aiohttp.ClientSession()
-        with async_timeout.timeout(30):
-            async with self.session.get("https://min-api.cryptocompare.com/data/all/coinlist") as resp:
-                self.crypto['coins'] = {k.upper(): v for k, v in (await resp.json())['Data'].items()}
-
-        await asyncio.wait([self.get_forecast("anon/gen/fwo/" + link) for link in FORECAST_XML])
-        # await asyncio.wait([self.get_weather("anon/gen/fwo/" + link) for link in WEATHER_XML])
-        self.documentation = await CreateDocumentation().generate_documentation()
+        super().add_cog(cog)
 
     async def get_trivia_categories(self):
-        with async_timeout.timeout(10):
-            async with self.session.get("https://opentdb.com/api_category.php") as resp:
-                cats = (await resp.json())['trivia_categories']
+        try:
+            with async_timeout.timeout(10):
+                async with self.session.get("https://opentdb.com/api_category.php") as resp:
+                    cats = (await resp.json())['trivia_categories']
+        except asyncio.TimeoutError:
+            return
 
-        categories = {}
         for cat in cats:
             self.trivia_categories[cat['name'].lower()] = cat['id']
 
     async def get_demotivators(self):
         url = "https://despair.com/collections/posters"
-        with async_timeout.timeout(10):
-            async with self.session.get(url) as resp:
-                soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+        try:
+            with async_timeout.timeout(10):
+                async with self.session.get(url) as resp:
+                    soup = BeautifulSoup((await resp.read()).decode('utf-8'), "lxml")
+        except asyncio.TimeoutError:
+            return
 
         for div_el in soup.find_all('div', {'class': 'column'}):
             a_el = div_el.a
@@ -150,16 +171,14 @@ class KernBot(commands.Bot):
 
     #     return data
 
-    async def suicide(self, message="Shutting Down"):
+    async def close(self, message="Shutting Down"):
         print(f"\n{message}\n")
         em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}", colour=discord.Colour.red())
         em.timestamp = datetime.utcnow()
         await self.logs.send(embed=em)
         await self.database.pool.close()
-        self.session.close()
-        await self.close()
-        [task.cancel() for task in self.tasks]
-        sys.exit(0)
+        await self.session.close()
+        await super().close()
 
     async def wait_for_any(self, events, checks, timeout=None):
         if not isinstance(checks, list):
@@ -171,20 +190,6 @@ class KernBot(commands.Bot):
         done, _ = await asyncio.wait(to_wait, timeout=timeout, return_when=FIRST_COMPLETED)
         return done.pop().result()
 
-    async def status_changer(self):
-        await self.wait_until_ready()
-        activities = {
-            "for new contests."       : discord.ActivityType.watching,
-            "{len(0.guilds)} servers.": discord.ActivityType.watching,
-            "bot commands"            : discord.ActivityType.listening,
-            "prefix {0.prefix}"       : discord.ActivityType.listening,
-        }
-        while not self.is_closed():
-            message, activity_type = choice(list(activities.items()))
-            activity = discord.Activity(name=message.format(self), type=activity_type)
-            await self.change_presence(activity=activity)
-            await asyncio.sleep(60)
-
     def get_emojis(self, *ids):
         emojis = []
         for e_id in ids:
@@ -195,10 +200,15 @@ class KernBot(commands.Bot):
         url = f"https://discordbots.org/api/bots/{self.user.id}/stats"
         headers = {"Authorization": dbl_token}
         payload = {"server_count": len(self.guilds)}
-        with async_timeout.timeout(10):
-            await self.session.post(url, data=payload, headers=headers)
+        try:
+            with async_timeout.timeout(10):
+                await self.session.post(url, data=payload, headers=headers)
+        except asyncio.TimeoutError:
+            pass
 
     async def pull_remotes(self):
-        with async_timeout.timeout(20):
-            async with self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63"):
-                pass
+        try:
+            with async_timeout.timeout(20):
+                await self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
+        except asyncio.TimeoutError:
+            pass

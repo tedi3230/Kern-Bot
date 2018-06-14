@@ -11,6 +11,12 @@ from discord.ext import commands
 
 import custom_classes as cc
 
+ANNOUNCEMENT_FOOTER = "\n\n*This is an automated message sent by the bot's " \
+                      "owner to inform you of a change in this bot which " \
+                      "might cause issues in the operation of this bot in " \
+                      "your server. Please feel free to send this " \
+                      "announcement to the rest of your server*"
+
 
 class Owner:
     """Owner only commands"""
@@ -24,40 +30,17 @@ class Owner:
         return await self.bot.is_owner(ctx.author)
 
     @cc.command(hidden=True)
-    async def update_lib(self, ctx):
-        await self.bot.pull_remotes()
-        await ctx.send("""Instigated Pull Request. To update;
-```pip install -U git+https://github.com/Modelmat/discord.py@rewrite#egg=discord.py[voice]```""")
-
-    @cc.group(hidden=True)
-    async def vps(self, ctx):
-        """Commands for controlling the VPS"""
-        pass
-
-    @vps.command()
-    async def stop(self, ctx):
-        """Stops the VPS Server"""
-        system('heroku ps:scale worker=0 --app discord-kern-bot')
-        await ctx.success("Stopping VPS instance")
-
-    @vps.command()
-    async def start(self, ctx):
-        """Starts the VPS server"""
-        system('heroku ps:scale worker=1 --app discord-kern-bot')
-        await ctx.success("Starting VPS instance")
-
-    @cc.command(hidden=True, aliases=['restart'])
-    async def rebirth(self, ctx):
+    async def restart(self, ctx):
         """Owner of this bot only command; Restart the bot"""
         await ctx.success("", f"Restarting @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
-        await self.bot.suicide("Restarting")
+        await self.bot.close("Restarting")
         execl(executable, 'python "' + "".join(argv) + '"')
 
-    @cc.command(hidden=True, aliases=['shutdown', 'die'])
-    async def suicide(self, ctx):
+    @cc.command(hidden=True, aliases=["die"])
+    async def shutdown(self, ctx):
         """Owner of this bot only command; Shutdown the bot"""
         await ctx.success("", f"Shutting Down @ {datetime.utcnow().strftime('%H:%M:%S')}", rqst_by=False)
-        await self.bot.suicide()
+        await self.bot.close()
 
     @cc.command(hidden=True)
     async def leave(self, ctx):
@@ -66,18 +49,17 @@ class Owner:
         await ctx.guild.leave()
 
     @cc.command(hidden=True)
-    async def servers(self, ctx):
-        """Sends the servers this bot is in"""
-        await ctx.send("My servers:```ini\n[{}]```".format(", ".join([guild.name for guild in self.bot.guilds])))
-
-    @cc.command(hidden=True)
     async def announce(self, ctx, *, message):
-        """Announces a message to everyone"""
+        """Sends a message to all server owners"""
         for guild in self.bot.guilds:
-            for channel in guild.text_channels:
-                if channel.permissions_for(guild.me).send_messages:
-                    await channel.send(message)
-                    break
+            if "discord" in guild.name.lower():
+                continue
+
+            try:
+                await guild.owner.send(message + ANNOUNCEMENT_FOOTER)
+            except discord.Forbidden:
+                pass
+
         await ctx.send("Success.")
 
     @cc.command(hidden=True, name="eval", aliases=['exec'])

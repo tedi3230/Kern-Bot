@@ -1,3 +1,4 @@
+import aiofiles
 from datetime import datetime
 import inspect
 from collections import defaultdict
@@ -85,18 +86,22 @@ class Misc:
 
     @cc.command()
     async def codestats(self, ctx):
-        """Provides information about the bot's code"""
+        """Provides statistics on the bot's code"""
+        cog_count = len(self.bot.cogs)
+        commands_count = len(set(self.bot.walk_commands()))
+
         line_count = 0
-        cog_count = 0
-        files = [f for f in os.listdir(".") if ".py" in f] + ["cogs/" + f for f in os.listdir("cogs") if ".py" in f]
-        for f_name in files:
-            cog_count += 1
-            with open(f_name, encoding="utf-8") as f:
-                line_count += len(f.readlines())
+        directories = [".", "cogs", "custom_classes"]
+        files = [f"{d}/{f}" for d in directories for f in os.listdir(d) if ".py" in f]
+        for file in files:
+            async with aiofiles.open(file, encoding="utf-8") as f:
+                line_count += len(await f.readlines())
+
         await ctx.neutral(f"""**Lines**: {line_count}
 **Cogs**: {cog_count}
-**Commands**: {len(ctx.bot.commands)}""",
-                          "Code Statistics", timestamp=False)
+**Files**: {len(files)}
+**Commands**: {commands_count}""", timestamp=False)
+
 
     @cc.command()
     async def emoji(self, ctx, *, emoji):
@@ -139,40 +144,35 @@ class Misc:
 
         await ctx.send(embed=em)
 
+    async def clean_content(self, ctx, content):
+        return await commands.clean_content(escape_markdown=True).convert(ctx, content)
+
     @cc.command()
     async def raw(self, ctx, *, message=None):
         """Displays the raw code of a message.
         The message can be a message id, some text, or nothing (in which case it will be the most recent message not by you)."""
-        msg = None
-        if message is not None:
-            msg = await ctx.get_message(int(message))
+        if message:
+            try:
+                message = await ctx.get_message(int(message))
+            except ValueError:
+                message = message
         else:
-            async for message in ctx.history(limit=10):
-                if message.author == ctx.author:
-                    continue
-                msg = message
-                break
+            async for msg in ctx.history(limit=100):
+                if msg.author != ctx.author:
+                    message = msg
+                    break
 
-        if msg is None:
-            msg = ctx.message
-            msg.content = msg.content.split('raw ')[1]
+        embed = None
+        content = await self.clean_content(ctx, message.content)
 
-        raw = await commands.clean_content(escape_markdown=True).convert(
-            ctx, msg.content)
-        if raw:
-            raw = f"​\n{raw}\n​"
-        embed_text = str()
-        if msg.embeds:
-            embed_text += "*Message has {} embed(s).*".format(len(msg.embeds))
-        embed = discord.Embed(
-            description=raw + embed_text,
-            timestamp=msg.created_at,
-            colour=0x36393E)
-        embed.set_author(
-            name="Message by: {}".format(msg.author),
-            icon_url=msg.author.avatar_url)
-        embed.set_footer(text="Sent")
-        await ctx.send(embed=embed)
+        if message.embeds:
+            embed = message.embeds[0]
+            embed.description = await self.clean_content(ctx, embed.description or "")
+            for index, field in enumerate(embed.fields):
+                value = await self.clean_content(ctx, field.value)
+                embed.set_field_at(index, name=field.name, value=value)
+
+        await ctx.send(content, embed=embed)
 
     @raw.error
     async def raw_error_handler(self, ctx, error):
@@ -328,17 +328,18 @@ class Misc:
 
         else:
             cmd = self.bot.get_command(command)
-            if await cmd.can_run(ctx):
-                embed.clear_fields()
-                embed.description = cmd.long_doc
-                for subcommand in getattr(cmd, "commands", []):
-                    embed.add_field(name=subcommand.name,
-                                    value=subcommand.long_doc,
-                                    inline=False)
+            if not cmd or not await cmd.can_run(ctx):
+                return await ctx.error(f"The command `{command}` does not exist.", "")
 
-                await ctx.send(embed=embed)
-            else:
-                await ctx.error(f"The command `{command}` does not exist.", "")
+            embed.clear_fields()
+            embed.description = cmd.long_doc
+            for subcommand in getattr(cmd, "commands", []):
+                embed.add_field(name=subcommand.name,
+                                value=subcommand.long_doc,
+                                inline=False)
+
+            await ctx.send(embed=embed)
+
 
 
 def setup(bot):
