@@ -34,14 +34,26 @@ class Errors:
             return
 
         elif isinstance(error, commands.CheckFailure):
-            if await self.bot.is_owner(ctx.author):
+            if isinstance(error, commands.NoPrivateMessage):
+                await ctx.error("This command cannot be run in DMs",
+                                "No DMs")
+
+            elif await self.bot.is_owner(ctx.author):
+                print(f"Owner reinvoked {ctx.command.qualified_name} "
+                      f"due to a {error.__class__.__name__}: {error}")
                 await ctx.reinvoke()
+
+            elif isinstance(error, commands.MissingPermissions):
+                await ctx.error(f"{error}", "Missing Required Permissions")
 
         elif isinstance(error, commands.DisabledCommand):
             if await self.bot.is_owner(ctx.author):
+                print(f"Owner reinvoked {ctx.command.qualified_name} "
+                      f"due to a {error.__class__.__name__}: {error}")
                 await ctx.reinvoke()
             else:
-                await ctx.error(f"`{ctx.command}` is disabled.", "Command Disabled")
+                await ctx.error(f"`{ctx.command}` is disabled.",
+                                "Command Disabled")
 
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.error(f"Argument `{str(error.param).split(':')[0]}` is missing!",
@@ -55,6 +67,8 @@ class Errors:
 
         elif isinstance(error, commands.CommandOnCooldown):
             if await self.bot.is_owner(ctx.author):
+                print(f"Owner reinvoked {ctx.command.qualified_name} "
+                      f"due to a {error.__class__.__name__}: {error}")
                 await ctx.reinvoke()
             else:
                 await ctx.error(f"🛑 This command can't be used for another {round(error.retry_after)} seconds",

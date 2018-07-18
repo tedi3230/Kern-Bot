@@ -6,22 +6,13 @@ from discord.ext import commands
 import custom_classes as cc
 
 
-async def message_purge_perm_check(ctx):
-    if await ctx.bot.is_owner(ctx.author):
-        return True
-    elif ctx.author.permissions_in(ctx.channel).manage_messages:
-        return True
-    await ctx.error("Manage messages is required to run `{}`".format(ctx.command), "Invalid Permissions")
-    return False
-
-
 class Admin:
     """Administration commands."""
 
     def __init__(self, bot: cc.KernBot):
         self.bot = bot
 
-    @commands.check(message_purge_perm_check)
+    @commands.has_permissions(manage_messages=True)
     @cc.group(invoke_without_command=True)
     async def delete(self, ctx):
         """Deletes the last message sent by this bot"""
@@ -29,14 +20,11 @@ class Admin:
             if message.author == self.bot.user:
                 await message.delete()
                 await ctx.success("Message deleted.")
-
-                if ctx.channel.permissions_for(ctx.guild.me).manage_messages:
-                    await asyncio.sleep(5)
-                    await ctx.message.delete()
                 return
         await ctx.error("No messages were found.")
 
-    @commands.check(message_purge_perm_check)
+    @commands.guild_only()
+    @commands.has_permissions(manage_messages=True)
     @delete.command()
     async def clean(self, ctx, num_messages=200, other: bool = False):
         """Removes all messages for num_messages by this bot.
@@ -65,7 +53,8 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
                     "Invalid Permissions",
                     delete_after=10)
 
-    @commands.check(message_purge_perm_check)
+    @commands.guild_only()
+    @commands.has_permissions(manage_messages=True)
     @delete.command(name="id")
     async def delete_by_id(self, ctx, *message_ids: int):
         """Deletes message from list of ids/id"""
@@ -83,6 +72,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
                     await asyncio.sleep(5)
                     await ctx.message.delete()
 
+    @commands.guild_only()
     @cc.command(hidden=True)
     async def roles(self, ctx, *, member: discord.Member = None):
         """Shows the roles of the bot or member"""
@@ -91,7 +81,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
             await ctx.success(f"```ini\n[{roles}]```", f"Roles for `{ctx.guild.name}`:")
         else:
             roles = ", ".join([role.name.strip('@') for role in member.roles])
-            await ctx.success("```ini\n[{roles}]```", f"Roles for `{member.display_name}`:")
+            await ctx.success(f"```ini\n[{roles}]```", f"Roles for `{member.display_name}`:")
 
     @commands.guild_only()
     @cc.group(aliases=["permissions"])
@@ -107,6 +97,7 @@ Instead, use: `{}delete clean <num_messages> True`""".format(ctx.prefix),
         neg = ", ".join([name for name, has in perms if not has])
         await ctx.send(f"Permissions for member `{member}`: ```ini\n[{pos}]``````css\n[{neg}]```")
 
+    @commands.guild_only()
     @perms.command(name="role")
     async def perms_role(self, ctx, *, role: discord.Role):
         """Shows the permissions for a role"""
