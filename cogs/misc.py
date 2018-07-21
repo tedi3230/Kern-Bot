@@ -84,19 +84,6 @@ class Misc:
         await ctx.neutral(f"{member.mention} was {index}{end}")
 
     @cc.command()
-    async def please(self, ctx, action: commands.clean_content, item: commands.clean_content, *, person: commands.clean_content="you"):
-        """You can now make this bot do things!"""
-        if len(action) < 3:
-            return await ctx.error(f"{action} is not long enough.", "Invalid Input")
-        elif action[-2] in "aeiou" and action[-1] not in "aeiou" and action[-3] not in "aeiou":
-            action = action[:-1]
-        elif action[-2:] == "ie":
-            action = action[-2:] + "y"
-        elif action[-1] == "e":
-            action = action[:-1]
-        await ctx.send(f"I am {action}ing {item} {person}")
-
-    @cc.command()
     async def codestats(self, ctx):
         """Provides statistics on the bot's code"""
         cog_count = len(self.bot.cogs)
@@ -242,7 +229,7 @@ class Misc:
     @cc.group(name="hash")
     async def _hash(self, ctx, hash_type, *, text):
         """Hashes a string of text
-        Hasers are: sha256, sha512, sha1, md5"""
+        Hashers available are: sha256, sha512, sha1, md5"""
         hash_types = ["sha256", "sha512", "sha1", "md5"]
         if hash_type in hash_types:
             hasher = eval(f"hashlib.{hash_type}")
@@ -297,57 +284,50 @@ class Misc:
         else:
             await ctx.send(date.strftime("%d/%m/%Y %H:%M:%S"))
 
-    async def make_commands(self, ctx, long_description=False):
-        total_commands = 0
-        cogs_dict = defaultdict(list)
-        for command in set(self.bot.walk_commands()):
-            if not command.hidden and await command.can_run(ctx):
-                if long_description:
-                    value = command.long_doc
-                else:
-                    value = command.short_doc or "No description."
-                data = {"name": command.qualified_name,
-                        "value": value}
-                cogs_dict[command.cog_name or "No Category"].append(data)
-                total_commands += 1
-
-        return cogs_dict, total_commands
-
     @cc.command(name="help")
     async def _help(self, ctx, *, command: str = None):
         """Shows this message."""
-        cogs_dict, total_commands = await self.make_commands(ctx, bool(command))
         embed = discord.Embed(title="Help",
                               description=self.bot.description,
                               colour=discord.Colour.green(),
                               timestamp=datetime.utcnow())
-        embed.set_footer(text=f"{total_commands} commands",
-                         icon_url=ctx.author.avatar_url)
+        embed.set_footer(icon_url=ctx.author.avatar_url)
         embed.add_field(name="Links", value=(f"[Invite URL]({self.bot.invite_url})\n"
                                              f"[Server Invite](https://discord.gg/nHmAkgg)\n"
                                              f"[Bot Website](https://kern-bot.carrd.co/)"))
 
         if not command:
-            await ctx.paginate(cogs_dict, embed)
+            paginator = await cc.Paginator.from_commands(ctx, embed)
+            await paginator.start_paginating()
 
-        elif command.title() in cogs_dict:
-            cog_dict = {command.title(): cogs_dict[command.title()]}
-            await ctx.paginate(cog_dict, embed, page=2, max_fields=3)
+        elif command.title() in self.bot.cogs:
+            def check(command_):
+                return command_.cog_name == command.title()
+            paginator = await cc.Paginator.from_commands(ctx, embed,
+                                                         max_fields=3,
+                                                         initial_page=2,
+                                                         long_doc=True,
+                                                         check=check)
+
+            await paginator.start_paginating()
 
         else:
             cmd = self.bot.get_command(command)
             if not cmd or not await cmd.can_run(ctx):
                 return await ctx.error(f"The command `{command}` does not exist.", "")
 
-            embed.clear_fields()
-            embed.description = cmd.long_doc
-            for subcommand in getattr(cmd, "commands", []):
-                embed.add_field(name=subcommand.name,
-                                value=subcommand.long_doc,
-                                inline=False)
+            def check(command_):
+                if command_ in cmd.commands:
+                    return True
+                return command_ == cmd
 
-            await ctx.send(embed=embed)
+            paginator = await cc.Paginator.from_commands(ctx, embed,
+                                                         max_fields=3,
+                                                         long_doc=True,
+                                                         check=check,
+                                                         include_base_embed=False)
 
+            await paginator.start_paginating()
 
 
 def setup(bot):
