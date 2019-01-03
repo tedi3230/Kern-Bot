@@ -15,12 +15,20 @@ import custom_classes as cc
 
 warnings.filterwarnings("ignore", category=UserWarning, module="fuzzywuzzy")
 
+GET_PREFIXES = """
+SELECT prefixes FROM guilds WHERE guild_id = $1;
+"""
+
 
 def server_prefix(default_prefixes: list):
     async def get_prefix(bots: cc.KernBot, message: discord.Message):
         if message.guild and bots.prefixes_cache.get(message.guild.id) is None:
-            guild_prefixes = await bots.database.get_prefixes(message)
-            bots.prefixes_cache[message.guild.id] = list(set(guild_prefixes))
+            guild_prefixes = await bots.database.fetchval(GET_PREFIXES,
+                                                          message.guild.id)
+            bots.prefixes_cache[message.guild.id] = list(set(guild_prefixes or []))
+
+        if message.guild:
+            guild_prefixes = bots.prefixes_cache[message.guild.id]
         else:
             guild_prefixes = []
 
@@ -151,7 +159,7 @@ async def on_socket_raw_receive(_):
 
 @bot.event
 async def on_message(message: discord.Message):
-    if bot.database is None or not bot.database.ready or message.author.bot:
+    if message.author.bot:
         return
     if " && " in message.content:
         cmds_run_before = []
@@ -165,7 +173,7 @@ async def on_message(message: discord.Message):
                     await bot.invoke(ctx)
                     cmds_run_before.append(msg.strip(ctx.prefix))
                 else:
-                    failed_to_run[msg.strip(ctx.prefix)] = "This command has been at least once before."
+                    failed_to_run[msg.strip(ctx.prefix)] = "This command has been run at least once before."
             else:
                 if ctx.prefix is not None:
                     failed_to_run[msg.strip(ctx.prefix)] = "Command not found."

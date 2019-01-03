@@ -1,7 +1,4 @@
-import asyncio
 from discord.ext import commands
-from urllib.parse import urlparse
-import traceback
 
 
 def chunks(s, n):
@@ -44,7 +41,7 @@ class CoinError(Exception):
         return "CoinError({0.message}, {0.coin}, {0.currency}, {0.limit})".format(self)
 
 
-class AlreadySubmitted(Exception):
+class AlreadySubmitted(commands.CheckFailure):
     pass
 
 

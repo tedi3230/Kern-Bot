@@ -43,7 +43,7 @@ class KernBot(commands.Bot):
         super().__init__(*args, **kwargs)
 
         self.logs = self.get_channel(log_channel)
-        self.database = cc.Database(self)
+        self.database = None
 
         extensions = sorted(
             [f"cogs.{ext[:-3]}" for ext in listdir("cogs") if ".py" in ext]
@@ -59,6 +59,7 @@ class KernBot(commands.Bot):
         self.load_extensions(extensions)
 
     async def init(self):
+        self.database = await cc.create_database()
         self.session = aiohttp.ClientSession()
         await self.ftp_client.connect("ftp.bom.gov.au", 21)
         await self.ftp_client.login()

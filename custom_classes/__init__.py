@@ -1,6 +1,6 @@
 from .ast_error_creator import Ast
 from .data_classes import *
-from .database import Database
+from .database import create_database
 from .documentation import CreateDocumentation
 from .kern_bot import KernBot
 from .kern_classes import *
