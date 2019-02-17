@@ -88,7 +88,7 @@ class Errors:
 **Member: ** {}
 **Guild: ** {}
 ```py\n{}```
-            """.format(ctx.command,
+            """.format(ctx.message.content,
                        type(error).__qualname__,
                        ctx.author,
                        ctx.guild, "".join(traceback.format_exception(type(error),
