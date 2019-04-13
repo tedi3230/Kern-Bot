@@ -227,7 +227,6 @@ class Misc:
 <:uptime:432082654335336457> **Uptime** {self.uptime}
 <:python:416194389853863939> **Python** {python_version()}
 <:discord:416194942520786945> **Discord.py** {get_distribution('discord.py').version}
-<:git:417177301244051525> **Git** {self.bot.latest_commit} [Up-To-Date: {self.bot.latest_commit == get_distribution('discord.py').version.split("+")[1]}]
 """
         embed.add_field(name="Links", value=(f"[Invite URL]({self.bot.invite_url})\n"
                                              f"[Server Invite](https://discord.gg/nHmAkgg)\n"

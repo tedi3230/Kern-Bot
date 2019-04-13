@@ -51,7 +51,6 @@ load_dotenv()
 token = environ["TOKEN"]
 name = environ["BOT_NAME"]
 default_prefixes = environ["BOT_PREFIXES"].split(", ")
-dbl_token = environ["DBL_TOKEN"]
 github_auth = environ["GITHUB_AUTH"].split(":")
 testing = bool(environ.get("TESTING", ""))
 log_channel = int(environ["LOG_CHANNEL"])
@@ -75,15 +74,6 @@ bot = cc.KernBot(
 
 
 @bot.event
-async def on_connect():
-    await bot.update_dbots_server_count(dbl_token)
-    with async_timeout.timeout(20):
-        async with bot.session.get("https://api.github.com/repos/rapptz/discord.py/commits/rewrite") as r:
-            bot.latest_commit = "g" + (await r.json())['sha'][:7]
-    await bot.pull_remotes()
-
-
-@bot.event
 async def on_guild_join(guild: discord.Guild):
     e = discord.Embed(
         title="Joined {} @ {}".format(guild.name,
@@ -91,7 +81,6 @@ async def on_guild_join(guild: discord.Guild):
         colour=discord.Colour.green(),
         timestamp=datetime.utcnow())
     await bot.logs.send(embed=e)
-    await bot.update_dbots_server_count(dbl_token)
 
 
 @bot.event
@@ -102,7 +91,6 @@ async def on_guild_remove(guild: discord.Guild):
         colour=discord.Colour.red(),
         timestamp=datetime.utcnow())
     await bot.logs.send(embed=e)
-    await bot.update_dbots_server_count(dbl_token)
 
 
 @bot.event
@@ -117,10 +105,6 @@ async def on_ready():
     if bot.user.name != name:
         print(f"\nName changed from '{bot.user.name}' to '{name}'")
         await bot.user.edit(username=name)
-    e = discord.Embed(
-        title=f"Bot Online @ {datetime.utcnow().strftime('%H:%M:%S UTC')}",
-        colour=discord.Colour.green(),
-        timestamp=datetime.utcnow())
     print(f"""
 Username:   {bot.user.name}
 ID:         {bot.user.id}
@@ -130,8 +114,6 @@ Members:    {sum(1 for _ in bot.get_all_members())}
 Channels:   {sum(1 for _ in bot.get_all_channels())}
 Python:     {python_version()}
 Discord:    {get_distribution('discord.py').version}
-Cur. Com:   {bot.latest_commit}
-Up to Date: {bot.latest_commit == get_distribution('discord.py').version.split("+")[1]}
 Testing:    {testing}
 ---------------
 """)
@@ -139,22 +121,6 @@ Testing:    {testing}
     while bot.logs is None:
         await asyncio.sleep(1)
         bot.logs = bot.get_channel(382780308610744331)
-    await bot.logs.send(embed=e)
-
-
-@bot.event
-async def on_resumed():
-    if bot.latest_message_time > datetime.utcnow() + timedelta(seconds=30):
-        em = discord.Embed(
-            title=f"Resumed @ {datetime.utcnow().strftime('%H:%M:%S')}",
-            description=f"Down since: {datetime.utcnow().strftime('%H:%M:%S')}",
-            colour=discord.Colour.red())
-        await bot.logs.send(embed=em)
-
-
-@bot.event
-async def on_socket_raw_receive(_):
-    bot.latest_message_time = datetime.utcnow()
 
 
 @bot.event

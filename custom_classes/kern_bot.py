@@ -17,7 +17,6 @@ from .documentation import CreateDocumentation
 
 class KernBot(commands.Bot):
     database = None
-    latest_commit = None
     latest_message_time = None
     owner = None
     session = None
@@ -43,7 +42,6 @@ class KernBot(commands.Bot):
         super().__init__(*args, **kwargs)
 
         self.logs = self.get_channel(log_channel)
-        self.database = None
 
         extensions = sorted(
             [f"cogs.{ext[:-3]}" for ext in listdir("cogs") if ".py" in ext]
@@ -98,9 +96,6 @@ class KernBot(commands.Bot):
 
     async def close(self, message="Shutting Down"):
         print(f"\n{message}\n")
-        em = discord.Embed(title=f"{message} @ {datetime.utcnow().strftime('%H:%M:%S')}", colour=discord.Colour.red())
-        em.timestamp = datetime.utcnow()
-        await self.logs.send(embed=em)
         await self.database.pool.close()
         await self.session.close()
         await super().close()
@@ -124,20 +119,3 @@ class KernBot(commands.Bot):
         for e_id in ids:
             emojis.append(str(self.get_emoji(e_id)))
         return emojis
-
-    async def update_dbots_server_count(self, dbl_token):
-        url = f"https://discordbots.org/api/bots/{self.user.id}/stats"
-        headers = {"Authorization": dbl_token}
-        payload = {"server_count": len(self.guilds)}
-        try:
-            with async_timeout.timeout(10):
-                await self.session.post(url, data=payload, headers=headers)
-        except asyncio.TimeoutError:
-            pass
-
-    async def pull_remotes(self):
-        try:
-            with async_timeout.timeout(20):
-                await self.session.get("https://api.backstroke.co/_88263c5ef4464e868bfd0323f9272d63")
-        except asyncio.TimeoutError:
-            pass
