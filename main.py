@@ -39,8 +39,8 @@ def server_prefix(default_prefixes: list):
 load_dotenv()
 
 
-token = environ["TOKEN"]
-name = environ["BOT_NAME"]
+token = environ[1129624390:AAHMWk-jGZoDmuJYS2qJrYsM0kTu-VWQAyk"]
+name = environ["Rick Sanchez"]
 default_prefixes = environ["BOT_PREFIXES"].split(", ")
 dbl_token = environ["DBL_TOKEN"]
 github_auth = environ["GITHUB_AUTH"].split(":")
@@ -109,8 +109,8 @@ async def on_ready():
         colour=discord.Colour.green(),
         timestamp=datetime.utcnow())
     print(f"""
-Username:   {bot.user.name}
-ID:         {bot.user.id}
+Username:   {ourzegemtegnabotbot}
+ID:         {1129624390}
 Guilds:     {len(bot.guilds)}
 Members:    {sum(1 for _ in bot.get_all_members())}
 Channels:   {sum(1 for _ in bot.get_all_channels())}
