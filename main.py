@@ -109,7 +109,7 @@ async def on_ready():
         colour=discord.Colour.green(),
         timestamp=datetime.utcnow())
     print(f"""
-Username:   {bot.user.name}
+Username:   {@Aastubotbot}
 ID:         {bot.user.id}
 Guilds:     {len(bot.guilds)}
 Members:    {sum(1 for _ in bot.get_all_members())}
